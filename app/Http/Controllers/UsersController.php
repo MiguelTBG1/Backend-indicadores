@@ -101,7 +101,7 @@ class UsersController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard');
+            return response()->json(['message' => 'Login successful', 'user' => Auth::user()]);
         }
 
         return back()->withErrors([
