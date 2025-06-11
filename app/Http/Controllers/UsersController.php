@@ -88,7 +88,7 @@ class UsersController extends Controller
 
         $token = $user->createToken('token-api')->plainTextToken;
 
-        $user -> makeHidden(['password', 'apellido_materno', 'apellido_paterno','email', 'password', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'updated_at', 'created_at']);
+        $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad']);
         return response()->json([
             'message' => 'Login exitoso',
             'user' => $user,

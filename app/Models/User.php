@@ -15,6 +15,8 @@ class User extends Model
     protected $collection = 'users'; // Especifica la colección de MongoDB
 
 
+    // Campos sensibles
+    protected $hidden = ['password', 'updated_at', 'created_at'];
     protected $fillable = [
         'nombre',
         'apellido_materno',
