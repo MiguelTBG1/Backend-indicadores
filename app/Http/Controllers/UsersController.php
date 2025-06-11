@@ -11,24 +11,6 @@ use Illuminate\Support\Facades\Log;
 class UsersController extends Controller
 {
 
-
-    public function loginUser(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return response()->json(['message' => 'Login successful', 'user' => Auth::user()]);
-        }
-
-        return response()->json(['errors' => ['email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.']], 422);
-    }
-
     public function userRegister(Request $request)
     {
         $request->validate([
@@ -96,17 +78,21 @@ class UsersController extends Controller
             'password' => 'required|string',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $user = User::where('email', $request->email)->first();
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            return response()->json(['message' => 'Login successful', 'user' => Auth::user()]);
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'Credenciales inválidas'
+            ], 401);
         }
 
-        return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-        ])->onlyInput('email');
+        $token = $user->createToken('token-api')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login exitoso',
+            'user' => $user,
+            'token' => $token
+        ]);
     }
 
     public function logout(Request $request)
