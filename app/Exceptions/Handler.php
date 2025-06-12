@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Auth\AuthenticationException;
+use ILluminate\Http\Response;
 
 class Handler extends ExceptionHandler
 {
@@ -11,7 +12,7 @@ class Handler extends ExceptionHandler
     {
         return response()->json([
             'success' => false,
-            'message' => 'Acceso no autorizado. Token requerido',
-        ], 401);
+            'message' => 'Acceso no autorizado.',
+        ], Response::HTTP_UNAUTHORIZED);
     }
 }

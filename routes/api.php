@@ -16,9 +16,9 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 
 // Todas las rutas dentro de esta funcion requieren autenticación
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth.sanctum'])->group(function () {
 /* RUTAS INDICADORES */
-Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores'])->middleware('auth.sanctum');
+Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores']);
 Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador']);
 Route::post('/indicador/upload', [IndicadoresController::class, 'uploadIndicador']);
 Route::delete('/indicador/delete/{id}', [IndicadoresController::class, 'deleteIndicador']);
