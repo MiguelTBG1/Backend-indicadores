@@ -11,6 +11,11 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// LOGIN
+Route::post('/login', [UsersController::class, 'login']);
+
+// Todas las rutas dentro de esta funcion requieren autenticación
+Route::middleware(['auth:sanctum'])->group(function () {
 /* RUTAS INDICADORES */
 Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores'])->middleware('auth.sanctum');
 Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador']);
@@ -33,10 +38,13 @@ Route::post('/documentos/{plantillaName}/{documentId}', [DocumentoController::cl
 Route::get('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'getDocumentbyid']);
 Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'deleteDocument']);
 
-// RUTAS USUARIOS
-Route::post('/login', [UsersController::class, 'login']);
-Route::post('/users', [UsersController::class, 'store'])->name('users.store');
+
+// LOGOUT
 Route::post('/logout', [UsersController::class, 'logout'])->name('users.logout');
+});
+
+// RUTAS USUARIOS
+Route::post('/users', [UsersController::class, 'store'])->name('users.store');
 
 Route::get('/list-users', [UsersController::class, 'listUsers'])->name('users.list');
 Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users.destroy');
