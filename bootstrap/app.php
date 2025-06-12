@@ -13,25 +13,24 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Remover middleware innecesario
+        // Remueve TODOS los middlewares de estado/sesión
         $middleware->remove([
             \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
         ]);
 
-        $middleware->api([
-            \Illuminate\Http\Middleware\HandleCors::class,
+        $middleware->alias([
+            'auth.sanctum' => \App\Http\Middleware\SanctumApiMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
         $exceptions->render(function (AuthenticationException $e, Request $request) {
-        if ($request->is('api/*')) {
             return response()->json([
-                'message' => 'Unauthenticated.',
-                'error' => 'Token requerido o inválido'
+                'success' => false,
+                'message' => 'Authentication required'
             ], 401);
-        }
-    });
+        });
     })->create();

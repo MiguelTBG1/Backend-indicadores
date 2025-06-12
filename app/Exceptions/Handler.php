@@ -2,19 +2,16 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Exception;
 
-class Handler extends Exception
+class Handler extends ExceptionHandler
 {
-    //
     protected function unauthenticated($request, AuthenticationException $exception)
     {
         return response()->json([
-            'message' => 'Unauthenticated.',
-            'success' => false
+            'success' => false,
+            'message' => 'Acceso no autorizado. Token requerido',
         ], 401);
     }
 }
