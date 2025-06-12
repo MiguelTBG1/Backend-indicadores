@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use ILluminate\Http\Response;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
@@ -58,19 +58,11 @@ class AuthController extends Controller
         $user = $request->user();
         
         if ($user) {
-            // Obtener todos los tokens del usuario (adaptado para MongoDB)
-            $tokens = PersonalAccessToken::where('tokenable_id', $user->getKey())
-                        ->where('tokenable_type', get_class($user))
-                        ->get();
+            $user->tokens()->delete();
             
-            // Eliminar cada token manualmente
-            foreach ($tokens as $token) {
-                $token->delete();
-            }
-            
-            return response()->json(['message' => 'Logout exitoso']);
+            return response()->json(['message' => 'Logout exitoso'], Response::HTTP_OK);
         }
         
-        return response()->json(['message' => 'No se pudo realizar el logout'], 401);
+        return response()->json(['message' => 'No se pudo realizar el logout'], Response::HTTP_UNAUTHORIZED);
     }
 }

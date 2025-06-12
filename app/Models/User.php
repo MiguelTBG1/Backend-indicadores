@@ -52,4 +52,9 @@ class User extends Model
     {
         return $this->hasMany(Comentario::class, 'usuario_id', '_id');
     }
+
+    public function tokens()
+    {
+        return $this->morphMany(PersonalAccessToken::class, 'tokenable');
+    }
 }

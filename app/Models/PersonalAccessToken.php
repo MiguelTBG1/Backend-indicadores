@@ -9,4 +9,8 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
     protected $connection = 'mongodb';
     protected $collection = 'personal_access_tokens';
     
+    public function tokenable()
+    {
+        return $this->morphTo();
+    }
 }
