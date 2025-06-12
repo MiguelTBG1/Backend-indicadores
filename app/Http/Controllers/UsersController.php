@@ -71,31 +71,6 @@ class UsersController extends Controller
         return response()->json(['message' => '¡Usuario creado exitosamente!']);
     }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Credenciales inválidas'
-            ], 401);
-        }
-
-        $token = $user->createToken('token-api')->plainTextToken;
-
-        $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad']);
-        return response()->json([
-            'message' => 'Login exitoso',
-            'user' => $user,
-            'token' => $token
-        ]);
-    }
-
     public function logout(Request $request)
     {
         Auth::logout();

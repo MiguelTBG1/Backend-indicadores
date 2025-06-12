@@ -6,13 +6,14 @@ use App\Http\Controllers\IndicadoresController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\AuthController;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
 // LOGIN
-Route::post('/login', [UsersController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 
 // Todas las rutas dentro de esta funcion requieren autenticación
 Route::middleware(['auth:sanctum'])->group(function () {
