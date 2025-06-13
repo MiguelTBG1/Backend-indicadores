@@ -319,7 +319,7 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
      */
-    public function configIndicador(Request $request, $id) {
+    public function updateConfig(Request $request, $id) {
         try {
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
@@ -361,6 +361,47 @@ class IndicadoresController extends Controller
             return response() -> json([
                 'message' => 'Indicador actualizado exitosamente',
                 'indicador_actualizado' => $indicador
+            ], Response::HTTP_OK);
+
+        } catch (Exception $e) {
+            // Retornamos el mensaje de error
+            return response()->json([
+                'message' => 'Error guardar la configuración del indicador',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+     /**
+     * Obtener la configuración de un indicador por su ID
+     * @param Request $request Datos de configuración del indicador
+     * @param string $id ID del indicador a actualizar
+     * @return JsonResponse La respuesta de la operación
+     */
+    public function getConfig($id) {
+        try {
+            // Buscamos el indicador por su ID
+            $indicador = Indicadores::find($id);
+
+            // Verificamos si existe el indicador
+            if (!$indicador) {
+                throw new Exception("No se encontró el indicador con ID: $id", Response::HTTP_NOT_FOUND);
+
+            }
+
+            // Creamos la configuración
+            $configuracion = [];
+
+            // Verificamos si el indicador tiene configuración
+            if($indicador->configuracion && is_array($indicador->configuracion)) {
+                // Si tiene configuración, la asignamos
+                $configuracion = $indicador->configuracion;
+            }
+
+            // Retornamos la respuesta de éxito
+            return response() -> json([
+                'message' => 'Configuración del indicador obtenida exitosamente',
+                'configuracion' => $configuracion
             ], Response::HTTP_OK);
 
         } catch (Exception $e) {
