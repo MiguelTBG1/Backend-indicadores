@@ -343,7 +343,7 @@ class IndicadoresController extends Controller
                 'configuracion.coleccion' => 'required|string',
                 'configuracion.operacion' => 'required|string|in:contar,sumar',
                 'configuracion.campo' => 'nullable|string',
-                'configuracion.condicion' => 'required|array',
+                'configuracion.condicion' => 'nullable|array',
                 'configuracion.condicion.*.campo' => 'required_if:configuracion.condicion,true|string',
                 'configuracion.condicion.*.operador' => 'required_if:configuracion.condicion,true|string|in:igual,mayor,menor',
                 'configuracion.condicion.*.valor' => 'required_if:configuracion.condicion,true|string',
