@@ -23,6 +23,7 @@ Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador
 Route::post('/indicador/upload', [IndicadoresController::class, 'uploadIndicador']);
 Route::delete('/indicador/delete/{id}', [IndicadoresController::class, 'deleteIndicador']);
 Route::post('/indicador/update/{id}', [IndicadoresController::class, 'updateIndicador']);
+Route::put('/indicadores/{id}/configuracion', [IndicadoresController::class, 'configIndicador']);
 
 //PLANTILLAS
 Route::post('/plantillas/crear', [PlantillaController::class, 'store']);

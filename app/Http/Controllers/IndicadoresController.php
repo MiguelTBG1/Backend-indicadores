@@ -80,7 +80,18 @@ class IndicadoresController extends Controller
             case 'contar':
                 $result = $collection->countDocuments();
                 break;
+            case 'sumar':
+                // Validamos que el campo a sumar exista
+                if (!isset($configuracion['campo'])) {
+                    throw new Exception('Campo no especificado para la operación de suma', Response::HTTP_BAD_REQUEST);
+                }
 
+                $result = $collection->aggregate([
+                    ['$group' => ['_id' => null, 'total' => ['$sum' => '$' . $configuracion['campo']]]]
+                ])->toArray();
+                $result = $result[0]['total'] ?? 0; // Si no hay resultados, retornamos 0
+
+                break;
             default:
                 throw new Exception('Operación no válida', Response::HTTP_BAD_REQUEST);
         }
@@ -297,6 +308,65 @@ class IndicadoresController extends Controller
             // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error al actualizar el indicador',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+     /**
+     * Agrega o actualiza la configuración de un indicador por su ID
+     * @param Request $request Datos de configuración del indicador
+     * @param string $id ID del indicador a actualizar
+     * @return JsonResponse La respuesta de la operación
+     */
+    public function configIndicador(Request $request, $id) {
+        try {
+            // Buscamos el indicador por su ID
+            $indicador = Indicadores::find($id);
+
+            // Verificamos si existe el indicador
+            if (!$indicador) {
+                throw new Exception("No se encontró el indicador con ID: $id", Response::HTTP_NOT_FOUND);
+
+            }
+
+            $validator = Validator::make($request->all(), [
+                'configuracion' => 'required|array',
+                'configuracion.coleccion' => 'required|string',
+                'configuracion.operacion' => 'required|string|in:contar,sumar',
+                'configuracion.campo' => 'nullable|string',
+                'configuracion.condicion' => 'required|array',
+                'configuracion.condicion.*.campo' => 'required_if:configuracion.condicion,true|string',
+                'configuracion.condicion.*.operador' => 'required_if:configuracion.condicion,true|string|in:igual,mayor,menor',
+                'configuracion.condicion.*.valor' => 'required_if:configuracion.condicion,true|string',
+            ], [
+                'configuracion.required' => 'El campo configuracion es obligatorio.',
+                'configuracion.array' => 'El campo configuracion debe ser un array.',
+                'configuracion.condicion.*.campo.required_if' => 'El campo es obligatorio en cada condición.',
+                'configuracion.condicion.*.operador.required_if' => 'El operador es obligatorio en cada condición.',
+                'configuracion.condicion.*.valor.required_if' => 'El valor es obligatorio en cada condición.',
+            ]);
+
+            // Verifica si la validación falla
+            if ($validator->fails()) {
+                throw new \Exception($validator->errors()->first(), Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            // Guardamos o Actualizamos la configuración
+            if(!$indicador->update(['configuracion' => $request->input('configuracion')])){
+                throw new Exception('Error al actualizar o guardar la configuración del indicador', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            // Retornamos la respuesta de éxito
+            return response() -> json([
+                'message' => 'Indicador actualizado exitosamente',
+                'indicador_actualizado' => $indicador
+            ], Response::HTTP_OK);
+
+        } catch (Exception $e) {
+            // Retornamos el mensaje de error
+            return response()->json([
+                'message' => 'Error guardar la configuración del indicador',
                 'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
