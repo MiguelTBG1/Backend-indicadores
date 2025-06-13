@@ -120,6 +120,14 @@ class IndicadoresController extends Controller
     public function insertIndicador(Request $request)
     {
         try {
+            // Validamos los datos del request
+            $request -> validate([
+                '_idProyecto' => 'required|string',
+                'numero' => 'required|integer',
+                'nombreIndicador' => 'required|string',
+                'denominador' => 'required|integer'
+            ]);
+
             // Creamos un indicador con los datos del resquest
             $indicador = Indicadores::create([
                 '_idProyecto' => $request->_idProyecto,
