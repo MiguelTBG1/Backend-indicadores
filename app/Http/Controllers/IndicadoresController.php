@@ -10,6 +10,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use MongoDB\Client as MongoClient;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\configIndicador\SumarOperacion;
+use App\Http\Controllers\configIndicador\ContarOperacion;
 
 class IndicadoresController extends Controller
 {
@@ -55,6 +58,7 @@ class IndicadoresController extends Controller
 
         } catch (Exception $e) {
             // Retornamos mensaje de error
+            Log::error('Error al obtener los indicadores: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error del sistema al obtener los indicadores',
                 'error' => $e->getMessage()
@@ -66,32 +70,131 @@ class IndicadoresController extends Controller
      * Calcula el numerador de un indicador
      * @param array $configuracion Configuración del indicador
      * @return int El valor del numerador
-     */
+    */
     private function calculateNumerador($configuracion)
     {
         // Obtenemos la conexión a la base de datos MongoDB
         $db = $this->connectToMongoDB();
 
-        // Obtenemos todos los registros de la colección
+        // Seleccionamos la colección
         $collection = $db->selectCollection($configuracion['coleccion']);
 
-        //Validamos que operacion esta configurada
-        switch ($configuracion['operacion']) {
-            case 'contar':
-                $result = $collection->countDocuments();
-                break;
-            case 'sumar':
-                // Validamos que el campo a sumar exista
-                if (!isset($configuracion['campo'])) {
-                    throw new Exception('Campo no especificado para la operación de suma', Response::HTTP_BAD_REQUEST);
+        // Creamos un filtro para las condiciones
+        $filter = [];
+
+        if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
+
+            foreach ($configuracion['condicion'] as $condicion) {
+
+                $operador = match ($condicion['operador']) {
+                    'mayor' => '$gt',
+                    'menor' => '$lt',
+                    'igual' => '$eq',
+                    'diferente' => '$ne',
+                    'mayor_igual' => '$gte',
+                    'menor_igual' => '$lte',
+                    default => throw new Exception('Operador no válido: ' . $condicion['operador'], Response::HTTP_BAD_REQUEST)
+                };
+
+                $valor = $condicion['valor'];
+                if (is_numeric($valor)) {
+                    $valor = (float)$valor; // Puedes usar (int) si prefieres
+                    if ((int)$valor === $valor) $valor = (int)$valor;
                 }
 
-                $result = $collection->aggregate([
-                    ['$group' => ['_id' => null, 'total' => ['$sum' => '$' . $configuracion['campo']]]]
-                ])->toArray();
-                $result = $result[0]['total'] ?? 0; // Si no hay resultados, retornamos 0
+                $filter[$condicion['campo']][$operador] = $valor;
+            }
+        }
 
+        // Validamos qué operación está configurada
+        switch ($configuracion['operacion']) {
+            case 'contar':
+                // Aplicamos el filtro y contamos
+                $result = $collection->countDocuments($filter);
                 break;
+
+            case 'sumar':
+                if (!isset($configuracion['campo'])) {
+                    throw new Exception('Campo no especificado para la operación de suma');
+                }
+
+                // Creamos el pipeline de agregación
+                $pipeline = !empty($filter) ? [['$match' => $filter]] : [];
+                /*
+                if(isset($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && count($configuracion['subConfiguracion']) > 0) {
+
+                    if(isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
+                        $cond = [];
+                        foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
+                            $operador = match ($subCondicion['operador']) {
+                                'mayor' => '$gt',
+                                'menor' => '$lt',
+                                'igual' => '$eq',
+                                'diferente' => '$ne',
+                                'mayor_igual' => '$gte',
+                                'menor_igual' => '$lte',
+                                default => throw new Exception('Operador no válido: ' . $subCondicion['operador'], Response::HTTP_BAD_REQUEST)
+                            };
+
+                            $valor = $subCondicion['valor'];
+                            if (is_numeric($valor)) {
+                                $valor = (float)$valor; // Puedes usar (int) si prefieres
+                                if ((int)$valor === $valor) $valor = (int)$valor;
+                            }
+
+                            $cond[$configuracion['subCondicion']['campo']][$operador] = $valor;
+                        }
+                    }
+
+                    $pipeline[] = match ($configuracion['subConfiguracion']['operacion']) {
+                        'contar' => [
+                            '$addFields' => [
+                                'total' => ['$size' => '$' . $configuracion['campo']]
+                            ]
+                        ],
+                        'sumar' => [
+                            '$addFields' => [
+                                'total' => ['$sum' => '$' . $configuracion['campo']]
+                            ]
+                        ]
+                    };
+                    // Si hay subConfiguración, la aplicamos al filtro
+                    foreach ($configuracion['subConfiguracion'] as $subCondicion) {
+                        $operador = match ($subCondicion['operador']) {
+                            'mayor' => '$gt',
+                            'menor' => '$lt',
+                            'igual' => '$eq',
+                            'diferente' => '$ne',
+                            'mayor_igual' => '$gte',
+                            'menor_igual' => '$lte',
+                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'], Response::HTTP_BAD_REQUEST)
+                        };
+
+                        $valor = $subCondicion['valor'];
+                        if (is_numeric($valor)) {
+                            $valor = (float)$valor; // Puedes usar (int) si prefieres
+                            if ((int)$valor === $valor) $valor = (int)$valor;
+                        }
+
+                        $filter[$subCondicion['campo']][$operador] = $valor;
+                    }
+                }*/
+
+
+
+                $pipeline[] = [
+                    '$group' => [
+                        '_id' => null,
+                        'total' => ['$sum' => '$' . $configuracion['campo']]
+                    ]
+                ];
+
+                $cursor = $collection->aggregate($pipeline);
+                $resultados = iterator_to_array($cursor);
+
+                $result = $resultados[0]['total'] ?? 0;
+                break;
+
             default:
                 throw new Exception('Operación no válida', Response::HTTP_BAD_REQUEST);
         }
@@ -99,6 +202,60 @@ class IndicadoresController extends Controller
         // Retornamos el resultado
         return $result;
     }
+    /*
+    public function calculateNumerador(array $configuracion)
+    {
+        // Validamos que la colección esté especificada
+        if (!isset($configuracion['coleccion']) || empty($configuracion['coleccion'])) {
+            throw new Exception('Colección no especificada', Response::HTTP_BAD_REQUEST);
+        }
+
+        //Creamos la conexión a la base de datos MongoDB y obtenemos la colección
+        $db = $this->connectToMongoDB();
+        $collection = $db->selectCollection($configuracion['coleccion']);
+
+        // Creamos el filtro
+        $filter = [];
+
+        // Validamos las condiciones
+        if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
+            foreach ($configuracion['condicion'] as $condicion) {
+
+                $operador = match ($condicion['operador']) {
+                    'mayor' => '$gt',
+                    'menor' => '$lt',
+                    'igual' => '$eq',
+                    'diferente' => '$ne',
+                    'mayor_igual' => '$gte',
+                    'menor_igual' => '$lte',
+                    default => throw new Exception('Operador no válido: ' . $condicion['operador'], Response::HTTP_BAD_REQUEST)
+                };
+
+                $valor = $condicion['valor'];
+                if (is_numeric($valor)) {
+                    $valor = (float)$valor; // Puedes usar (int) si prefieres
+                    if ((int)$valor === $valor) $valor = (int)$valor;
+                }
+
+                $filter[$condicion['campo']][$operador] = $valor;
+            }
+
+        }
+
+        // Validamos la operación
+        if (!isset($configuracion['operacion']) || !in_array($configuracion['operacion'], ['contar', 'sumar'])) {
+            throw new Exception('Operación no válida', Response::HTTP_BAD_REQUEST);
+        }
+        // Creamos la operación según la configuración
+        $operacion = match ($configuracion['operacion']) {
+            'contar' => new ContarOperacion($collection),
+            'sumar'  => new SumarOperacion($collection),
+            default => throw new Exception("Operación no soportada: {$configuracion['operacion']}", Response::HTTP_BAD_REQUEST),
+        };
+
+        // Ejecutamos y devolvemos
+        return $operacion->ejecutar($configuracion, $filter);
+    }*/
 
     /**
      * Conexión a la base de datos MongoDB
