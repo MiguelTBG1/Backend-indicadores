@@ -67,6 +67,33 @@ class IndicadoresController extends Controller
     }
 
     /**
+     * Obtiene un indicador por su ID
+     * @param string $id ID del indicador a obtener
+     * @return JsonResponse La respuesta con el indicador
+     */
+    public function getIndicador($id){
+        try {
+            // Obtenemos el indicador por su ID
+            $indicador = Indicadores::findOrFail($id);
+
+            // Retornamos la respuesta con el indicador
+            return response()->json([
+                'success' => true,
+                'message' => 'Indicador encontrado',
+                'indicador' => $indicador
+            ], Response::HTTP_OK);
+
+        } catch (Exception $e) {
+            // Retornamos mensaje de error
+            Log::error('Error al obtener el indicador: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error del sistema al obtener el indicador',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * Calcula el numerador de un indicador
      * @param array $configuracion Configuración del indicador
      * @return int El valor del numerador
@@ -118,13 +145,25 @@ class IndicadoresController extends Controller
                     throw new Exception('Campo no especificado para la operación de suma');
                 }
 
-                // Creamos el pipeline de agregación
                 $pipeline = !empty($filter) ? [['$match' => $filter]] : [];
-                /*
-                if(isset($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && count($configuracion['subConfiguracion']) > 0) {
 
-                    if(isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
-                        $cond = [];
+                // Verificar si hay subConfiguracion
+                if (
+                    isset($configuracion['subConfiguracion']) &&
+                    is_array($configuracion['subConfiguracion']) &&
+                    count($configuracion['subConfiguracion']) > 0
+                ) {
+                    $nombreCampo = $configuracion['campo'];
+                    $pipelineSub = [];
+
+                    // Verificar si hay condiciones en subConfiguracion
+                    if (
+                        isset($configuracion['subConfiguracion']['condicion']) &&
+                        is_array($configuracion['subConfiguracion']['condicion']) &&
+                        count($configuracion['subConfiguracion']['condicion']) > 0
+                    ) {
+                        $condiciones = [];
+
                         foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
                             $operador = match ($subCondicion['operador']) {
                                 'mayor' => '$gt',
@@ -133,55 +172,78 @@ class IndicadoresController extends Controller
                                 'diferente' => '$ne',
                                 'mayor_igual' => '$gte',
                                 'menor_igual' => '$lte',
-                                default => throw new Exception('Operador no válido: ' . $subCondicion['operador'], Response::HTTP_BAD_REQUEST)
+                                default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
                             };
 
                             $valor = $subCondicion['valor'];
                             if (is_numeric($valor)) {
-                                $valor = (float)$valor; // Puedes usar (int) si prefieres
+                                $valor = (float)$valor;
                                 if ((int)$valor === $valor) $valor = (int)$valor;
                             }
 
-                            $cond[$configuracion['subCondicion']['campo']][$operador] = $valor;
-                        }
-                    }
-
-                    $pipeline[] = match ($configuracion['subConfiguracion']['operacion']) {
-                        'contar' => [
-                            '$addFields' => [
-                                'total' => ['$size' => '$' . $configuracion['campo']]
-                            ]
-                        ],
-                        'sumar' => [
-                            '$addFields' => [
-                                'total' => ['$sum' => '$' . $configuracion['campo']]
-                            ]
-                        ]
-                    };
-                    // Si hay subConfiguración, la aplicamos al filtro
-                    foreach ($configuracion['subConfiguracion'] as $subCondicion) {
-                        $operador = match ($subCondicion['operador']) {
-                            'mayor' => '$gt',
-                            'menor' => '$lt',
-                            'igual' => '$eq',
-                            'diferente' => '$ne',
-                            'mayor_igual' => '$gte',
-                            'menor_igual' => '$lte',
-                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'], Response::HTTP_BAD_REQUEST)
-                        };
-
-                        $valor = $subCondicion['valor'];
-                        if (is_numeric($valor)) {
-                            $valor = (float)$valor; // Puedes usar (int) si prefieres
-                            if ((int)$valor === $valor) $valor = (int)$valor;
+                            $condiciones[] = [
+                                "$operador" => ["\$\$curso." . $subCondicion['campo'], $valor]
+                            ];
                         }
 
-                        $filter[$subCondicion['campo']][$operador] = $valor;
+                        // Aplicamos filtro interno al arreglo
+                        $pipelineSub[] = [
+                            '$addFields' => [
+                                'filtrado' => [
+                                    '$filter' => [
+                                        'input' => '$' . $nombreCampo,
+                                        'as' => 'curso',
+                                        'cond' => ['$and' => $condiciones]
+                                    ]
+                                ]
+                            ]
+                        ];
+
+                        // Cambiamos el campo a contar
+                        $nombreCampo = 'filtrado';
                     }
-                }*/
 
+                    // Agregar conteo o suma según sea necesario
+                    $operacionSub = $configuracion['subConfiguracion']['operacion'];
 
+                    switch ($operacionSub) {
+                        case 'contar':
+                            $pipelineSub[] = [
+                                '$addFields' => [
+                                    'total' => ['$size' => '$' . $nombreCampo]
+                                ]
+                            ];
+                            break;
 
+                        case 'sumar':
+                            if (!isset($configuracion['subConfiguracion']['campo'])) {
+                                throw new Exception('Campo no especificado en subConfiguracion para la operación de suma');
+                            }
+
+                            $campoSub = $configuracion['subConfiguracion']['campo'];
+
+                            $pipelineSub[] = [
+                                '$addFields' => [
+                                    'total' => [
+                                        '$sum' => '$' . $nombreCampo . '.' . $campoSub
+                                    ]
+                                ]
+                            ];
+                            break;
+
+                        default:
+                            throw new Exception("Operación no soportada en subConfiguracion: {$operacionSub}");
+                    }
+
+                    // Añadimos las etapas generadas por subConfiguracion
+                    foreach ($pipelineSub as $etapa) {
+                        $pipeline[] = $etapa;
+                    }
+
+                    $configuracion['campo'] = 'total'; // Cambiamos el campo a total para la siguiente etapa
+                }
+
+                // Finalmente, sumamos todos los totales
                 $pipeline[] = [
                     '$group' => [
                         '_id' => null,
@@ -194,7 +256,6 @@ class IndicadoresController extends Controller
 
                 $result = $resultados[0]['total'] ?? 0;
                 break;
-
             default:
                 throw new Exception('Operación no válida', Response::HTTP_BAD_REQUEST);
         }

@@ -19,6 +19,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth.sanctum'])->group(function () {
 /* RUTAS INDICADORES */
 Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores']);
+Route::get('/indicador/{id}', [IndicadoresController::class, 'getIndicador']);
 Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador']);
 Route::post('/indicador/upload', [IndicadoresController::class, 'uploadIndicador']);
 Route::delete('/indicador/delete/{id}', [IndicadoresController::class, 'deleteIndicador']);
