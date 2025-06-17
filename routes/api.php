@@ -2,11 +2,12 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\IndicadoresController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\DocumentoController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OperacionesController;
+use App\Http\Controllers\IndicadoresController;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
@@ -52,3 +53,6 @@ Route::post('/users', [UsersController::class, 'store'])->name('users.store');
 Route::get('/list-users', [UsersController::class, 'listUsers'])->name('users.list');
 Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users.destroy');
 Route::put('/users/{id}', [UsersController::class, 'update'])->name('users.update');
+
+/* RUTAS PARA OPERACIONES */
+Route::get('/operaciones', [OperacionesController::class, 'getAll']);

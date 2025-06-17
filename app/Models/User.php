@@ -28,7 +28,10 @@ class User extends Model
         'estado',
         'ocupacion',
         'escolaridad',
-        'roles'
+        'roles',
+        'permisos',
+        'negaciones',
+        'funciones_permitidas'
     ];
 
 
