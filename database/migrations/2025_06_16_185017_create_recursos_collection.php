@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('recursos_collection', function (Blueprint $collection) {
+        Schema::create('recursos', function (Blueprint $collection) {
             $collection->id();
             $collection->string('nombre')->unique();
             $collection->string('descripcion')->nullable();
-            $collection->string('nombre_coleccion')->unique();
+            $collection->string('nombre_coleccion');
             $collection->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('recursos_collection');
+        Schema::dropIfExists('recursos');
     }
 };
