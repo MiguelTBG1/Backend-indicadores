@@ -6,6 +6,8 @@ use App\Models\Comentario;
 use Laravel\Sanctum\HasApiTokens;
 use MongoDB\Laravel\Eloquent\Model;
 
+use App\Models\Accion;
+use App\Models\Recurso;
 class User extends Model
 {
     use HasApiTokens;
@@ -71,7 +73,24 @@ class User extends Model
 
         // Recorremos los permisos del usuario
         foreach ($this->permisos as $permiso) {
+            // Conseguimos las ids del recurso y la accion
+            $recursoId = $permiso['recurso'];
             
+            // Conseguimos el nombre del recurso
+            $recurso = Recurso::find($recursoId)->nombre;
+            $acciones = [];
+
+            // Recorremos las acciones del permiso
+            foreach($permiso['permisos'] as $accion) {
+                // Buscamos la acción en la colección de acciones
+                $accionObj = Accion::find($accion);
+                $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
+
+                // Generamos la cadena de permiso
+                $permisosStr[] = "{$recurso}_{$nombreAccion}";
+            }
         }
+
+        return $permisosStr;
     }
 }

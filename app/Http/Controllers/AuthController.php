@@ -34,7 +34,8 @@ class AuthController extends Controller
 
         // Parametros para generar el token
         $nombreToken = str_replace(' ', '_', $user->nombre). "_access_token"; // Nombre del token
-        $permisos = ["*"]; // Permisos del token, por mientras todos
+        $permisos =  $user->getPermisos(); // Permisos del usuario
+
         $tiempoVida = now()->addWeek(); // TIempo de vida del token
 
         // Generamos el token
@@ -47,7 +48,8 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Login exitoso',
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+            'permisos' => $permisos,
         ], Response::HTTP_OK);
     }
 
