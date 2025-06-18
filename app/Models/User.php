@@ -71,6 +71,11 @@ class User extends Model
     public function getPermisos() {
         $permisosStr = [];
 
+        // Verificamos si permisos no es null o vacío
+        if (empty($this->permisos) || !is_array($this->permisos)) {
+            return $permisosStr;
+        }
+
         // Recorremos los permisos del usuario
         foreach ($this->permisos as $permiso) {
             // Conseguimos las ids del recurso y la accion

@@ -8,6 +8,7 @@ use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\OperacionesController;
 use App\Http\Controllers\IndicadoresController;
+use GuzzleHttp\Middleware;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
@@ -19,7 +20,7 @@ Route::post('/login', [AuthController::class, 'login']);
 // Todas las rutas dentro de esta funcion requieren autenticación
 Route::middleware(['auth.sanctum'])->group(function () {
 /* RUTAS INDICADORES */
-Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores']);
+Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores'])->middleware(['abilities:Indicadores_leer']);
 Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador']);
 Route::post('/indicador/upload', [IndicadoresController::class, 'uploadIndicador']);
 Route::delete('/indicador/delete/{id}', [IndicadoresController::class, 'deleteIndicador']);
