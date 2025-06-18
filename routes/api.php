@@ -7,6 +7,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReporteController;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
@@ -42,10 +43,12 @@ Route::post('/documentos/{plantillaName}/{documentId}', [DocumentoController::cl
 Route::get('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'getDocumentbyid']);
 Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'deleteDocument']);
 
-
 // LOGOUT
 Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+// Reporte PDF
+Route::get('/generate-invoice-pdf', [ReporteController::class, 'generatePdf']);
 
 // RUTAS USUARIOS
 Route::post('/users', [UsersController::class, 'store'])->name('users.store');
