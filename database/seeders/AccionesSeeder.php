@@ -4,16 +4,16 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Operacion;
+use App\Models\Accion;
 
-class OperacionesSeeder extends Seeder
+class AccionesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $operaciones = [
+        $Acciones = [
             [
             "nombre" => "crear",
             "descripcion" => "Crear un nuevo registro"
@@ -32,8 +32,8 @@ class OperacionesSeeder extends Seeder
             ]
         ];
 
-        foreach ($operaciones as $operacion) {
-            Operacion::create($operacion);
+        foreach ($Acciones as $Accion) {
+            Accion::create($Accion);
         }
     }
 }

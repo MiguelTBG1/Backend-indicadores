@@ -60,4 +60,18 @@ class User extends Model
     {
         return $this->morphMany(PersonalAccessToken::class, 'tokenable');
     }
+    
+    /**
+     * Obtiene los permisos del usuario.
+     *
+     * @return array String[] Lista de permisos del usuario con el formato 'recurso_permiso'.
+     */
+    public function getPermisos() {
+        $permisosStr = [];
+
+        // Recorremos los permisos del usuario
+        foreach ($this->permisos as $permiso) {
+            
+        }
+    }
 }

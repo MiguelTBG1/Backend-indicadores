@@ -4,9 +4,9 @@ namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
 
-class Operacion extends Model
+class Accion extends Model
 {
-    protected $collection = 'operaciones';
+    protected $collection = 'acciones';
 
     protected $primaryKey = '_id';
 
