@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\Plantillas;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use MongoDB\Client as MongoClient;
-use MongoDB\BSON\ObjectId;
 
 class PlantillaController extends Controller
 {

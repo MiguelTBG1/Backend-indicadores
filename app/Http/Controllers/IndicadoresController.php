@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use MongoDB\Client as MongoClient;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Operaciones\OperacionFactory;
 
 class IndicadoresController extends Controller
 {
@@ -99,40 +98,36 @@ class IndicadoresController extends Controller
     */
     private function calculateNumerador($configuracion)
     {
-        // Validamos que la configuración tenga los campos necesarios
-        if (!isset($configuracion['coleccion']) || !isset($configuracion['operacion'])) {
-            throw new Exception('Configuración incompleta: coleccion y operacion son requeridos', Response::HTTP_BAD_REQUEST);
-        }
-
-        // Validamos que la colección sea una cadena no vacía
-        if (!is_string($configuracion['coleccion']) || empty($configuracion['coleccion'])) {
-            throw new Exception('Colección no válida: debe ser una cadena no vacía', Response::HTTP_BAD_REQUEST);
-        }
 
         // Validamos que la operación sea una de las permitidas
-        $operacionsPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo'];
-
-        // Validamos que la operación sea una cadena
-        if (!is_string($configuracion['operacion'])) {
-            throw new Exception('Operación no válida: debe ser una cadena', Response::HTTP_BAD_REQUEST);
-        }
+        $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo'];
 
         // Normalizamos a minúsculas
         $configuracion['operacion'] = strtolower($configuracion['operacion']);
 
-        // Verificamos si la operación está en las permitidas
-        if (!in_array($configuracion['operacion'], $operacionsPermitidas)) {
-            throw new Exception('Operación no válida: debe ser una de las siguientes: ' . implode(', ', $operacionsPermitidas), Response::HTTP_BAD_REQUEST);
-        }
+        // Operadores permitidos para las condiciones
+        $operadoresValidos = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
 
-        // Validamos que el campo este definido, pero que sea obligatorio solo para ciertas operaciones
-        if (in_array($configuracion['operacion'], $operacionsPermitidas) && $configuracion['operacion'] !== 'contar' && !isset($configuracion['campo'])) {
-            throw new Exception('Campo no válido: debe estar definido para las operaciones de ' . implode(', ', array_diff($operacionsPermitidas, ['contar'])), Response::HTTP_BAD_REQUEST);
-        }
+        // Validamos la configuracion
+        $validator = Validator::make($configuracion, [
+            'coleccion' => 'required|string',
+            'operacion' => 'required|string|in:' . implode(',', $operacionesPermitidas),
+            'campo' => 'required_if:operacion,in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string',
+            'condicion' => 'sometimes|array',
+            'condicion.*.campo' => 'required_with:condicion|string',
+            'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
+            'condicion.*.valor' => 'required_with:condicion|string',
+            'subConfiguracion' => 'sometimes|array',
+            'subConfiguracion.operacion' => 'required_with:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
+            'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string',
+            'subConfiguracion.condicion' => 'sometimes|array',
+            'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
+            'subConfiguracion.condicion.*.operador' => 'required_with:subConfiguracion.condicion|string|in:' . implode(',', $operadoresValidos),
+            'subConfiguracion.condicion.*.valor' => 'required_with:subConfiguracion.condicion|string',
+        ]);
 
-        // Validamos que el campo sea una cadena si está definido
-        if (isset($configuracion['campo']) && (!is_string($configuracion['campo']) || empty($configuracion['campo']))) {
-            throw new Exception('Campo no válido: debe ser una cadena no vacía', Response::HTTP_BAD_REQUEST);
+        if ($validator->fails()) {
+            throw new Exception('Configuración no válida: ' . $validator->errors()->first(), Response::HTTP_BAD_REQUEST);
         }
 
         // Obtenemos la conexión a la base de datos MongoDB
