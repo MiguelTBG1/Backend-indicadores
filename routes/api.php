@@ -45,6 +45,9 @@ Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::
 
 // LOGOUT
 Route::post('/logout', [AuthController::class, 'logout']);
+
+/* RUTAS PARA USUARIOS */
+Route::post('/register', [UsersController::class, 'register']);
 });
 
 // RUTAS USUARIOS

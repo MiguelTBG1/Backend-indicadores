@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Log;
 class UsersController extends Controller
 {
 
-    public function userRegister(Request $request)
+    /**
+     * Registra un nuevo usuario.
+     */
+    public function register(Request $request)
     {
         $request->validate([
             'email' => 'required|string|email|unique:users',
@@ -24,6 +27,14 @@ class UsersController extends Controller
             'estado' => 'required|string',
             'ocupacion' => 'required|string',
             'escolaridad' => 'required|string',
+            'roles' => 'array|nullable',
+            'permisos' => 'array|nullable',
+            'permisos.*.recurso' => 'required|string',
+            'permisos.*.permisos' => 'array|required',
+            'negaciones' => 'array|nullable',
+            'negaciones.*.recurso' => 'required|string',
+            'negaciones.*.permisos' => 'array|required',
+            'funciones_permitidas' => 'array|nullable',
         ]);
 
         $user = User::create([
@@ -38,9 +49,13 @@ class UsersController extends Controller
             'estado' => $request->estado,
             'ocupacion' => $request->ocupacion,
             'escolaridad' => $request->escolaridad,
+            'permisos' => $request->permisos ?? [], // Asegura que permisos sea un array
+            'negaciones' => $request->negaciones ?? [], // Asegura que neg
+            'funciones_permitidas' => $request->funciones_permitidas ?? [], // Asegura que funciones_permitidas sea un array
+            'roles' => $request->roles ?? [], // Asegura que roles sea un array
         ]);
 
-        return response()->json(['message' => '¡Usuario creado exitosamente!']);
+        return response()->json(['message' => '¡Usuario creado exitosamente!', 'datosCONseguidos' => $request->all()], 201);
     }
 
 
