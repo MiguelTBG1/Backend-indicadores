@@ -8,6 +8,7 @@ use App\Http\Controllers\PlantillaController;
 use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\EjesController;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
@@ -42,6 +43,13 @@ Route::get('/documentos/{id}', [DocumentoController::class, 'getAllDocuments']);
 Route::post('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'update']);
 Route::get('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'getDocumentbyid']);
 Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'deleteDocument']);
+
+// EJES
+Route::get('/eje', [EjesController::class, 'index']);
+Route::get('/eje/{id}', [EjesController::class, 'show']);
+Route::post('/eje', [EjesController::class, 'store']);
+Route::put('/eje/{id}', [EjesController::class, 'update']);
+Route::delete('/eje/{id}', [EjesController::class, 'destroy']);
 
 // LOGOUT
 Route::post('/logout', [AuthController::class, 'logout']);
