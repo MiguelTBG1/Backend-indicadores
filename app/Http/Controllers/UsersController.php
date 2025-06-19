@@ -30,10 +30,10 @@ class UsersController extends Controller
             'roles' => 'array|nullable',
             'permisos' => 'array|nullable',
             'permisos.*.recurso' => 'required|string',
-            'permisos.*.permisos' => 'array|required',
+            'permisos.*.acciones' => 'array|required',
             'negaciones' => 'array|nullable',
             'negaciones.*.recurso' => 'required|string',
-            'negaciones.*.permisos' => 'array|required',
+            'negaciones.*.acciones' => 'array|required',
             'funciones_permitidas' => 'array|nullable',
         ]);
 
@@ -95,13 +95,6 @@ class UsersController extends Controller
 
         return redirect('/');
     }
-    public function dashboard()
-    {
-        $user = Auth::user();
-        $userName = $user->nombre . ' ' . $user->apellido_paterno . ' ' . $user->apellido_materno;
-        return view('administrativas.dashboard', ['userName' => $userName]);
-    }
-
 
     public function listUsers()
     {

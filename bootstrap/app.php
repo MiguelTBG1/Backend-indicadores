@@ -17,8 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->remove([
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class
         ]);
 
         $middleware->alias([

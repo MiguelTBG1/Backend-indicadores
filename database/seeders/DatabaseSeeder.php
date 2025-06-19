@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             IndicadoresCollectionSeeder::class,
             PlantillasCollectionSeeder::class,
             RecursosSeeder::class,
-            OperacionesSeeder::class
+            AccionesSeeder::class,
+            RolesSeeder::class,
         ]);
     }
 }
