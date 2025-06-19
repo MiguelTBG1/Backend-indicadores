@@ -356,15 +356,23 @@ class IndicadoresController extends Controller
             // Guardar temporalmente el archivo
             $path = $file->storeAs('temp', 'upload.' . $extension);
 
-            // Leer el archivo según su extensión
-            if ($extension === 'csv') {
-                $data = Excel::toArray([], storage_path('app/' . $path), null, \Maatwebsite\Excel\Excel::CSV);
-            } else {
-                $data = Excel::toArray([], storage_path('app/' . $path), null, \Maatwebsite\Excel\Excel::XLSX);
+            // Obtener la ruta real del sistema de archivos
+            $fullPath = Storage::path($path);
+
+            // Verificar que el archivo exista antes de leerlo
+            if (!file_exists($fullPath)) {
+                throw new Exception("El archivo no existe en la ruta: $fullPath", Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            // Eliminar el archivo temporal
-            Storage::delete($path);
+            // Leer el archivo según su extensión
+            if ($extension === 'csv') {
+                $data = Excel::toArray([], $fullPath, null, \Maatwebsite\Excel\Excel::CSV);
+            } else {
+                $data = Excel::toArray([], $fullPath, null, \Maatwebsite\Excel\Excel::XLSX);
+            }
+
+            Log::info("Ruta completa: " . storage_path('app/' . $path));
+
 
             if (empty($data) || !isset($data[0]) || empty($data[0])) {
                 throw new Exception('El archivo no contiene datos válidos', Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -402,8 +410,15 @@ class IndicadoresController extends Controller
                 }
             }
 
+            // Eliminar el archivo temporal
+            Storage::delete($path);
+
             return response()->json(['message' => 'Datos guardados correctamente en MongoDB']);
         } catch (Exception $e) {
+            // Manejo de errores
+            Log::error('Error al cargar el archivo Excel: ' . $e->getMessage());
+
+            // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error al guardar los indicadores',
                 'error' => $e->getMessage()
@@ -515,26 +530,32 @@ class IndicadoresController extends Controller
 
             }
 
-            $validator = Validator::make($request->all(), [
-                'configuracion' => 'required|array',
-                'configuracion.coleccion' => 'required|string',
-                'configuracion.operacion' => 'required|string|in:contar,sumar',
-                'configuracion.campo' => 'nullable|string',
-                'configuracion.condicion' => 'nullable|array',
-                'configuracion.condicion.*.campo' => 'required_if:configuracion.condicion,true|string',
-                'configuracion.condicion.*.operador' => 'required_if:configuracion.condicion,true|string|in:igual,mayor,menor',
-                'configuracion.condicion.*.valor' => 'required_if:configuracion.condicion,true|string',
-            ], [
-                'configuracion.required' => 'El campo configuracion es obligatorio.',
-                'configuracion.array' => 'El campo configuracion debe ser un array.',
-                'configuracion.condicion.*.campo.required_if' => 'El campo es obligatorio en cada condición.',
-                'configuracion.condicion.*.operador.required_if' => 'El operador es obligatorio en cada condición.',
-                'configuracion.condicion.*.valor.required_if' => 'El valor es obligatorio en cada condición.',
+            // Validamos que la operación sea una de las permitidas
+            $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo'];
+
+            // Operadores permitidos para las condiciones
+            $operadoresValidos = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
+
+            // Validamos la configuracion
+            $validator = Validator::make($request->input('configuracion'), [
+                'coleccion' => 'required|string',
+                'operacion' => 'required|string|in:' . implode(',', $operacionesPermitidas),
+                'campo' => 'required_if:operacion,in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
+                'condicion' => 'sometimes|array',
+                'condicion.*.campo' => 'required_with:condicion|string',
+                'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
+                'condicion.*.valor' => 'required_with:condicion|string',
+                'subConfiguracion' => 'sometimes|array',
+                'subConfiguracion.operacion' => 'required_with:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
+                'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
+                'subConfiguracion.condicion' => 'sometimes|array',
+                'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
+                'subConfiguracion.condicion.*.operador' => 'required_with:subConfiguracion.condicion|string|in:' . implode(',', $operadoresValidos),
+                'subConfiguracion.condicion.*.valor' => 'required_with:subConfiguracion.condicion|string',
             ]);
 
-            // Verifica si la validación falla
             if ($validator->fails()) {
-                throw new \Exception($validator->errors()->first(), Response::HTTP_UNPROCESSABLE_ENTITY);
+                throw new Exception('Configuración no válida: ' . $validator->errors()->first(), Response::HTTP_BAD_REQUEST);
             }
 
             // Guardamos o Actualizamos la configuración
