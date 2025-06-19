@@ -22,7 +22,8 @@ class PlantillaController extends Controller
             $plantillas = $plantillas->map(function ($plantilla) {
                 return [
                     'id' => $plantilla->_id,
-                    'nombre_plantilla' => $plantilla->nombre_plantilla
+                    'nombre_plantilla' => $plantilla->nombre_plantilla,
+                    'nombre_coleccion' => $plantilla->nombre_coleccion,
                 ];
             });
 
