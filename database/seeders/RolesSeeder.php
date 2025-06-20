@@ -2,9 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Rol;
+use App\Models\Accion;
+use App\Models\Recurso;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 class RolesSeeder extends Seeder
 {
     /**
@@ -12,45 +16,17 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
+        $todosRecursos = Recurso::where('nombre','*')->first();
+        $todosAcciones = Accion::where('nombre','*')->first();
         $roles = [
             [
-                'nombre' => 'Administrador del sistema',
+                'nombre' => 'super_usuario',
                 'descripcion' => 'Acceso completo al sistema',
                 'permisos' => [
                     [
-                        'recurso' => '6851df8c4ceed527080443bc',
-                        'permisos' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1',
-                            '6851df8c4ceed527080443c2',
-                            '6851df8c4ceed527080443c3'
-                        ]
-                    ],
-                    [
-                        'recurso' => '6851df8c4ceed527080443bd',
-                        'permisos' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1',
-                            '6851df8c4ceed527080443c2',
-                            '6851df8c4ceed527080443c3'
-                        ]
-                    ],
-                    [
-                        'recurso' => '6851df8c4ceed527080443be',
-                        'permisos' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1',
-                            '6851df8c4ceed527080443c2',
-                            '6851df8c4ceed527080443c3'
-                        ]
-                    ],
-                    [
-                        'recurso' => '6851df8c4ceed527080443bf',
-                        'permisos' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1',
-                            '6851df8c4ceed527080443c2',
-                            '6851df8c4ceed527080443c3'
+                        'recurso' => $todosRecursos->_id,
+                        'acciones' => [
+                            $todosAcciones->_id
                         ]
                     ]
                 ]
@@ -61,7 +37,7 @@ class RolesSeeder extends Seeder
                 'permisos' => [
                     [
                         'recurso' => '6851df8c4ceed527080443bd',
-                        'permisos' => [
+                        'acciones' => [
                             '6851df8c4ceed527080443c0',
                             '6851df8c4ceed527080443c1',
                             '6851df8c4ceed527080443c2',
@@ -70,7 +46,7 @@ class RolesSeeder extends Seeder
                     ],
                     [
                         'recurso' => '6851df8c4ceed527080443bf',
-                        'permisos' => [
+                        'acciones' => [
                             '6851df8c4ceed527080443c0',
                             '6851df8c4ceed527080443c1',
                             '6851df8c4ceed527080443c2',
@@ -85,7 +61,7 @@ class RolesSeeder extends Seeder
                 'permisos' => [
                     [
                         'recurso' => '6851df8c4ceed527080443be',
-                        'permisos' => [
+                        'acciones' => [
                             '6851df8c4ceed527080443c0',
                             '6851df8c4ceed527080443c1',
                             '6851df8c4ceed527080443c2',
@@ -100,19 +76,19 @@ class RolesSeeder extends Seeder
                 'permisos' => [
                     [
                         'recurso' => '6851df8c4ceed527080443bc',
-                        'permisos' => ['6851df8c4ceed527080443c1']
+                        'acciones' => ['6851df8c4ceed527080443c1']
                     ],
                     [
                         'recurso' => '6851df8c4ceed527080443bd',
-                        'permisos' => ['6851df8c4ceed527080443c1']
+                        'acciones' => ['6851df8c4ceed527080443c1']
                     ],
                     [
                         'recurso' => '6851df8c4ceed527080443be',
-                        'permisos' => ['6851df8c4ceed527080443c1']
+                        'acciones' => ['6851df8c4ceed527080443c1']
                     ],
                     [
                         'recurso' => '6851df8c4ceed527080443bf',
-                        'permisos' => ['6851df8c4ceed527080443c1']
+                        'acciones' => ['6851df8c4ceed527080443c1']
                     ]
                 ]
             ],
@@ -122,7 +98,7 @@ class RolesSeeder extends Seeder
                 'permisos' => [
                     [
                         'recurso' => '6851df8c4ceed527080443bd',
-                        'permisos' => ['6851df8c4ceed527080443c1']
+                        'acciones' => ['6851df8c4ceed527080443c1']
                     ]
                 ]
             ],
@@ -132,7 +108,7 @@ class RolesSeeder extends Seeder
                 'permisos' => [
                     [
                         'recurso' => '6851df8c4ceed527080443bf',
-                        'permisos' => [
+                        'acciones' => [
                             '6851df8c4ceed527080443c0',
                             '6851df8c4ceed527080443c1'
                         ]

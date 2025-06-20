@@ -15,6 +15,10 @@ class AccionesSeeder extends Seeder
     {
         $Acciones = [
             [
+                "nombre" => "*",
+                "descripcion" => "Todos los permisos",
+            ],
+            [
             "nombre" => "crear",
             "descripcion" => "Crear un nuevo registro"
             ],

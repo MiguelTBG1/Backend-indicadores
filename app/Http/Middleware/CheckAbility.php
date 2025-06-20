@@ -15,9 +15,37 @@ class CheckAbility
      */
     public function handle(Request $request, Closure $next, $ability)
     {
-        if (!$request->user() || !$request->user()->tokenCan($ability)) {
-            return response()->json(['message' => 'No autorizado'], 403);
+        // REvisamos si el usuario esta auntenticado
+        if (!$request->user()) {
+            return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
         }
+
+        // Separamos el recurso del permiso
+        [$recurso, $permiso] = explode('_', $ability, 2);
+
+        // Arreglo con habilidades permitidas
+        $abilitiesToCheck = [
+            "{$recurso}_{$permiso}",
+            "{$recurso}_*",
+            "*_{$permiso}",
+            "*_*",
+        ];
+
+        // BAndera
+        $hasAbility = false;
+
+        //Reccorremos el arreglo de hablidades permitidas y preguntamos si el token de usuario tiene ese permiso
+        foreach ($abilitiesToCheck as $ab) {
+            if ($request->user()->tokenCan($ab)) {
+                $hasAbility = true;
+                break;
+            }
+        }
+
+        if (!$hasAbility) {
+            return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
+        }
+
         return $next($request);
     }
 }

@@ -71,13 +71,42 @@ class User extends Model
     public function getPermisos() {
         $permisosStr = [];
 
+        // Variable para almacenar todos los permisos del usuario
+        $permisosTotales = $this->permisos;
+
+        // Conseguimos los permisos de los roles del usuario
+        if( empty($this->roles) || !is_array($permisosTotales))
+        {
+            foreach ($this->roles as $role) {
+                // Buscamos el rol en la colección de roles
+                $rol = Rol::find($role);
+
+                //Recorremos los permisos del rol
+                foreach($rol->permisos as $permiso){
+                    // Conseguimos el nombre del recurso
+                    $recursoId = $permiso['recurso'];
+                    $recurso = Recurso::find($recursoId)->nombre;
+
+                        // Recorremos las acciones del permiso
+                    foreach($permiso['acciones'] as $accion) {
+                        // Buscamos la acción en la colección de acciones
+                        $accionObj = Accion::find($accion);
+                        $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
+
+                        // Generamos la cadena de permiso
+                        $permisosStr[] = "{$recurso}_{$nombreAccion}";
+                    }
+                }
+            }
+        }
+
         // Verificamos si permisos no es null o vacío
-        if (empty($this->permisos) || !is_array($this->permisos)) {
+        if (empty($permisosTotales) || !is_array($permisosTotales)) {
             return $permisosStr;
         }
 
         // Recorremos los permisos del usuario
-        foreach ($this->permisos as $permiso) {
+        foreach ($permisosTotales as $permiso) {
             // Conseguimos las ids del recurso y la accion
             $recursoId = $permiso['recurso'];
             

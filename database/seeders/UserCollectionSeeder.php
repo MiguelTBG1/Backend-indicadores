@@ -5,6 +5,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Rol;
 use Illuminate\Support\Facades\Hash;
 
 class UserCollectionSeeder extends Seeder
@@ -14,8 +15,23 @@ class UserCollectionSeeder extends Seeder
      */
     public function run(): void
     {
+    
+        $super_usuario = Rol::where('nombre', 'super_usuario')->first();
         // Insertamos un usuario admin en la tabla
         User::create(
+            [
+                'nombre' => 'SuperUSuario',
+                'apellido_paterno' => '',
+                'apellido_materno' => '',
+                'email' => 'admin@test.com',
+                'password' => Hash::make('admin'),
+                'edad' => 27,
+                'genero' => 'Masculino',
+                'estado' => 'Activo',
+                'ocupacion' => 'Administrador',
+                'escolaridad' => 'Universidad',
+                'roles' => [$super_usuario->_id]
+            ],
             [
                 'nombre' => 'Rodrigo Alexander',
                 'apellido_paterno' => 'Can',
@@ -26,8 +42,7 @@ class UserCollectionSeeder extends Seeder
                 'genero' => 'Masculino',
                 'estado' => 'Activo',
                 'ocupacion' => 'Administrador',
-                'escolaridad' => 'Universidad',
-                'roles' => ['administrador', 'plantillas', 'capturista', 'validador','carrusel']
+                'escolaridad' => 'Universidad'
             ]
         );
 
@@ -43,8 +58,7 @@ class UserCollectionSeeder extends Seeder
                 'genero' => 'Masculino',
                 'estado' => 'Activo',
                 'ocupacion' => 'Desarrollador',
-                'escolaridad' => 'Universidad',
-                'roles' => ['administrador', 'plantillas', 'capturista', 'validador','carrusel']
+                'escolaridad' => 'Universidad'
             ]
         );
 
@@ -60,8 +74,7 @@ class UserCollectionSeeder extends Seeder
                 'genero' => 'Masculino',
                 'estado' => 'Activo',
                 'ocupacion' => 'Desarrollador',
-                'escolaridad' => 'Universidad',
-                'roles' => ['plantillas', 'capturista', 'validador']
+                'escolaridad' => 'Universidad'
             ]
         );
     }

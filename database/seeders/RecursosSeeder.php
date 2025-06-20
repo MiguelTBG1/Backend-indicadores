@@ -14,6 +14,11 @@ class RecursosSeeder extends Seeder
     {
         $recursos = [
             [
+                "nombre" => "*",
+                "descripcion" => "Permisos en todas las tablas",
+                "tipo" => "estatico"
+            ],
+            [
                 "nombre" => "Usuarios",
                 "descripcion" => "Gestión de usuarios del sistema",
                 "tipo" => 'estatico'
