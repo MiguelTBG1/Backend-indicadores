@@ -302,7 +302,8 @@ class IndicadoresController extends Controller
                 '_idProyecto' => 'required|string',
                 'numero' => 'required|integer',
                 'nombreIndicador' => 'required|string',
-                'denominador' => 'required|integer'
+                'denominador' => 'required|integer',
+                'departamento' => 'required|string'
             ]);
 
             // Creamos un indicador con los datos del resquest
@@ -310,7 +311,8 @@ class IndicadoresController extends Controller
                 '_idProyecto' => $request->_idProyecto,
                 'numero' => $request->numero,
                 'nombreIndicador' => $request->nombreIndicador,
-                'denominador' => $request->denominador
+                'denominador' => $request->denominador,
+                'departamento' => $request->departamento
             ]);
 
             // Avisamos que el indicador se creo exitosamente
@@ -489,7 +491,8 @@ class IndicadoresController extends Controller
                 '_idProyecto',
                 'numero',
                 'nombreIndicador',
-                'denominador'
+                'denominador',
+                'departamento'
             ]);
 
             // Actualizamos el indicador
