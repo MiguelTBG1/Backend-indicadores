@@ -94,7 +94,7 @@ class User extends Model
                         $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
 
                         // Generamos la cadena de permiso
-                        $permisosStr[] = "{$recurso}_{$nombreAccion}";
+                        $permisosStr[] = strtolower("{$recurso}_{$nombreAccion}");
                     }
                 }
             }
@@ -121,7 +121,7 @@ class User extends Model
                 $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
 
                 // Generamos la cadena de permiso
-                $permisosStr[] = "{$recurso}_{$nombreAccion}";
+                $permisosStr[] = strtolower("{$recurso}_{$nombreAccion}");
             }
         }
 
