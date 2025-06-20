@@ -52,7 +52,7 @@ class PlantillaController extends Controller
     {
         try {
             // Tipos de campos permitidos
-            $tiposCamposPermitidos = ['string', 'number', 'file', 'date', 'subform'];
+            $tiposCamposPermitidos = ['string', 'number', 'file', 'date', 'subform', 'boolean', 'select', 'checkbox'];
 
             // Tipos de campos que se permiten en subform
             $tiposCamposPermitidosSubform = array_diff($tiposCamposPermitidos, ['subform']);
@@ -64,6 +64,8 @@ class PlantillaController extends Controller
                 'fields' => 'required|array|min:1',
                 'fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
+                'fields.*.type' => 'required_if:select,checkbox|array',
+                'fields.*options' => 'required_if:fields.*.type,select|array|min:1',
                 'fields.*.required' => 'required|boolean',
                 'fields.*.subcampos' => 'required_if:fields.*.type,subform|array|min:1',
                 'fields.*.subcampos.*.name' => 'required_if:fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
@@ -202,6 +204,7 @@ class PlantillaController extends Controller
                 'fields' => 'required|array|min:1',
                 'fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
+                'fields.*options' => 'required_if:fields.*.type,select|array|min:1',
                 'fields.*.required' => 'required|boolean',
                 'fields.*.subcampos' => 'required_if:fields.*.type,subform|array|min:1',
                 'fields.*.subcampos.*.name' => 'required_if:fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
