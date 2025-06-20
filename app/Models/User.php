@@ -86,7 +86,7 @@ class User extends Model
             $acciones = [];
 
             // Recorremos las acciones del permiso
-            foreach($permiso['permisos'] as $accion) {
+            foreach($permiso['acciones'] as $accion) {
                 // Buscamos la acción en la colección de acciones
                 $accionObj = Accion::find($accion);
                 $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
