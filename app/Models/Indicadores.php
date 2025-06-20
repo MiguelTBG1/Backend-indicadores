@@ -18,6 +18,7 @@ class Indicadores extends Model
         'nombreIndicador',
         'numerador',
         'denominador',
+        'departamento',
         'configuracion',
     ];
 

@@ -19,7 +19,8 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Todas las rutas dentro de esta funcion requieren autenticación
 Route::middleware(['auth.sanctum'])->group(function () {
-/* RUTAS INDICADORES */
+
+/* INDICADORES */
 Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores']);
 Route::get('/indicador/{id}', [IndicadoresController::class, 'getIndicador']);
 Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador']);
