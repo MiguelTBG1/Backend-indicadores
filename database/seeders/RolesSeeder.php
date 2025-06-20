@@ -16,8 +16,20 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
+        // Obtenemos los recursos del sistema
         $todosRecursos = Recurso::where('nombre','*')->first();
+        $usuarios = Recurso::where('nombre', 'Usuarios')->first();
+        $indicadores = Recurso::where('nombre', 'Indicadores')->first();
+        $plantillas = Recurso::where('nombre', 'Plantillas')->first();
+        $documentos = Recurso::where('nombre', 'Documentos')->first();
+
+        // Obtenemos las acciones
         $todosAcciones = Accion::where('nombre','*')->first();
+        $crear = Accion::where('nombre','crear')->first();
+        $leer = Accion::where('nombre','leer')->first();
+        $actualizar = Accion::where('nombre','actualizar')->first();
+        $eliminar = Accion::where('nombre','eliminar')->first();
+
         $roles = [
             [
                 'nombre' => 'super_usuario',
@@ -36,22 +48,12 @@ class RolesSeeder extends Seeder
                 'descripcion' => 'Gestiona indicadores y documentos relacionados con la actividad académica',
                 'permisos' => [
                     [
-                        'recurso' => '6851df8c4ceed527080443bd',
-                        'acciones' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1',
-                            '6851df8c4ceed527080443c2',
-                            '6851df8c4ceed527080443c3'
-                        ]
+                        'recurso' => $indicadores->_id,
+                        'acciones' => [ $todosAcciones->_id ]
                     ],
                     [
-                        'recurso' => '6851df8c4ceed527080443bf',
-                        'acciones' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1',
-                            '6851df8c4ceed527080443c2',
-                            '6851df8c4ceed527080443c3'
-                        ]
+                        'recurso' => $documentos->_id,
+                        'acciones' => [ $todosAcciones->_id ]
                     ]
                 ]
             ],
@@ -60,13 +62,8 @@ class RolesSeeder extends Seeder
                 'descripcion' => 'Gestiona exclusivamente las plantillas de documentos',
                 'permisos' => [
                     [
-                        'recurso' => '6851df8c4ceed527080443be',
-                        'acciones' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1',
-                            '6851df8c4ceed527080443c2',
-                            '6851df8c4ceed527080443c3'
-                        ]
+                        'recurso' => $plantillas->_id,
+                        'acciones' => [ $todosAcciones->_id ]
                     ]
                 ]
             ],
@@ -75,20 +72,8 @@ class RolesSeeder extends Seeder
                 'descripcion' => 'Permiso de solo lectura en todo el sistema',
                 'permisos' => [
                     [
-                        'recurso' => '6851df8c4ceed527080443bc',
-                        'acciones' => ['6851df8c4ceed527080443c1']
-                    ],
-                    [
-                        'recurso' => '6851df8c4ceed527080443bd',
-                        'acciones' => ['6851df8c4ceed527080443c1']
-                    ],
-                    [
-                        'recurso' => '6851df8c4ceed527080443be',
-                        'acciones' => ['6851df8c4ceed527080443c1']
-                    ],
-                    [
-                        'recurso' => '6851df8c4ceed527080443bf',
-                        'acciones' => ['6851df8c4ceed527080443c1']
+                        'recurso' => '*',
+                        'acciones' => [$leer->_id]
                     ]
                 ]
             ],
@@ -97,8 +82,8 @@ class RolesSeeder extends Seeder
                 'descripcion' => 'Accede a los indicadores del sistema para análisis, sin permisos de edición',
                 'permisos' => [
                     [
-                        'recurso' => '6851df8c4ceed527080443bd',
-                        'acciones' => ['6851df8c4ceed527080443c1']
+                        'recurso' => $indicadores->_id,
+                        'acciones' => [$leer->_id]
                     ]
                 ]
             ],
@@ -107,10 +92,10 @@ class RolesSeeder extends Seeder
                 'descripcion' => 'Puede crear documentos a partir de plantillas, pero no puede modificar ni eliminar otros documentos',
                 'permisos' => [
                     [
-                        'recurso' => '6851df8c4ceed527080443bf',
+                        'recurso' => $documentos->_id,
                         'acciones' => [
-                            '6851df8c4ceed527080443c0',
-                            '6851df8c4ceed527080443c1'
+                            $crear->_id,
+                            $actualizar->_id
                         ]
                     ]
                 ]
