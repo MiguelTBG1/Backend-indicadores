@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use MongoDB\Client as MongoClient;
 use Illuminate\Support\Facades\Log;
-use PhpParser\Node\Stmt\Return_;
+use App\Models\Plantillas;
 
 class IndicadoresController extends Controller
 {
@@ -142,11 +142,48 @@ class IndicadoresController extends Controller
             return 0;
         }
 
+        // Buscamos la plantilla en la colección Templates
+        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first();
+
+        // Si no existe la plantilla, retornamos 0
+        if (!$plantilla) {
+            return 0;
+        }
+
         // Creamos el pipeline de agregación
         $pipeline = [];
 
+        // Validamos que la plantilla tenga el campo de configuración para obtener el tipo de campo
+        $campos = $plantilla->campos ?? [];
+
         // Validamos si hay condiciones
         if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
+            // Verificar si un campo en la condicion es subform
+            foreach ($configuracion['condicion'] as $index => $condicion) {
+                $tipocampo = null;
+
+                foreach ($campos as $campo) {
+                    if (isset($campo['name']) && $campo['name'] == $condicion['campo']) {
+                        $tipocampo = $campo['type'] ?? null;
+                        break;
+                    }
+                }
+
+                if ($tipocampo === 'subform') {
+                    // Agregar etapa al pipeline
+                    $pipeline[] = [
+                        '$addFields' => [
+                            'total' . $condicion['campo'] => [
+                                '$size' => '$' . $condicion['campo']
+                            ]
+                        ]
+                    ];
+
+                    // Actualizar el campo en la condición original
+                    $configuracion['condicion'][$index]['campo'] = 'total' . $condicion['campo'];
+                }
+            }
+
             foreach ($configuracion['condicion'] as $condicion) {
 
                 $operador = match ($condicion['operador']) {
