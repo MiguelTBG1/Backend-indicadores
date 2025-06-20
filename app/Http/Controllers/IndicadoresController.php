@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use MongoDB\Client as MongoClient;
 use Illuminate\Support\Facades\Log;
+use PhpParser\Node\Stmt\Return_;
 
 class IndicadoresController extends Controller
 {
@@ -127,7 +128,7 @@ class IndicadoresController extends Controller
         ]);
 
         if ($validator->fails()) {
-            throw new Exception('Configuración no válida: ' . $validator->errors()->first(), Response::HTTP_BAD_REQUEST);
+            return 0;
         }
 
         // Obtenemos la conexión a la base de datos MongoDB
@@ -138,7 +139,7 @@ class IndicadoresController extends Controller
 
         // Validamos que la colección exista
         if (!$collection) {
-            throw new Exception('Colección no encontrada: ' . $configuracion['coleccion'], Response::HTTP_NOT_FOUND);
+            return 0;
         }
 
         // Creamos el pipeline de agregación
@@ -373,15 +374,24 @@ class IndicadoresController extends Controller
                 $data = Excel::toArray([], $fullPath, null, \Maatwebsite\Excel\Excel::XLSX);
             }
 
-            Log::info("Ruta completa: " . storage_path('app/' . $path));
-
-
             if (empty($data) || !isset($data[0]) || empty($data[0])) {
                 throw new Exception('El archivo no contiene datos válidos', Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            $headers = array_map('strtolower', $data[0][0]); // Obtener encabezados en minúsculas
-            $rows = array_slice($data[0], 1); // Eliminar fila de encabezados
+            // Tomamos la primera hoja
+            $hoja = $data[0] ?? [];
+
+            // Eliminamos filas completamente vacías
+            $filasLimpias = array_filter($hoja, function ($row) {
+                return !empty(array_filter($row)); // Mantiene filas con contenido
+            });
+
+            // Reindexar para evitar problemas con índices
+            $filasLimpias = array_values($filasLimpias);
+
+            $headers = array_map('strtolower', $filasLimpias[0]); // Obtener encabezados en minúsculas
+
+            $rows = array_slice($filasLimpias, 1); // Eliminar fila de encabezados
 
             // Mapeo de nombres de columnas esperados
             $columnMapping = [
