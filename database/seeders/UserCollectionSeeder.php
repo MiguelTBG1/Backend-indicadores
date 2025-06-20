@@ -64,7 +64,7 @@ class UserCollectionSeeder extends Seeder
                 'nombre' => 'Daris Gael',
                 'apellido_paterno' => 'Martinez',
                 'apellido_materno' => 'Galicia',
-                'email' => 'editorPlantillas@hotmail.com',
+                'email' => 'editorPlantillas@test.com',
                 'password' => Hash::make('123456'),
                 'edad' => 22,
                 'genero' => 'Masculino',

@@ -72,7 +72,7 @@ class RolesSeeder extends Seeder
                 'descripcion' => 'Permiso de solo lectura en todo el sistema',
                 'permisos' => [
                     [
-                        'recurso' => '*',
+                        'recurso' => $todosRecursos->_id,
                         'acciones' => [$leer->_id]
                     ]
                 ]
