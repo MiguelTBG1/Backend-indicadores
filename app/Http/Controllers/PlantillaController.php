@@ -90,8 +90,6 @@ class PlantillaController extends Controller
             // Filtrar datos no serializables en `campos`
             $fields = $request->input('fields');
 
-            Log::info('Campos recibidos: ' . json_encode($fields));
-
             // Agregar la plantilla a la colección de Plantillas
             $plantilla = Plantillas::create([
                 'nombre_plantilla' => $plantillaName,
@@ -202,16 +200,15 @@ class PlantillaController extends Controller
 
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
-                'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'fields' => 'required|array|min:1',
-                'fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
-                'fields.*options' => 'required_if:fields.*.type,select|array|min:1',
-                'fields.*.required' => 'required|boolean',
-                'fields.*.subcampos' => 'required_if:fields.*.type,subform|array|min:1',
-                'fields.*.subcampos.*.name' => 'required_if:fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'fields.*.subcampos.*.type' => 'required_if:fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
-                'fields.*.subcampos.*.required' => 'required_if:fields.*.type,subform|boolean'
+                'campos' => 'required|array|min:1',
+                'campos.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'campos.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
+                'campos.*options' => 'required_if:fields.*.type,select|array|min:1',
+                'campos.*.required' => 'required|boolean',
+                'campos.*.subcampos' => 'required_if:fields.*.type,subform|array|min:1',
+                'campos.*.subcampos.*.name' => 'required_if:fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'campos.*.subcampos.*.type' => 'required_if:fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
+                'campos.*.subcampos.*.required' => 'required_if:fields.*.type,subform|boolean'
             ]);
 
             if ($validator->fails()) {
