@@ -192,7 +192,7 @@ class PlantillaController extends Controller
             }
 
             // Tipos de campos permitidos
-            $tiposCamposPermitidos = ['string', 'number', 'file', 'date', 'subform'];
+            $tiposCamposPermitidos = ['string', 'number', 'file', 'date', 'subform', 'select'];
 
             // Tipos de campos que se permiten en subform
             $tiposCamposPermitidosSubform = array_diff($tiposCamposPermitidos, ['subform']);
