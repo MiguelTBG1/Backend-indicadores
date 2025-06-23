@@ -65,6 +65,57 @@ class IndicadoresController extends Controller
         }
     }
 
+        /**
+     * Obtiene todos los indicadores por periodo
+     * @param Request $request Datos del periodo
+     * @return JsonResponse La respuesta con los indicadores
+     */
+    public function indexPeriodo(Request $request)
+    {
+        try {
+            // Obtenemos todos los indicadores
+            $indicadores = Indicadores::all();
+
+            // Verificamos si se obtuvieron indicadores
+            if ($indicadores->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No se encontraron indicadores',
+                    'indicadores' => []
+                ], Response::HTTP_OK);
+            }
+
+            // Agregamos el campo numerador si no existe
+            foreach ($indicadores as $indicador) {
+                if (!isset($indicador->numerador)) {
+                    $indicador->numerador = 0; // Valor por defecto
+                }
+            }
+
+            // Verificamos si tiene el campo de configuración y calculamos el numerador
+            foreach ($indicadores as $indicador) {
+                if (isset($indicador->configuracion)) {
+                    $indicador->numerador = $this->calculateNumerador($indicador->configuracion);
+                }
+            }
+
+            // Retornamos la respuesta con los indicadores
+            return response()->json([
+                'success' => true,
+                'message' => 'Indicadores encontrados',
+                'indicadores' => $indicadores,
+            ], Response::HTTP_OK);
+
+        } catch (Exception $e) {
+            // Retornamos mensaje de error
+            Log::error('Error al obtener los indicadores: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error del sistema al obtener los indicadores',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     /**
      * Obtiene un indicador por su ID
      * @param string $id ID del indicador a obtener

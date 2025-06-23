@@ -188,7 +188,7 @@ class EjesController extends Controller
             $eje->delete();
 
             // Verificar si la eliminación fue exitosa
-            if (!$eje->trashed()) {
+            if (!$eje) {
                 throw new Exception('Error al eliminar el eje');
             }
 
