@@ -64,7 +64,7 @@ class PlantillaController extends Controller
                 'fields' => 'required|array|min:1',
                 'fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
-                'fields.*.type' => 'required_if:select,checkbox|array',
+                'fields.*.type' => 'required_if:select,checkbox|string',
                 'fields.*options' => 'required_if:fields.*.type,select|array|min:1',
                 'fields.*.required' => 'required|boolean',
                 'fields.*.subcampos' => 'required_if:fields.*.type,subform|array|min:1',
@@ -72,6 +72,7 @@ class PlantillaController extends Controller
                 'fields.*.subcampos.*.type' => 'required_if:fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
                 'fields.*.subcampos.*.required' => 'required_if:fields.*.type,subform|boolean'
             ]);
+
 
             if ($validator->fails()) {
                 throw new \Exception(json_encode($validator->errors()), 422);
@@ -89,6 +90,8 @@ class PlantillaController extends Controller
 
             // Filtrar datos no serializables en `campos`
             $fields = $request->input('fields');
+
+            Log::info('Campos recibidos: ' . json_encode($fields));
 
             // Agregar la plantilla a la colección de Plantillas
             $plantilla = Plantillas::create([
