@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use MongoDB\Client as MongoClient;
 use Illuminate\Support\Facades\Log;
 use App\Models\Plantillas;
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
 
 class IndicadoresController extends Controller
 {
@@ -386,14 +387,21 @@ class IndicadoresController extends Controller
     public function insertIndicador(Request $request)
     {
         try {
-            // Validamos los datos del request
-            $request -> validate([
+            // Validar la solicitud
+            $validator = Validator::make($request->all(), [
                 '_idProyecto' => 'required|string',
                 'numero' => 'required|integer',
-                'nombreIndicador' => 'required|string',
-                'denominador' => 'required|integer',
-                'departamento' => 'required|string'
+                'nombreIndicador' => 'required|string|max:255',
+                'denominador' => 'required|numeric',
+                'departamento' => 'required|string|max:255'
             ]);
+
+            // Verificar si la validación falla
+            if ($validator->fails()) {
+                throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            Log::info('Datos del request para insertar indicador: ', $request->all());
 
             // Creamos un indicador con los datos del resquest
             $indicador = Indicadores::create([
@@ -404,6 +412,11 @@ class IndicadoresController extends Controller
                 'departamento' => $request->departamento
             ]);
 
+            // Verificamos si se creó el indicador
+            if (!$indicador) {
+                throw new Exception('Error al crear el indicador', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
             // Avisamos que el indicador se creo exitosamente
             return response()->json([
                 'success' => true,
@@ -412,6 +425,9 @@ class IndicadoresController extends Controller
             ], Response::HTTP_CREATED);
 
         } catch (Exception $e) {
+            // Manejo de errores
+            // Logueamos el error
+            Log::error('Error al insertar el indicador: ' . $e->getMessage());
             // Retornamos el mensaje de error
             return response()->json([
                 'success' => false,
@@ -573,31 +589,48 @@ class IndicadoresController extends Controller
      */
     public function updateIndicador(Request $request, $id) {
         try {
+            Log::info('Datos del request para actualizar indicador: ', $request->all());
+
+            // Validar el formato de la id
+            if(!preg_match('/^[a-f0-9]{24}$/', $id)) {
+                throw new Exception('ID de indicador no válido', Response::HTTP_BAD_REQUEST);
+            }
+
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
 
-            // Verificamos si existe el indicador
+            // Si no existe el indicador, retornamos un error
             if (!$indicador) {
-                return response()->json([
-                    'message' => 'No se encontró el indicador a borrar',
-                    'id_recibido' => $id
-                ], Response::HTTP_NOT_FOUND);
+                throw new Exception("No se encontró el indicador con ID: $id", Response::HTTP_NOT_FOUND);
+            }
+
+            // Validamos la solicitud
+            $validator = Validator::make($request->all(), [
+                '_idProyecto' => 'required|string',
+                'numero' => 'required|integer',
+                'nombreIndicador' => 'required|string|max:255',
+                'numerador' => 'required|numeric', // El numerador es opcional al actualizar
+                'denominador' => 'required|numeric',
+                'departamento' => 'required|string|max:255'
+            ]);
+
+            // Verificamos si la validación falla
+            if( $validator->fails()) {
+                throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
             // Obtenemos los datos del request
-            $data = $request->only([
+            $datos = $request->only([
                 '_idProyecto',
                 'numero',
                 'nombreIndicador',
+                'numerador',
                 'denominador',
                 'departamento'
             ]);
 
             // Actualizamos el indicador
-            $indicador -> update ($data);
-
-            // Actualizamos el indicador con la nueva información
-            $indicador -> refresh();
+            $indicador ->fill($datos);
 
             // Retornamos la respuesta de éxito
             return response() -> json([
@@ -606,6 +639,9 @@ class IndicadoresController extends Controller
             ], Response::HTTP_OK);
 
         } catch (Exception $e) {
+            // Manejamos el error
+            // Logueamos el error
+            Log::error('Error al actualizar el indicador: ' . $e->getMessage());
             // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error al actualizar el indicador',
