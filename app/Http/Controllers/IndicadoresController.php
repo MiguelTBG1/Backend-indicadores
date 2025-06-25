@@ -630,7 +630,8 @@ class IndicadoresController extends Controller
             ]);
 
             // Actualizamos el indicador
-            $indicador ->fill($datos);
+            $indicador ->update($datos);
+
 
             // Retornamos la respuesta de éxito
             return response() -> json([
