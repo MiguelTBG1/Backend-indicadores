@@ -32,7 +32,7 @@ Este documento describe los distintos tipos de usuarios registrados en el sistem
 
 ## 3. Editor de Plantillas
 
-* **Correo:** `editorPlantillas@hotmail.com`
+* **Correo:** `editorPlantillas@test.com`
 * **Contraseña (por defecto):** `123456`
 * **Rol:** `Editor de plantillas`
 * **Descripción:** Responsable de gestionar las plantillas de documentos.

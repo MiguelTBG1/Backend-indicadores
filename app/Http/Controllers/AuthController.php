@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -42,14 +43,15 @@ class AuthController extends Controller
         $token = $user->createToken($nombreToken, $permisos, $tiempoVida)->plainTextToken;
 
         // Eliminamos los campos innecesarios de la respuesta
-        $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad']);
+        $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles']);
         
+        $permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
         // Respuesta exitosa
         return response()->json([
             'message' => 'Login exitoso',
             'user' => $user,
             'token' => $token,
-            'permisos' => $permisos,
+            'permisos' => $permisosEncriptados,
         ], Response::HTTP_OK);
     }
 
