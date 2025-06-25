@@ -296,14 +296,6 @@ class DocumentoController extends Controller
         // Validar los datos de entrada
         $validatos = Validator::make($request->all(), [
             'document_data' => 'required|array',
-            'document_data.denominador' => 'nullable|integer',
-            'document_data.indicador_asociado' => 'required|string',
-        ], [
-            'document_data.required' => 'El campo document_data es obligatorio.',
-            'document_data.array' => 'El campo document_data debe ser un array.',
-            'document_data.denominador.integer' => 'El denominador debe ser un número entero.',
-            'document_data.indicador_asociado.required' => 'El campo indicador asociado es obligatorio.',
-            'document_data.indicador_asociado.string' => 'El campo indicador asociado debe ser una cadena de texto.',
         ]);
 
         // Verifica si la validación falla
