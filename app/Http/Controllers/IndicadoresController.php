@@ -155,7 +155,7 @@ class IndicadoresController extends Controller
             'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
             'condicion.*.valor' => 'required_with:condicion|string',
             'subConfiguracion' => 'sometimes|array',
-            'subConfiguracion.operacion' => 'excluded_if:operacion,distinto|required_without:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
+            'subConfiguracion.operacion' => 'required_without:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
             'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
             'subConfiguracion.condicion' => 'sometimes|array',
             'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
