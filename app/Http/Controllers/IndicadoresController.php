@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use MongoDB\Client as MongoClient;
+use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Log;
 use App\Models\Plantillas;
 use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
@@ -74,13 +75,24 @@ class IndicadoresController extends Controller
     public function filterByDateRange(Request $request)
     {
         try {
-            // Obtenemos todos los indicadores
-            $indicadores = Indicadores::all();
+            // Validamos el rango de fechas
+            $validator = Validator::make($request->all(), [
+                'inicio' => 'required|date',
+                'fin' => 'required|date|after_or_equal:inicio',
+            ]);
 
-            // Verificamos si se obtuvieron indicadores
-            if ($indicadores->isEmpty()) {
-                throw new Exception('No se encontraron indicadores', Response::HTTP_NOT_FOUND);
+            // Verificamos si la validación falla
+            if( $validator->fails()) {
+                throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
+
+            // Convertimos las fechas a UTCDateTime
+            $inicioDate = new UTCDateTime(strtotime($request->input('inicio')) * 1000);
+            $finDate = new UTCDateTime(strtotime($request->input('fin')) * 1000);
+
+            $indicadores = Indicadores::where('fecha_inicio', '<=', $finDate)
+                        ->where('fecha_fin', '>=', $inicioDate)
+                        ->get();
 
             // Retornamos la respuesta con los indicadores
             return response()->json([
@@ -408,8 +420,11 @@ class IndicadoresController extends Controller
                 '_idProyecto' => 'required|string',
                 'numero' => 'required|integer',
                 'nombreIndicador' => 'required|string|max:255',
-                'denominador' => 'required|numeric',
-                'departamento' => 'required|string|max:255'
+                'numerador' => 'nullable|numeric',
+                'denominador' => 'nullable|numeric',
+                'departamento' => 'required|string|max:255',
+                'fecha_inicio' => 'required|date',
+                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
 
             // Verificar si la validación falla
@@ -417,16 +432,28 @@ class IndicadoresController extends Controller
                 throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            Log::info('Datos del request para insertar indicador: ', $request->all());
-
-            // Creamos un indicador con los datos del resquest
-            $indicador = Indicadores::create([
-                '_idProyecto' => $request->_idProyecto,
-                'numero' => $request->numero,
-                'nombreIndicador' => $request->nombreIndicador,
-                'denominador' => $request->denominador,
-                'departamento' => $request->departamento
+            // Obtener los datos del request
+            $data = $request->only([
+                '_idProyecto',
+                'numero',
+                'nombreIndicador',
+                'numerador',
+                'denominador',
+                'departamento',
+                'fecha_inicio',
+                'fecha_fin'
             ]);
+
+            // Convertir las fechas a UTCDateTime
+            if (isset($data['fecha_inicio'])) {
+                $data['fecha_inicio'] = new UTCDateTime(strtotime($data['fecha_inicio']) * 1000);
+            }
+            if (isset($data['fecha_fin'])) {
+                $data['fecha_fin'] = new UTCDateTime(strtotime($data['fecha_fin']) * 1000);
+            }
+
+            // Creamos un indicador con los datos del request
+            $indicador = Indicadores::create($data);
 
             // Verificamos si se creó el indicador
             if (!$indicador) {
@@ -625,9 +652,11 @@ class IndicadoresController extends Controller
                 '_idProyecto' => 'required|string',
                 'numero' => 'required|integer',
                 'nombreIndicador' => 'required|string|max:255',
-                'numerador' => 'required|numeric', // El numerador es opcional al actualizar
-                'denominador' => 'required|numeric',
-                'departamento' => 'required|string|max:255'
+                'numerador' => 'nullable|numeric',
+                'denominador' => 'nullable|numeric',
+                'departamento' => 'required|string|max:255',
+                'fecha_inicio' => 'required|date',
+                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
 
             // Verificamos si la validación falla
@@ -642,8 +671,18 @@ class IndicadoresController extends Controller
                 'nombreIndicador',
                 'numerador',
                 'denominador',
-                'departamento'
+                'departamento',
+                'fecha_inicio',
+                'fecha_fin'
             ]);
+
+            // Convertir las fechas a UTCDateTime
+            if (isset($datos['fecha_inicio'])) {
+                $datos['fecha_inicio'] = new UTCDateTime(strtotime($datos['fecha_inicio']) * 1000);
+            }
+            if (isset($datos['fecha_fin'])) {
+                $datos['fecha_fin'] = new UTCDateTime(strtotime($datos['fecha_fin']) * 1000);
+            }
 
             // Actualizamos el indicador
             $indicador ->update($datos);

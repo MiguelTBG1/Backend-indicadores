@@ -20,6 +20,8 @@ class Indicadores extends Model
         'denominador',
         'departamento',
         'configuracion',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
 }
