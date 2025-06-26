@@ -67,11 +67,11 @@ class IndicadoresController extends Controller
     }
 
         /**
-     * Obtiene todos los indicadores por periodo
-     * @param Request $request Datos del periodo
+     * Obtiene todos los indicadores filtrado por rango de fechas
+     * @param Request $request Datos del rango de fecha
      * @return JsonResponse La respuesta con los indicadores
      */
-    public function indexPeriodo(Request $request)
+    public function filterByDateRange(Request $request)
     {
         try {
             // Obtenemos todos los indicadores
@@ -79,25 +79,7 @@ class IndicadoresController extends Controller
 
             // Verificamos si se obtuvieron indicadores
             if ($indicadores->isEmpty()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'No se encontraron indicadores',
-                    'indicadores' => []
-                ], Response::HTTP_OK);
-            }
-
-            // Agregamos el campo numerador si no existe
-            foreach ($indicadores as $indicador) {
-                if (!isset($indicador->numerador)) {
-                    $indicador->numerador = 0; // Valor por defecto
-                }
-            }
-
-            // Verificamos si tiene el campo de configuración y calculamos el numerador
-            foreach ($indicadores as $indicador) {
-                if (isset($indicador->configuracion)) {
-                    $indicador->numerador = $this->calculateNumerador($indicador->configuracion);
-                }
+                throw new Exception('No se encontraron indicadores', Response::HTTP_NOT_FOUND);
             }
 
             // Retornamos la respuesta con los indicadores
@@ -109,7 +91,9 @@ class IndicadoresController extends Controller
 
         } catch (Exception $e) {
             // Retornamos mensaje de error
+            // Logueamos el error
             Log::error('Error al obtener los indicadores: ' . $e->getMessage());
+            // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error del sistema al obtener los indicadores',
                 'error' => $e->getMessage()
@@ -171,7 +155,7 @@ class IndicadoresController extends Controller
             'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
             'condicion.*.valor' => 'required_with:condicion|string',
             'subConfiguracion' => 'sometimes|array',
-            'subConfiguracion.operacion' => 'required_with:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
+            'subConfiguracion.operacion' => 'excluded_if:operacion,distinto|required_without:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
             'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
             'subConfiguracion.condicion' => 'sometimes|array',
             'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
@@ -180,6 +164,7 @@ class IndicadoresController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::error('Configuración no válida: ' . $validator->errors()->first());
             return 0;
         }
 
@@ -191,6 +176,7 @@ class IndicadoresController extends Controller
 
         // Validamos que la colección exista
         if (!$collection) {
+            Log::error('Colección no encontrada: ' . $configuracion['coleccion']);
             return 0;
         }
 
@@ -264,9 +250,22 @@ class IndicadoresController extends Controller
             }
         }
 
+        if( $configuracion['operacion'] === 'distinto'){
+            $pipeline[] = [
+                '$unwind' => '$' . $configuracion['campo']
+            ];
+        }
+
         // Validamos si hay subConfiguración
         if (isset($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && count($configuracion['subConfiguracion']) > 0) {
             $nombreCampo = $configuracion['campo'];
+
+            if($configuracion['operacion'] === 'distinto'){
+                $subNombreCampo = $configuracion['subConfiguracion']['campo'];
+                $configuracion['campo'] = $configuracion['campo'] . "." . $subNombreCampo;
+            } else{
+
+
             $pipelineSub = [];
 
             // Verificamos si hay condiciones en subConfiguración
@@ -321,6 +320,7 @@ class IndicadoresController extends Controller
                 'promedio' => ['$avg' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
                 'maximo' => ['$max' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
                 'minimo' => ['$min' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
+
                 default => throw new Exception("Operación no soportada en subConfiguración: {$configuracion['subConfiguracion']['operacion']}")
             };
             // Añadimos la etapa de agregación para la subConfiguración
@@ -336,6 +336,19 @@ class IndicadoresController extends Controller
             // Cambiamos el campo a total para la siguiente etapa
             $configuracion['campo'] = 'total'; // Cambiamos el campo a total para la siguiente etapa
         }
+        }
+
+        // Si la operación es distinta, agregamos un campo temporal para contar
+        if(  $configuracion['operacion'] === 'distinto') {
+            $pipeline[] = [
+                '$group' => [
+                    '_id' => null,
+                    'total' => ['$addToSet' => '$' . $configuracion['campo']]
+                ]
+            ];
+
+            $configuracion['campo'] = 'total';
+        }
 
         // Validamos qué operación está configurada
         $operacion = match ($configuracion['operacion']) {
@@ -344,17 +357,20 @@ class IndicadoresController extends Controller
             'promedio' => ['$avg' => '$' . $configuracion['campo']],
             'maximo' => ['$max' => '$' . $configuracion['campo']],
             'minimo' => ['$min' => '$' . $configuracion['campo']],
+            'distinto' => ['$size' => '$total'],
             default => throw new Exception('Operación no válida: ' . $configuracion['operacion'], Response::HTTP_BAD_REQUEST)
         };
 
 
         // Agregamos la operación al pipeline
         $pipeline[] = [
-            '$group' => [
-                '_id' => null,
+            '$project' => [
                 'resultado' => $operacion
             ]
         ];
+
+        // Log para depuración
+        Log::info('Pipeline de agregación: ', $pipeline);
 
         // Ejecutamos el pipeline
         $cursor = $collection->aggregate($pipeline);
@@ -631,6 +647,11 @@ class IndicadoresController extends Controller
 
             // Actualizamos el indicador
             $indicador ->update($datos);
+
+            // Verificamos si se actualizó el indicador
+            if (!$indicador) {
+                throw new Exception('Error al actualizar el indicador', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
 
 
             // Retornamos la respuesta de éxito

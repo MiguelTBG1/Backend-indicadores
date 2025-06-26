@@ -22,7 +22,7 @@ Route::middleware(['auth.sanctum'])->group(function () {
 
 /* INDICADORES */
 Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores']);
-Route::post('/indicadores', [IndicadoresController::class, 'indexPeriodo']);
+Route::post('/indicadores/filterByDates', [IndicadoresController::class, 'filterByDateRange']);
 Route::get('/indicador/{id}', [IndicadoresController::class, 'getIndicador']);
 Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador']);
 Route::post('/indicador/upload', [IndicadoresController::class, 'uploadIndicador']);
