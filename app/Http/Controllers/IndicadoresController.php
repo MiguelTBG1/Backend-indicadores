@@ -107,10 +107,10 @@ class IndicadoresController extends Controller
             });
 
             // Procesamos la configuración
-            $resultado = $resultado->map(function ($indicador) use ($inicioDate, $finDate) {
+            $resultado = $resultado->map(function ($indicador) use ($request) {
                 if (isset($indicador['configuracion'])) {
-                    $indicador['configuracion']['fecha_inicio'] = $inicioDate;
-                    $indicador['configuracion']['fecha_fin'] = $finDate;
+                    $indicador['configuracion']['fecha_inicio'] = $request->input('inicio');
+                    $indicador['configuracion']['fecha_fin'] = $request->input('fin');
                     $indicador['numerador'] = $this->calculateNumerador($indicador['configuracion']);
                 }
                 return $indicador;
@@ -166,6 +166,7 @@ class IndicadoresController extends Controller
     */
     private function calculateNumerador($configuracion)
     {
+        Log::info('Calculando numerador con configuración', $configuracion);
 
         // Validamos que la operación sea una de las permitidas
         $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
@@ -323,20 +324,21 @@ class IndicadoresController extends Controller
                         ];
                     }
 
-                    if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
-                        // Filtrar fecha  de registro
-                        $pipeline[] = [
-                            '$match' => [
-                                $nombreCampo . '.fecha de creación' => [
-                                    '$gte' => new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000),
-                                    '$lte' => new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)
-                                ]
-                            ]
-                        ];
-                    }
-
 
                 }
+
+                if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
+                        // Filtrar fecha  de registro
+                    $pipeline[] = [
+                        '$match' => [
+                            $nombreCampo . '.fecha de creación' => [
+                                '$gte' => new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000),
+                                '$lte' => new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)
+                            ]
+                        ]
+                    ];
+                }
+
                 $configuracion['campo'] = $configuracion['campo'] . "." . $subNombreCampo;
           } else{
 
