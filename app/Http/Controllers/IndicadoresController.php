@@ -75,37 +75,56 @@ class IndicadoresController extends Controller
     public function filterByDateRange(Request $request)
     {
         try {
-            // Validamos el rango de fechas
+            // Validación (se mantiene igual)
             $validator = Validator::make($request->all(), [
                 'inicio' => 'required|date',
                 'fin' => 'required|date|after_or_equal:inicio',
             ]);
 
-            // Verificamos si la validación falla
-            if( $validator->fails()) {
+            if($validator->fails()) {
                 throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            // Convertimos las fechas a UTCDateTime
             $inicioDate = new UTCDateTime(strtotime($request->input('inicio')) * 1000);
             $finDate = new UTCDateTime(strtotime($request->input('fin')) * 1000);
 
+            // Obtenemos los indicadores
             $indicadores = Indicadores::where('fecha_inicio', '<=', $finDate)
                         ->where('fecha_fin', '>=', $inicioDate)
                         ->get();
 
-            // Retornamos la respuesta con los indicadores
+            // Primero convertimos los modelos a arrays
+            $resultado = $indicadores->map(function ($indicador) {
+                return $indicador->toArray(); // Convertimos a array
+            });
+
+            // Aseguramos el campo numerador
+            $resultado = $resultado->map(function ($indicador) {
+                if (!isset($indicador['numerador'])) {
+                    $indicador['numerador'] = 0;
+                }
+                return $indicador;
+            });
+
+            // Procesamos la configuración
+            $resultado = $resultado->map(function ($indicador) use ($inicioDate, $finDate) {
+                if (isset($indicador['configuracion'])) {
+                    $indicador['configuracion']['fecha_inicio'] = $inicioDate;
+                    $indicador['configuracion']['fecha_fin'] = $finDate;
+                    $indicador['numerador'] = $this->calculateNumerador($indicador['configuracion']);
+                }
+                return $indicador;
+            });
+
+            // Retornamos el RESULTADO procesado, no los indicadores originales
             return response()->json([
                 'success' => true,
                 'message' => 'Indicadores encontrados',
-                'indicadores' => $indicadores,
+                'indicadores' => $resultado, // Cambiado de $indicadores a $resultado
             ], Response::HTTP_OK);
 
         } catch (Exception $e) {
-            // Retornamos mensaje de error
-            // Logueamos el error
             Log::error('Error al obtener los indicadores: ' . $e->getMessage());
-            // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error del sistema al obtener los indicadores',
                 'error' => $e->getMessage()
@@ -149,7 +168,7 @@ class IndicadoresController extends Controller
     {
 
         // Validamos que la operación sea una de las permitidas
-        $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo'];
+        $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
 
         // Normalizamos a minúsculas
         $configuracion['operacion'] = strtolower($configuracion['operacion']);
@@ -167,7 +186,7 @@ class IndicadoresController extends Controller
             'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
             'condicion.*.valor' => 'required_with:condicion|string',
             'subConfiguracion' => 'sometimes|array',
-            'subConfiguracion.operacion' => 'required_without:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
+            'subConfiguracion.operacion' => 'excluded_if:operacion, distinto|required_without:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
             'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
             'subConfiguracion.condicion' => 'sometimes|array',
             'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
@@ -274,8 +293,52 @@ class IndicadoresController extends Controller
 
             if($configuracion['operacion'] === 'distinto'){
                 $subNombreCampo = $configuracion['subConfiguracion']['campo'];
+
+                // Verificamos si hay condiciones en subConfiguración
+                if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
+
+                    foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
+                        $operador = match ($subCondicion['operador']) {
+                            'mayor' => '$gt',
+                            'menor' => '$lt',
+                            'igual' => '$eq',
+                            'diferente' => '$ne',
+                            'mayor_igual' => '$gte',
+                            'menor_igual' => '$lte',
+                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
+                        };
+
+                        $valor = $subCondicion['valor'];
+                        if (is_numeric($valor)) {
+                            $valor = (float)$valor;
+                            if ((int)$valor === $valor) $valor = (int)$valor;
+                        }
+
+                        $pipeline[] = [
+                            '$match' => [
+                                $nombreCampo . "." . $subCondicion['campo'] => [
+                                    $operador => $valor
+                                ]
+                            ]
+                        ];
+                    }
+
+                    if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
+                        // Filtrar fecha  de registro
+                        $pipeline[] = [
+                            '$match' => [
+                                $nombreCampo . '.fecha de creación' => [
+                                    '$gte' => new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000),
+                                    '$lte' => new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)
+                                ]
+                            ]
+                        ];
+                    }
+
+
+                }
                 $configuracion['campo'] = $configuracion['campo'] . "." . $subNombreCampo;
-            } else{
+          } else{
 
 
             $pipelineSub = [];
@@ -303,6 +366,14 @@ class IndicadoresController extends Controller
 
                     $condiciones[] = [
                         "$operador" => ["\$\$campo" . "." . $subCondicion['campo'], $valor]
+                    ];
+                }
+
+                if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
+                        // Filtrar fecha  de registro
+                    $condiciones[] = [
+                        '$gte' => ["\$\$campo.fecha de creación", new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000)],
+                        '$lte' => ["\$\$campo.fecha de creación", new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)]
                     ];
                 }
 
