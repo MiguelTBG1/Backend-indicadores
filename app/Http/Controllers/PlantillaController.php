@@ -247,7 +247,7 @@ class PlantillaController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function delete($id)
+    public function destroy($id)
     {
         try {
             // Conexión a MongoDB

@@ -21,7 +21,7 @@ class IndicadoresController extends Controller
      * Obtiene todos los indicadores
      * @return JsonResponse La respuesta con los indicadores
      */
-    public function getAllIndicadores()
+    public function index()
     {
         try {
             // Obtenemos todos los indicadores
@@ -137,7 +137,7 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a obtener
      * @return JsonResponse La respuesta con el indicador
      */
-    public function getIndicador($id){
+    public function show($id){
         try {
             // Obtenemos el indicador por su ID
             $indicador = Indicadores::findOrFail($id);
@@ -484,8 +484,10 @@ class IndicadoresController extends Controller
     /**
      * Inserta un nuevo indicador en la base de datos
      * @param Request $request Datos del indicador a insertar
+     * @return JsonResponse La respuesta de la operación
+     * @throws Exception Si ocurre un error durante la inserción
      */
-    public function insertIndicador(Request $request)
+    public function store(Request $request)
     {
         try {
             // Validar la solicitud
@@ -558,7 +560,7 @@ class IndicadoresController extends Controller
      * @param Request $request Datos del archivo Excel
      * @return JsonResponse La respuesta de la operación
      */
-    public function uploadIndicador(Request $request)
+    public function upload(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -663,7 +665,7 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a borrar
      * @return JsonResponse La respuesta de la operación
      */
-    public function deleteIndicador($id) {
+    public function destroy($id) {
         try {
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
@@ -703,7 +705,7 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
      */
-    public function updateIndicador(Request $request, $id) {
+    public function update($id, Request $request) {
         try {
             Log::info('Datos del request para actualizar indicador: ', $request->all());
 

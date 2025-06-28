@@ -122,8 +122,8 @@ class DocumentoController extends Controller
             // Buscar los campos que tengan un valor en formato stringjson
             foreach ($documentData as $key => $value) {
                 if (is_string($value)) {
-                    // Verifica si el valor es un JSON válido
-                    if (json_decode($value) !== null) {
+                    // Verifica si el valor tiene un formato de un string JSON
+                    if (is_array(json_decode($value, true))) {
                         // Convierte el string JSON a un array
                         $documentData[$key] = json_decode($value, true);
                         // Si algún es una fecha, convertirla a UTCDateTime
@@ -172,7 +172,13 @@ class DocumentoController extends Controller
         }
     }
 
-    public function getAllDocuments($id)
+    /**
+     * Obtiene todos los documentos de una plantilla específica.
+     * @param string $id ID de la plantilla.
+     * @return \Illuminate\Http\JsonResponse Lista de documentos de la plantilla.
+     * @throws \Exception Si la plantilla no existe o la colección no se encuentra.
+     */
+    public function index($id)
     {
         // Verifica si la id de la plantilla es válida
         if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
@@ -209,8 +215,23 @@ class DocumentoController extends Controller
             // Obtener todos los documentos de la colección
             $documents = $db->selectCollection($collectionName)->find()->toArray();
             // Convertir los documentos a un formato legible
-            foreach ($documents as &$document) {
-                $document = json_decode(json_encode($document), true);
+            foreach ($documents as $index => $document) {
+                foreach ($document as $key => $value) {
+                    // Verificar si el valor es un objeto UTCDateTime y convertirlo a un formato legible
+                    if ($value instanceof UTCDateTime) {
+                        $documents[$index][$key] = $value->toDateTime()->format('Y-m-d');
+                    }
+
+                    if( is_array($value) && isset($value[0]) && $value[0] instanceof UTCDateTime) {
+                        // Convertir cada elemento del array de UTCDateTime a un formato legible
+                        foreach ($value as $subIndex => $subValue) {
+                            if ($subValue instanceof UTCDateTime) {
+                                $documents[$index][$key][$subIndex] = $subValue->toDateTime()->format('Y-m-d');
+                            }
+                        }
+                    }
+                }
+
             }
             // Devolver los documentos en formato JSON
 
@@ -220,7 +241,7 @@ class DocumentoController extends Controller
         }
     }
 
-    public function deleteDocument($plantillaName, $documentId)
+    public function destroy($plantillaName, $documentId)
     {
         try{
             // Conexión a MongoDB
@@ -405,7 +426,7 @@ class DocumentoController extends Controller
 
 
 
-    public function getDocumentbyid($plantillaName, $documentId)
+    public function show($plantillaName, $documentId)
     {
         // Conexión a MongoDB
         $client = new MongoClient(config('database.connections.mongodb.url'));

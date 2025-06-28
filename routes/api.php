@@ -21,37 +21,38 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware(['auth.sanctum'])->group(function () {
 
 /* INDICADORES */
-Route::get('/indicador/getAll', [IndicadoresController::class, 'getAllIndicadores']);
-Route::post('/indicadores/filterByDates', [IndicadoresController::class, 'filterByDateRange']);
-Route::get('/indicador/{id}', [IndicadoresController::class, 'getIndicador']);
-Route::post('/indicador/insert', [IndicadoresController::class, 'insertIndicador']);
-Route::post('/indicador/upload', [IndicadoresController::class, 'uploadIndicador']);
-Route::delete('/indicador/delete/{id}', [IndicadoresController::class, 'deleteIndicador']);
-Route::post('/indicador/update/{id}', [IndicadoresController::class, 'updateIndicador']);
+Route::get('/indicadores', [IndicadoresController::class, 'index']);
+Route::get('/indicadores/{id}', [IndicadoresController::class, 'show']);
+Route::post('/indicadores', [IndicadoresController::class, 'store']);
+Route::put('/indicadores/{id}', [IndicadoresController::class, 'update']);
+Route::delete('/indicadores/{id}', [IndicadoresController::class, 'destroy']);
 Route::put('/indicadores/{id}/configuracion', [IndicadoresController::class, 'updateConfig']);
 Route::get('/indicadores/{id}/configuracion', [IndicadoresController::class, 'getConfig']);
+Route::post('/indicadores/filterByDates', [IndicadoresController::class, 'filterByDateRange']);
+Route::post('/indicadores/upload', [IndicadoresController::class, 'upload']);
 
 //PLANTILLAS
-Route::post('/plantillas/crear', [PlantillaController::class, 'store']);
-Route::get('/plantillas/consultar', [PlantillaController::class, 'index']);
-Route::get('/plantillas/{id}/campos', [PlantillaController::class, 'getFields']);
+Route::get('/plantillas', [PlantillaController::class, 'index']);
+Route::get('/plantillas/{id}', [PlantillaController::class, 'show']);
+Route::post('/plantillas', [PlantillaController::class, 'store']);
 Route::put('/plantillas/{id}', [PlantillaController::class, 'update']);
-Route::delete('/plantillas/{id}', [PlantillaController::class, 'delete']);
+Route::delete('/plantillas/{id}', [PlantillaController::class, 'destroy']);
+Route::get('/plantillas/{id}/campos', [PlantillaController::class, 'getFields']);
 
 // DOCUMENTOS
-Route::get('/documentos/plantillas', [DocumentoController::class, 'templateNames']);
+Route::get('/documentos/{id}', [DocumentoController::class, 'index'])->where('id', '[a-fA-F0-9]{24}');
+Route::get('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'show']);
 Route::post('/documentos/{id}', [DocumentoController::class, 'store']);
-Route::get('/documentos/{id}', [DocumentoController::class, 'getAllDocuments']);
 Route::post('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'update']);
-Route::get('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'getDocumentbyid']);
-Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'deleteDocument']);
+Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'destroy']);
+Route::get('/documentos/plantillas', [DocumentoController::class, 'templateNames']);
 
 // EJES
-Route::get('/eje', [EjesController::class, 'index']);
-Route::get('/eje/{id}', [EjesController::class, 'show']);
-Route::post('/eje', [EjesController::class, 'store']);
-Route::put('/eje/{id}', [EjesController::class, 'update']);
-Route::delete('/eje/{id}', [EjesController::class, 'destroy']);
+Route::get('/ejes', [EjesController::class, 'index']);
+Route::get('/ejes/{id}', [EjesController::class, 'show']);
+Route::post('/ejes', [EjesController::class, 'store']);
+Route::put('/ejes/{id}', [EjesController::class, 'update']);
+Route::delete('/ejes/{id}', [EjesController::class, 'destroy']);
 
 // LOGOUT
 Route::post('/logout', [AuthController::class, 'logout']);
