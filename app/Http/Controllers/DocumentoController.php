@@ -3,13 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Plantillas;
-use App\Models\Indicadores;
 use MongoDB\Client as MongoClient;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
@@ -330,6 +327,8 @@ class DocumentoController extends Controller
         if (!$documento) {
             throw new \Exception('Documento no encontrado');
         }
+
+        Log::info("Datos: ", $request->all());
 
         // Validar los datos de entrada
         $validatos = Validator::make($request->all(), [
