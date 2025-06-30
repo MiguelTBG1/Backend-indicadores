@@ -120,7 +120,7 @@ class DocumentoController extends Controller
             }
 
             // Buscar los campos que tengan un valor en formato stringjson
-            foreach ($documentData as $key => $value) {
+            /*foreach ($documentData as $key => $value) {
                 if (is_string($value)) {
                     // Verifica si el valor tiene un formato de un string JSON
                     if (is_array(json_decode($value, true))) {
@@ -145,11 +145,8 @@ class DocumentoController extends Controller
                         $documentData[$key] = new UTCDateTime(strtotime($value) * 1000);
                     }
                 }
-            }
+            }*/
 
-
-
-            Log::info('Datos del documento: ', $documentData);
 
             // Obtener el nombre de la colección de la plantilla
             $collectionName = $plantilla -> nombre_coleccion;
@@ -375,7 +372,7 @@ class DocumentoController extends Controller
         }
 
         // Buscar los campos que tengan un valor en formato stringjson
-            foreach ($updateData as $key => $value) {
+            /*foreach ($updateData as $key => $value) {
                 if (is_string($value)) {
                     // Verifica si el valor es un JSON válido
                     if (json_decode($value) !== null) {
@@ -400,7 +397,7 @@ class DocumentoController extends Controller
                         $updateData[$key] = new UTCDateTime(strtotime($value) * 1000);
                     }
                 }
-            }
+            }*/
 
         // Asegurar que solo exista 'Recurso Digital' y no 'Recurso_Digital'
         unset($documento['Recurso_Digital']);
