@@ -117,7 +117,7 @@ class DocumentoController extends Controller
             }
 
             // Buscar los campos que tengan un valor en formato stringjson
-            /*foreach ($documentData as $key => $value) {
+            foreach ($documentData as $key => $value) {
                 if (is_string($value)) {
                     // Verifica si el valor tiene un formato de un string JSON
                     if (is_array(json_decode($value, true))) {
@@ -142,7 +142,7 @@ class DocumentoController extends Controller
                         $documentData[$key] = new UTCDateTime(strtotime($value) * 1000);
                     }
                 }
-            }*/
+            }
 
 
             // Obtener el nombre de la colección de la plantilla
@@ -371,32 +371,30 @@ class DocumentoController extends Controller
         }
 
         // Buscar los campos que tengan un valor en formato stringjson
-            /*foreach ($updateData as $key => $value) {
-                if (is_string($value)) {
-                    // Verifica si el valor es un JSON válido
-                    if (json_decode($value) !== null) {
-                        // Convierte el string JSON a un array
-                        $updateData[$key] = json_decode($value, true);
-                        // Si algún es una fecha, convertirla a UTCDateTime
-                        foreach ($updateData[$key] as $index => $data){
-                            foreach ($data as $subKey => $subValue) {
-                                //Log::info("SubKey: $subKey, SubValue: $subValue");
-                                if (is_string($subValue) && strtotime($subValue) !== false) {
-                                    // Convertir la fecha a UTCDateTime
-                                    $updateData[$key][$index][$subKey] = new UTCDateTime(strtotime($subValue) * 1000);
-                                }
+        foreach ($updateData as $key => $value) {
+            if (is_string($value)) {
+                // Verifica si el valor es un JSON válido
+                if (is_array(json_decode($value, true))) {
+                    // Convierte el string JSON a un array
+                    $updateData[$key] = json_decode($value, true);
+                    // Si algún es una fecha, convertirla a UTCDateTime
+                    foreach ($updateData[$key] as $index => $data){
+                        foreach ($data as $subKey => $subValue) {
+                            //Log::info("SubKey: $subKey, SubValue: $subValue");
+                            if (is_string($subValue) && strtotime($subValue) !== false) {
+                                // Convertir la fecha a UTCDateTime
+                                $updateData[$key][$index][$subKey] = new UTCDateTime(strtotime($subValue) * 1000);
                             }
                         }
-
-                    }
-
-                    // Verificamos si es una fecha y la convertimos a UTCDateTime
-                    if (strtotime($value) !== false) {
-                        // Convertir la fecha a UTCDateTime
-                        $updateData[$key] = new UTCDateTime(strtotime($value) * 1000);
                     }
                 }
-            }*/
+                // Verificamos si es una fecha y la convertimos a UTCDateTime
+                if (strtotime($value) !== false) {
+                    // Convertir la fecha a UTCDateTime
+                    $updateData[$key] = new UTCDateTime(strtotime($value) * 1000);
+                }
+            }
+        }
 
         // Asegurar que solo exista 'Recurso Digital' y no 'Recurso_Digital'
         unset($documento['Recurso_Digital']);

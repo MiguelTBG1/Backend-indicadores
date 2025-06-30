@@ -13,7 +13,6 @@ use MongoDB\Client as MongoClient;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Log;
 use App\Models\Plantillas;
-use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
 
 class IndicadoresController extends Controller
 {
