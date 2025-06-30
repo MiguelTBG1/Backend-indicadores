@@ -420,7 +420,7 @@ class DocumentoController extends Controller
         Log::error("Error en la actualización del documento: " . $e->getMessage());
 
         // Registrar el error completo
-        return response()->json(['error' => 'Error interno del servidor'], 500);
+        return response()->json(['message' => 'Error al crear documento', 'error' => $e->getMessage()], 500);
     }
 }
 
