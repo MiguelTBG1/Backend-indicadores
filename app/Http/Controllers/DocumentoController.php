@@ -12,6 +12,7 @@ use App\Models\Plantillas;
 use App\Models\Indicadores;
 use MongoDB\Client as MongoClient;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 
 
 
@@ -119,17 +120,33 @@ class DocumentoController extends Controller
             }
 
             // Buscar los campos que tengan un valor en formato stringjson
-            foreach ($documentData as $key => $value) {
+            /*foreach ($documentData as $key => $value) {
                 if (is_string($value)) {
-                    // Verifica si el valor es un JSON válido
-                    if (json_decode($value) !== null) {
+                    // Verifica si el valor tiene un formato de un string JSON
+                    if (is_array(json_decode($value, true))) {
                         // Convierte el string JSON a un array
                         $documentData[$key] = json_decode($value, true);
+                        // Si algún es una fecha, convertirla a UTCDateTime
+                        foreach ($documentData[$key] as $index => $data){
+                            foreach ($data as $subKey => $subValue) {
+                                //Log::info("SubKey: $subKey, SubValue: $subValue");
+                                if (is_string($subValue) && strtotime($subValue) !== false) {
+                                    // Convertir la fecha a UTCDateTime
+                                    $documentData[$key][$index][$subKey] = new UTCDateTime(strtotime($subValue) * 1000);
+                                }
+                            }
+                        }
+
+                    }
+
+                    // Verificamos si es una fecha y la convertimos a UTCDateTime
+                    if (strtotime($value) !== false) {
+                        // Convertir la fecha a UTCDateTime
+                        $documentData[$key] = new UTCDateTime(strtotime($value) * 1000);
                     }
                 }
-            }
+            }*/
 
-            Log::info('Datos del documento: ', $documentData);
 
             // Obtener el nombre de la colección de la plantilla
             $collectionName = $plantilla -> nombre_coleccion;
@@ -152,7 +169,13 @@ class DocumentoController extends Controller
         }
     }
 
-    public function getAllDocuments($id)
+    /**
+     * Obtiene todos los documentos de una plantilla específica.
+     * @param string $id ID de la plantilla.
+     * @return \Illuminate\Http\JsonResponse Lista de documentos de la plantilla.
+     * @throws \Exception Si la plantilla no existe o la colección no se encuentra.
+     */
+    public function index($id)
     {
         // Verifica si la id de la plantilla es válida
         if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
@@ -189,8 +212,23 @@ class DocumentoController extends Controller
             // Obtener todos los documentos de la colección
             $documents = $db->selectCollection($collectionName)->find()->toArray();
             // Convertir los documentos a un formato legible
-            foreach ($documents as &$document) {
-                $document = json_decode(json_encode($document), true);
+            foreach ($documents as $index => $document) {
+                foreach ($document as $key => $value) {
+                    // Verificar si el valor es un objeto UTCDateTime y convertirlo a un formato legible
+                    if ($value instanceof UTCDateTime) {
+                        $documents[$index][$key] = $value->toDateTime()->format('Y-m-d');
+                    }
+
+                    if( is_array($value) && isset($value[0]) && $value[0] instanceof UTCDateTime) {
+                        // Convertir cada elemento del array de UTCDateTime a un formato legible
+                        foreach ($value as $subIndex => $subValue) {
+                            if ($subValue instanceof UTCDateTime) {
+                                $documents[$index][$key][$subIndex] = $subValue->toDateTime()->format('Y-m-d');
+                            }
+                        }
+                    }
+                }
+
             }
             // Devolver los documentos en formato JSON
 
@@ -200,7 +238,7 @@ class DocumentoController extends Controller
         }
     }
 
-    public function deleteDocument($plantillaName, $documentId)
+    public function destroy($plantillaName, $documentId)
     {
         try{
             // Conexión a MongoDB
@@ -296,14 +334,6 @@ class DocumentoController extends Controller
         // Validar los datos de entrada
         $validatos = Validator::make($request->all(), [
             'document_data' => 'required|array',
-            'document_data.denominador' => 'nullable|integer',
-            'document_data.indicador_asociado' => 'required|string',
-        ], [
-            'document_data.required' => 'El campo document_data es obligatorio.',
-            'document_data.array' => 'El campo document_data debe ser un array.',
-            'document_data.denominador.integer' => 'El denominador debe ser un número entero.',
-            'document_data.indicador_asociado.required' => 'El campo indicador asociado es obligatorio.',
-            'document_data.indicador_asociado.string' => 'El campo indicador asociado debe ser una cadena de texto.',
         ]);
 
         // Verifica si la validación falla
@@ -341,6 +371,34 @@ class DocumentoController extends Controller
             }
         }
 
+        // Buscar los campos que tengan un valor en formato stringjson
+            /*foreach ($updateData as $key => $value) {
+                if (is_string($value)) {
+                    // Verifica si el valor es un JSON válido
+                    if (json_decode($value) !== null) {
+                        // Convierte el string JSON a un array
+                        $updateData[$key] = json_decode($value, true);
+                        // Si algún es una fecha, convertirla a UTCDateTime
+                        foreach ($updateData[$key] as $index => $data){
+                            foreach ($data as $subKey => $subValue) {
+                                //Log::info("SubKey: $subKey, SubValue: $subValue");
+                                if (is_string($subValue) && strtotime($subValue) !== false) {
+                                    // Convertir la fecha a UTCDateTime
+                                    $updateData[$key][$index][$subKey] = new UTCDateTime(strtotime($subValue) * 1000);
+                                }
+                            }
+                        }
+
+                    }
+
+                    // Verificamos si es una fecha y la convertimos a UTCDateTime
+                    if (strtotime($value) !== false) {
+                        // Convertir la fecha a UTCDateTime
+                        $updateData[$key] = new UTCDateTime(strtotime($value) * 1000);
+                    }
+                }
+            }*/
+
         // Asegurar que solo exista 'Recurso Digital' y no 'Recurso_Digital'
         unset($documento['Recurso_Digital']);
 
@@ -359,13 +417,13 @@ class DocumentoController extends Controller
         Log::error("Error en la actualización del documento: " . $e->getMessage());
 
         // Registrar el error completo
-        return response()->json(['error' => 'Error interno del servidor'], 500);
+        return response()->json(['message' => 'Error al crear documento', 'error' => $e->getMessage()], 500);
     }
 }
 
 
 
-    public function getDocumentbyid($plantillaName, $documentId)
+    public function show($plantillaName, $documentId)
     {
         // Conexión a MongoDB
         $client = new MongoClient(config('database.connections.mongodb.url'));

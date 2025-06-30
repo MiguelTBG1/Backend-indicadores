@@ -18,7 +18,10 @@ class Indicadores extends Model
         'nombreIndicador',
         'numerador',
         'denominador',
+        'departamento',
         'configuracion',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
 }

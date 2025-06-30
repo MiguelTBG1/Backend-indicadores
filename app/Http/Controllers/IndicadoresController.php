@@ -10,9 +10,10 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use MongoDB\Client as MongoClient;
+use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\configIndicador\SumarOperacion;
-use App\Http\Controllers\configIndicador\ContarOperacion;
+use App\Models\Plantillas;
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Exp;
 
 class IndicadoresController extends Controller
 {
@@ -20,7 +21,7 @@ class IndicadoresController extends Controller
      * Obtiene todos los indicadores
      * @return JsonResponse La respuesta con los indicadores
      */
-    public function getAllIndicadores()
+    public function index()
     {
         try {
             // Obtenemos todos los indicadores
@@ -66,6 +67,98 @@ class IndicadoresController extends Controller
         }
     }
 
+        /**
+     * Obtiene todos los indicadores filtrado por rango de fechas
+     * @param Request $request Datos del rango de fecha
+     * @return JsonResponse La respuesta con los indicadores
+     */
+    public function filterByDateRange(Request $request)
+    {
+        try {
+            // Validación (se mantiene igual)
+            $validator = Validator::make($request->all(), [
+                'inicio' => 'required|date',
+                'fin' => 'required|date|after_or_equal:inicio',
+            ]);
+
+            if($validator->fails()) {
+                throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            $inicioDate = new UTCDateTime(strtotime($request->input('inicio')) * 1000);
+            $finDate = new UTCDateTime(strtotime($request->input('fin')) * 1000);
+
+            // Obtenemos los indicadores
+            $indicadores = Indicadores::where('fecha_inicio', '<=', $finDate)
+                        ->where('fecha_fin', '>=', $inicioDate)
+                        ->get();
+
+            // Primero convertimos los modelos a arrays
+            $resultado = $indicadores->map(function ($indicador) {
+                return $indicador->toArray(); // Convertimos a array
+            });
+
+            // Aseguramos el campo numerador
+            $resultado = $resultado->map(function ($indicador) {
+                if (!isset($indicador['numerador'])) {
+                    $indicador['numerador'] = 0;
+                }
+                return $indicador;
+            });
+
+            // Procesamos la configuración
+            $resultado = $resultado->map(function ($indicador) use ($request) {
+                if (isset($indicador['configuracion'])) {
+                    $indicador['configuracion']['fecha_inicio'] = $request->input('inicio');
+                    $indicador['configuracion']['fecha_fin'] = $request->input('fin');
+                    $indicador['numerador'] = $this->calculateNumerador($indicador['configuracion']);
+                }
+                return $indicador;
+            });
+
+            // Retornamos el RESULTADO procesado, no los indicadores originales
+            return response()->json([
+                'success' => true,
+                'message' => 'Indicadores encontrados',
+                'indicadores' => $resultado, // Cambiado de $indicadores a $resultado
+            ], Response::HTTP_OK);
+
+        } catch (Exception $e) {
+            Log::error('Error al obtener los indicadores: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error del sistema al obtener los indicadores',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Obtiene un indicador por su ID
+     * @param string $id ID del indicador a obtener
+     * @return JsonResponse La respuesta con el indicador
+     */
+    public function show($id){
+        try {
+            // Obtenemos el indicador por su ID
+            $indicador = Indicadores::findOrFail($id);
+
+            // Retornamos la respuesta con el indicador
+            return response()->json([
+                'success' => true,
+                'message' => 'Indicador encontrado',
+                'indicador' => $indicador
+            ], Response::HTTP_OK);
+
+        } catch (Exception $e) {
+            // Retornamos mensaje de error
+            Log::error('Error al obtener el indicador: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error del sistema al obtener el indicador',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     /**
      * Calcula el numerador de un indicador
      * @param array $configuracion Configuración del indicador
@@ -73,16 +166,93 @@ class IndicadoresController extends Controller
     */
     private function calculateNumerador($configuracion)
     {
+        Log::info('Calculando numerador con configuración', $configuracion);
+
+        // Validamos que la operación sea una de las permitidas
+        $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
+
+        // Normalizamos a minúsculas
+        $configuracion['operacion'] = strtolower($configuracion['operacion']);
+
+        // Operadores permitidos para las condiciones
+        $operadoresValidos = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
+
+        // Validamos la configuracion
+        $validator = Validator::make($configuracion, [
+            'coleccion' => 'required|string',
+            'operacion' => 'required|string|in:' . implode(',', $operacionesPermitidas),
+            'campo' => 'required_if:operacion,in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
+            'condicion' => 'sometimes|array',
+            'condicion.*.campo' => 'required_with:condicion|string',
+            'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
+            'condicion.*.valor' => 'required_with:condicion|string',
+            'subConfiguracion' => 'sometimes|array',
+            'subConfiguracion.operacion' => 'excluded_if:operacion, distinto|required_without:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
+            'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
+            'subConfiguracion.condicion' => 'sometimes|array',
+            'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
+            'subConfiguracion.condicion.*.operador' => 'required_with:subConfiguracion.condicion|string|in:' . implode(',', $operadoresValidos),
+            'subConfiguracion.condicion.*.valor' => 'required_with:subConfiguracion.condicion|string',
+        ]);
+
+        if ($validator->fails()) {
+            Log::error('Configuración no válida: ' . $validator->errors()->first());
+            return 0;
+        }
+
         // Obtenemos la conexión a la base de datos MongoDB
         $db = $this->connectToMongoDB();
 
         // Seleccionamos la colección
         $collection = $db->selectCollection($configuracion['coleccion']);
 
-        // Creamos un filtro para las condiciones
-        $filter = [];
+        // Validamos que la colección exista
+        if (!$collection) {
+            Log::error('Colección no encontrada: ' . $configuracion['coleccion']);
+            return 0;
+        }
 
+        // Buscamos la plantilla en la colección Templates
+        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first();
+
+        // Si no existe la plantilla, retornamos 0
+        if (!$plantilla) {
+            return 0;
+        }
+
+        // Creamos el pipeline de agregación
+        $pipeline = [];
+
+        // Validamos que la plantilla tenga el campo de configuración para obtener el tipo de campo
+        $campos = $plantilla->campos ?? [];
+
+        // Validamos si hay condiciones
         if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
+            // Verificar si un campo en la condicion es subform
+            foreach ($configuracion['condicion'] as $index => $condicion) {
+                $tipocampo = null;
+
+                foreach ($campos as $campo) {
+                    if (isset($campo['name']) && $campo['name'] == $condicion['campo']) {
+                        $tipocampo = $campo['type'] ?? null;
+                        break;
+                    }
+                }
+
+                if ($tipocampo === 'subform') {
+                    // Agregar etapa al pipeline
+                    $pipeline[] = [
+                        '$addFields' => [
+                            'total' . $condicion['campo'] => [
+                                '$size' => '$' . $condicion['campo']
+                            ]
+                        ]
+                    ];
+
+                    // Actualizar el campo en la condición original
+                    $configuracion['condicion'][$index]['campo'] = 'total' . $condicion['campo'];
+                }
+            }
 
             foreach ($configuracion['condicion'] as $condicion) {
 
@@ -101,65 +271,34 @@ class IndicadoresController extends Controller
                     $valor = (float)$valor; // Puedes usar (int) si prefieres
                     if ((int)$valor === $valor) $valor = (int)$valor;
                 }
-
-                $filter[$condicion['campo']][$operador] = $valor;
+                // Agregamos la condición al pipeline
+                $pipeline[] = [
+                    '$match' => [
+                        $condicion['campo'] => [
+                            $operador => $valor
+                        ]
+                    ]
+                ];
             }
         }
 
-        // Validamos qué operación está configurada
-        switch ($configuracion['operacion']) {
-            case 'contar':
-                // Aplicamos el filtro y contamos
-                $result = $collection->countDocuments($filter);
-                break;
+        if( $configuracion['operacion'] === 'distinto'){
+            $pipeline[] = [
+                '$unwind' => '$' . $configuracion['campo']
+            ];
+        }
 
-            case 'sumar':
-                if (!isset($configuracion['campo'])) {
-                    throw new Exception('Campo no especificado para la operación de suma');
-                }
+        // Validamos si hay subConfiguración
+        if (isset($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && count($configuracion['subConfiguracion']) > 0) {
+            $nombreCampo = $configuracion['campo'];
 
-                // Creamos el pipeline de agregación
-                $pipeline = !empty($filter) ? [['$match' => $filter]] : [];
-                /*
-                if(isset($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && count($configuracion['subConfiguracion']) > 0) {
+            if($configuracion['operacion'] === 'distinto'){
+                $subNombreCampo = $configuracion['subConfiguracion']['campo'];
 
-                    if(isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
-                        $cond = [];
-                        foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
-                            $operador = match ($subCondicion['operador']) {
-                                'mayor' => '$gt',
-                                'menor' => '$lt',
-                                'igual' => '$eq',
-                                'diferente' => '$ne',
-                                'mayor_igual' => '$gte',
-                                'menor_igual' => '$lte',
-                                default => throw new Exception('Operador no válido: ' . $subCondicion['operador'], Response::HTTP_BAD_REQUEST)
-                            };
+                // Verificamos si hay condiciones en subConfiguración
+                if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
 
-                            $valor = $subCondicion['valor'];
-                            if (is_numeric($valor)) {
-                                $valor = (float)$valor; // Puedes usar (int) si prefieres
-                                if ((int)$valor === $valor) $valor = (int)$valor;
-                            }
-
-                            $cond[$configuracion['subCondicion']['campo']][$operador] = $valor;
-                        }
-                    }
-
-                    $pipeline[] = match ($configuracion['subConfiguracion']['operacion']) {
-                        'contar' => [
-                            '$addFields' => [
-                                'total' => ['$size' => '$' . $configuracion['campo']]
-                            ]
-                        ],
-                        'sumar' => [
-                            '$addFields' => [
-                                'total' => ['$sum' => '$' . $configuracion['campo']]
-                            ]
-                        ]
-                    };
-                    // Si hay subConfiguración, la aplicamos al filtro
-                    foreach ($configuracion['subConfiguracion'] as $subCondicion) {
+                    foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
                         $operador = match ($subCondicion['operador']) {
                             'mayor' => '$gt',
                             'menor' => '$lt',
@@ -167,95 +306,167 @@ class IndicadoresController extends Controller
                             'diferente' => '$ne',
                             'mayor_igual' => '$gte',
                             'menor_igual' => '$lte',
-                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'], Response::HTTP_BAD_REQUEST)
+                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
                         };
 
                         $valor = $subCondicion['valor'];
                         if (is_numeric($valor)) {
-                            $valor = (float)$valor; // Puedes usar (int) si prefieres
+                            $valor = (float)$valor;
                             if ((int)$valor === $valor) $valor = (int)$valor;
                         }
 
-                        $filter[$subCondicion['campo']][$operador] = $valor;
+                        $pipeline[] = [
+                            '$match' => [
+                                $nombreCampo . "." . $subCondicion['campo'] => [
+                                    $operador => $valor
+                                ]
+                            ]
+                        ];
                     }
-                }*/
 
 
+                }
 
-                $pipeline[] = [
-                    '$group' => [
-                        '_id' => null,
-                        'total' => ['$sum' => '$' . $configuracion['campo']]
+                if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
+                        // Filtrar fecha  de registro
+                    $pipeline[] = [
+                        '$match' => [
+                            $nombreCampo . '.fecha de creación' => [
+                                '$gte' => new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000),
+                                '$lte' => new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)
+                            ]
+                        ]
+                    ];
+                }
+
+                $configuracion['campo'] = $configuracion['campo'] . "." . $subNombreCampo;
+          } else{
+
+
+            $pipelineSub = [];
+
+            // Verificamos si hay condiciones en subConfiguración
+            if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
+                $condiciones = [];
+
+                foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
+                    $operador = match ($subCondicion['operador']) {
+                        'mayor' => '$gt',
+                        'menor' => '$lt',
+                        'igual' => '$eq',
+                        'diferente' => '$ne',
+                        'mayor_igual' => '$gte',
+                        'menor_igual' => '$lte',
+                        default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
+                    };
+
+                    $valor = $subCondicion['valor'];
+                    if (is_numeric($valor)) {
+                        $valor = (float)$valor;
+                        if ((int)$valor === $valor) $valor = (int)$valor;
+                    }
+
+                    $condiciones[] = [
+                        "$operador" => ["\$\$campo" . "." . $subCondicion['campo'], $valor]
+                    ];
+                }
+
+                if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
+                        // Filtrar fecha  de registro
+                    $condiciones[] = [
+                        '$gte' => ["\$\$campo.fecha de creación", new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000)],
+                        '$lte' => ["\$\$campo.fecha de creación", new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)]
+                    ];
+                }
+
+                // Aplicamos filtro interno al arreglo
+                $pipelineSub[] = [
+                    '$addFields' => [
+                        'filtrado' => [
+                            '$filter' => [
+                                'input' => '$' . $nombreCampo,
+                                'as' => 'campo',
+                                'cond' => ['$and' => $condiciones]
+                            ]
+                        ]
                     ]
                 ];
 
-                $cursor = $collection->aggregate($pipeline);
-                $resultados = iterator_to_array($cursor);
-
-                $result = $resultados[0]['total'] ?? 0;
-                break;
-
-            default:
-                throw new Exception('Operación no válida', Response::HTTP_BAD_REQUEST);
-        }
-
-        // Retornamos el resultado
-        return $result;
-    }
-    /*
-    public function calculateNumerador(array $configuracion)
-    {
-        // Validamos que la colección esté especificada
-        if (!isset($configuracion['coleccion']) || empty($configuracion['coleccion'])) {
-            throw new Exception('Colección no especificada', Response::HTTP_BAD_REQUEST);
-        }
-
-        //Creamos la conexión a la base de datos MongoDB y obtenemos la colección
-        $db = $this->connectToMongoDB();
-        $collection = $db->selectCollection($configuracion['coleccion']);
-
-        // Creamos el filtro
-        $filter = [];
-
-        // Validamos las condiciones
-        if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
-            foreach ($configuracion['condicion'] as $condicion) {
-
-                $operador = match ($condicion['operador']) {
-                    'mayor' => '$gt',
-                    'menor' => '$lt',
-                    'igual' => '$eq',
-                    'diferente' => '$ne',
-                    'mayor_igual' => '$gte',
-                    'menor_igual' => '$lte',
-                    default => throw new Exception('Operador no válido: ' . $condicion['operador'], Response::HTTP_BAD_REQUEST)
-                };
-
-                $valor = $condicion['valor'];
-                if (is_numeric($valor)) {
-                    $valor = (float)$valor; // Puedes usar (int) si prefieres
-                    if ((int)$valor === $valor) $valor = (int)$valor;
-                }
-
-                $filter[$condicion['campo']][$operador] = $valor;
+                // Cambiamos el campo a contar
+                $nombreCampo = 'filtrado';
             }
 
+            // Agregar conteo o suma según sea necesario
+            $operacionSub = match ($configuracion['subConfiguracion']['operacion']) {
+                'contar' => ['$size' => '$' . $nombreCampo],
+                'sumar' => [
+                    '$sum' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']
+                ],
+                'promedio' => ['$avg' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
+                'maximo' => ['$max' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
+                'minimo' => ['$min' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
+
+                default => throw new Exception("Operación no soportada en subConfiguración: {$configuracion['subConfiguracion']['operacion']}")
+            };
+            // Añadimos la etapa de agregación para la subConfiguración
+            $pipelineSub[] = [
+                '$addFields' => [
+                    'total' => $operacionSub
+                ]
+            ];
+            // Añadimos las etapas generadas por subConfiguración al pipeline principal
+            foreach ($pipelineSub as $etapa) {
+                $pipeline[] = $etapa;
+            }
+            // Cambiamos el campo a total para la siguiente etapa
+            $configuracion['campo'] = 'total'; // Cambiamos el campo a total para la siguiente etapa
+        }
         }
 
-        // Validamos la operación
-        if (!isset($configuracion['operacion']) || !in_array($configuracion['operacion'], ['contar', 'sumar'])) {
-            throw new Exception('Operación no válida', Response::HTTP_BAD_REQUEST);
+        // Si la operación es distinta, agregamos un campo temporal para contar
+        if(  $configuracion['operacion'] === 'distinto') {
+            $pipeline[] = [
+                '$group' => [
+                    '_id' => null,
+                    'total' => ['$addToSet' => '$' . $configuracion['campo']]
+                ]
+            ];
+
+            $configuracion['campo'] = 'total';
         }
-        // Creamos la operación según la configuración
+
+        // Validamos qué operación está configurada
         $operacion = match ($configuracion['operacion']) {
-            'contar' => new ContarOperacion($collection),
-            'sumar'  => new SumarOperacion($collection),
-            default => throw new Exception("Operación no soportada: {$configuracion['operacion']}", Response::HTTP_BAD_REQUEST),
+            'contar' => ['$sum' => 1],
+            'sumar' => ['$sum' => '$' . $configuracion['campo']],
+            'promedio' => ['$avg' => '$' . $configuracion['campo']],
+            'maximo' => ['$max' => '$' . $configuracion['campo']],
+            'minimo' => ['$min' => '$' . $configuracion['campo']],
+            'distinto' => ['$size' => '$total'],
+            default => throw new Exception('Operación no válida: ' . $configuracion['operacion'], Response::HTTP_BAD_REQUEST)
         };
 
-        // Ejecutamos y devolvemos
-        return $operacion->ejecutar($configuracion, $filter);
-    }*/
+
+        // Agregamos la operación al pipeline
+        $pipeline[] = [
+            '$project' => [
+                'resultado' => $operacion
+            ]
+        ];
+
+        // Log para depuración
+        Log::info('Pipeline de agregación: ', $pipeline);
+
+        // Ejecutamos el pipeline
+        $cursor = $collection->aggregate($pipeline);
+
+        // Retornamos el resultado
+        $resultados = iterator_to_array($cursor);
+        if (empty($resultados)) {
+            return 0; // Si no hay resultados, retornamos 0
+        }
+        return $resultados[0]['resultado'] ?? 0; // Retornamos el resultado del numerador
+    }
 
     /**
      * Conexión a la base de datos MongoDB
@@ -273,25 +484,56 @@ class IndicadoresController extends Controller
     /**
      * Inserta un nuevo indicador en la base de datos
      * @param Request $request Datos del indicador a insertar
+     * @return JsonResponse La respuesta de la operación
+     * @throws Exception Si ocurre un error durante la inserción
      */
-    public function insertIndicador(Request $request)
+    public function store(Request $request)
     {
         try {
-            // Validamos los datos del request
-            $request -> validate([
+            // Validar la solicitud
+            $validator = Validator::make($request->all(), [
                 '_idProyecto' => 'required|string',
                 'numero' => 'required|integer',
-                'nombreIndicador' => 'required|string',
-                'denominador' => 'required|integer'
+                'nombreIndicador' => 'required|string|max:255',
+                'numerador' => 'nullable|numeric',
+                'denominador' => 'nullable|numeric',
+                'departamento' => 'required|string|max:255',
+                'fecha_inicio' => 'required|date',
+                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
 
-            // Creamos un indicador con los datos del resquest
-            $indicador = Indicadores::create([
-                '_idProyecto' => $request->_idProyecto,
-                'numero' => $request->numero,
-                'nombreIndicador' => $request->nombreIndicador,
-                'denominador' => $request->denominador
+            // Verificar si la validación falla
+            if ($validator->fails()) {
+                throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            // Obtener los datos del request
+            $data = $request->only([
+                '_idProyecto',
+                'numero',
+                'nombreIndicador',
+                'numerador',
+                'denominador',
+                'departamento',
+                'fecha_inicio',
+                'fecha_fin'
             ]);
+
+            // Convertir las fechas a UTCDateTime
+            if (isset($data['fecha_inicio'])) {
+                $data['fecha_inicio'] = new UTCDateTime(strtotime($data['fecha_inicio']) * 1000);
+            }
+            if (isset($data['fecha_fin'])) {
+                $data['fecha_fin'] = new UTCDateTime(strtotime($data['fecha_fin']) * 1000);
+            }
+
+            // Creamos un indicador con los datos del request
+            $indicador = Indicadores::create($data);
+
+            // Verificamos si se creó el indicador
+            if (!$indicador) {
+                throw new Exception('Error al crear el indicador', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
 
             // Avisamos que el indicador se creo exitosamente
             return response()->json([
@@ -301,6 +543,9 @@ class IndicadoresController extends Controller
             ], Response::HTTP_CREATED);
 
         } catch (Exception $e) {
+            // Manejo de errores
+            // Logueamos el error
+            Log::error('Error al insertar el indicador: ' . $e->getMessage());
             // Retornamos el mensaje de error
             return response()->json([
                 'success' => false,
@@ -315,7 +560,7 @@ class IndicadoresController extends Controller
      * @param Request $request Datos del archivo Excel
      * @return JsonResponse La respuesta de la operación
      */
-    public function uploadIndicador(Request $request)
+    public function upload(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -336,22 +581,39 @@ class IndicadoresController extends Controller
             // Guardar temporalmente el archivo
             $path = $file->storeAs('temp', 'upload.' . $extension);
 
-            // Leer el archivo según su extensión
-            if ($extension === 'csv') {
-                $data = Excel::toArray([], storage_path('app/' . $path), null, \Maatwebsite\Excel\Excel::CSV);
-            } else {
-                $data = Excel::toArray([], storage_path('app/' . $path), null, \Maatwebsite\Excel\Excel::XLSX);
+            // Obtener la ruta real del sistema de archivos
+            $fullPath = Storage::path($path);
+
+            // Verificar que el archivo exista antes de leerlo
+            if (!file_exists($fullPath)) {
+                throw new Exception("El archivo no existe en la ruta: $fullPath", Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            // Eliminar el archivo temporal
-            Storage::delete($path);
+            // Leer el archivo según su extensión
+            if ($extension === 'csv') {
+                $data = Excel::toArray([], $fullPath, null, \Maatwebsite\Excel\Excel::CSV);
+            } else {
+                $data = Excel::toArray([], $fullPath, null, \Maatwebsite\Excel\Excel::XLSX);
+            }
 
             if (empty($data) || !isset($data[0]) || empty($data[0])) {
                 throw new Exception('El archivo no contiene datos válidos', Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
-            $headers = array_map('strtolower', $data[0][0]); // Obtener encabezados en minúsculas
-            $rows = array_slice($data[0], 1); // Eliminar fila de encabezados
+            // Tomamos la primera hoja
+            $hoja = $data[0] ?? [];
+
+            // Eliminamos filas completamente vacías
+            $filasLimpias = array_filter($hoja, function ($row) {
+                return !empty(array_filter($row)); // Mantiene filas con contenido
+            });
+
+            // Reindexar para evitar problemas con índices
+            $filasLimpias = array_values($filasLimpias);
+
+            $headers = array_map('strtolower', $filasLimpias[0]); // Obtener encabezados en minúsculas
+
+            $rows = array_slice($filasLimpias, 1); // Eliminar fila de encabezados
 
             // Mapeo de nombres de columnas esperados
             $columnMapping = [
@@ -382,8 +644,15 @@ class IndicadoresController extends Controller
                 }
             }
 
+            // Eliminar el archivo temporal
+            Storage::delete($path);
+
             return response()->json(['message' => 'Datos guardados correctamente en MongoDB']);
         } catch (Exception $e) {
+            // Manejo de errores
+            Log::error('Error al cargar el archivo Excel: ' . $e->getMessage());
+
+            // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error al guardar los indicadores',
                 'error' => $e->getMessage()
@@ -396,7 +665,7 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a borrar
      * @return JsonResponse La respuesta de la operación
      */
-    public function deleteIndicador($id) {
+    public function destroy($id) {
         try {
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
@@ -436,32 +705,68 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
      */
-    public function updateIndicador(Request $request, $id) {
+    public function update($id, Request $request) {
         try {
+            Log::info('Datos del request para actualizar indicador: ', $request->all());
+
+            // Validar el formato de la id
+            if(!preg_match('/^[a-f0-9]{24}$/', $id)) {
+                throw new Exception('ID de indicador no válido', Response::HTTP_BAD_REQUEST);
+            }
+
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
 
-            // Verificamos si existe el indicador
+            // Si no existe el indicador, retornamos un error
             if (!$indicador) {
-                return response()->json([
-                    'message' => 'No se encontró el indicador a borrar',
-                    'id_recibido' => $id
-                ], Response::HTTP_NOT_FOUND);
+                throw new Exception("No se encontró el indicador con ID: $id", Response::HTTP_NOT_FOUND);
+            }
+
+            // Validamos la solicitud
+            $validator = Validator::make($request->all(), [
+                '_idProyecto' => 'required|string',
+                'numero' => 'required|integer',
+                'nombreIndicador' => 'required|string|max:255',
+                'numerador' => 'nullable|numeric',
+                'denominador' => 'nullable|numeric',
+                'departamento' => 'required|string|max:255',
+                'fecha_inicio' => 'required|date',
+                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            ]);
+
+            // Verificamos si la validación falla
+            if( $validator->fails()) {
+                throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
             // Obtenemos los datos del request
-            $data = $request->only([
+            $datos = $request->only([
                 '_idProyecto',
                 'numero',
                 'nombreIndicador',
-                'denominador'
+                'numerador',
+                'denominador',
+                'departamento',
+                'fecha_inicio',
+                'fecha_fin'
             ]);
 
-            // Actualizamos el indicador
-            $indicador -> update ($data);
+            // Convertir las fechas a UTCDateTime
+            if (isset($datos['fecha_inicio'])) {
+                $datos['fecha_inicio'] = new UTCDateTime(strtotime($datos['fecha_inicio']) * 1000);
+            }
+            if (isset($datos['fecha_fin'])) {
+                $datos['fecha_fin'] = new UTCDateTime(strtotime($datos['fecha_fin']) * 1000);
+            }
 
-            // Actualizamos el indicador con la nueva información
-            $indicador -> refresh();
+            // Actualizamos el indicador
+            $indicador ->update($datos);
+
+            // Verificamos si se actualizó el indicador
+            if (!$indicador) {
+                throw new Exception('Error al actualizar el indicador', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
 
             // Retornamos la respuesta de éxito
             return response() -> json([
@@ -470,6 +775,9 @@ class IndicadoresController extends Controller
             ], Response::HTTP_OK);
 
         } catch (Exception $e) {
+            // Manejamos el error
+            // Logueamos el error
+            Log::error('Error al actualizar el indicador: ' . $e->getMessage());
             // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error al actualizar el indicador',
@@ -495,26 +803,32 @@ class IndicadoresController extends Controller
 
             }
 
-            $validator = Validator::make($request->all(), [
-                'configuracion' => 'required|array',
-                'configuracion.coleccion' => 'required|string',
-                'configuracion.operacion' => 'required|string|in:contar,sumar',
-                'configuracion.campo' => 'nullable|string',
-                'configuracion.condicion' => 'nullable|array',
-                'configuracion.condicion.*.campo' => 'required_if:configuracion.condicion,true|string',
-                'configuracion.condicion.*.operador' => 'required_if:configuracion.condicion,true|string|in:igual,mayor,menor',
-                'configuracion.condicion.*.valor' => 'required_if:configuracion.condicion,true|string',
-            ], [
-                'configuracion.required' => 'El campo configuracion es obligatorio.',
-                'configuracion.array' => 'El campo configuracion debe ser un array.',
-                'configuracion.condicion.*.campo.required_if' => 'El campo es obligatorio en cada condición.',
-                'configuracion.condicion.*.operador.required_if' => 'El operador es obligatorio en cada condición.',
-                'configuracion.condicion.*.valor.required_if' => 'El valor es obligatorio en cada condición.',
+            // Validamos que la operación sea una de las permitidas
+            $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo'];
+
+            // Operadores permitidos para las condiciones
+            $operadoresValidos = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
+
+            // Validamos la configuracion
+            $validator = Validator::make($request->input('configuracion'), [
+                'coleccion' => 'required|string',
+                'operacion' => 'required|string|in:' . implode(',', $operacionesPermitidas),
+                'campo' => 'required_if:operacion,in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
+                'condicion' => 'sometimes|array',
+                'condicion.*.campo' => 'required_with:condicion|string',
+                'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
+                'condicion.*.valor' => 'required_with:condicion|string',
+                'subConfiguracion' => 'sometimes|array',
+                'subConfiguracion.operacion' => 'required_with:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
+                'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
+                'subConfiguracion.condicion' => 'sometimes|array',
+                'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
+                'subConfiguracion.condicion.*.operador' => 'required_with:subConfiguracion.condicion|string|in:' . implode(',', $operadoresValidos),
+                'subConfiguracion.condicion.*.valor' => 'required_with:subConfiguracion.condicion|string',
             ]);
 
-            // Verifica si la validación falla
             if ($validator->fails()) {
-                throw new \Exception($validator->errors()->first(), Response::HTTP_UNPROCESSABLE_ENTITY);
+                throw new Exception('Configuración no válida: ' . $validator->errors()->first(), Response::HTTP_BAD_REQUEST);
             }
 
             // Guardamos o Actualizamos la configuración
