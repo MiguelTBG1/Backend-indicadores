@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
+use Illuminate\Support\Facades\Crypt;
 
 class AuthController extends Controller
 {
@@ -36,20 +37,23 @@ class AuthController extends Controller
 
         // Parametros para generar el token
         $nombreToken = str_replace(' ', '_', $user->nombre). "_access_token"; // Nombre del token
-        $permisos = ["*"]; // Permisos del token, por mientras todos
+        $permisos =  $user->getPermisos(); // Permisos del usuario
+
         $tiempoVida = now()->addWeek(); // TIempo de vida del token
 
         // Generamos el token
         $token = $user->createToken($nombreToken, $permisos, $tiempoVida)->plainTextToken;
 
         // Eliminamos los campos innecesarios de la respuesta
-        $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad']);
-
+        $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles']);
+        
+        $permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
         // Respuesta exitosa
         return response()->json([
             'message' => 'Login exitoso',
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+            'permisos' => $permisosEncriptados,
         ], Response::HTTP_OK);
     }catch (\Exception $e) {
         // En caso de error, regresamos un mensaje genérico

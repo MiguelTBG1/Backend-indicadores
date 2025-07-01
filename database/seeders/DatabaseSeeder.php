@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
 
         // Llamamos a los seeders
         $this -> call([
+            RecursosSeeder::class,
+            AccionesSeeder::class,
+            RolesSeeder::class,
             UserCollectionSeeder::class,
             EjesCollectionSeeder::class,
             IndicadoresCollectionSeeder::class,
