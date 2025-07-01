@@ -216,11 +216,14 @@ class DocumentoController extends Controller
                         $documents[$index][$key] = $value->toDateTime()->format('Y-m-d');
                     }
 
-                    if( is_array($value) && isset($value[0]) && $value[0] instanceof UTCDateTime) {
+                    if( is_array($value)) {
                         // Convertir cada elemento del array de UTCDateTime a un formato legible
-                        foreach ($value as $subIndex => $subValue) {
-                            if ($subValue instanceof UTCDateTime) {
-                                $documents[$index][$key][$subIndex] = $subValue->toDateTime()->format('Y-m-d');
+                        foreach ($value as $subIndex => $subDocument) {
+                            foreach ($subDocument as $subKey => $subValue) {
+                                // Verificar si el subDocumento es un objeto UTCDateTime y convertirlo a un formato legible
+                                if ($subValue instanceof UTCDateTime) {
+                                    $documents[$index][$key][$subIndex][$subKey] = $subValue->toDateTime()->format('Y-m-d');
+                                }
                             }
                         }
                     }
