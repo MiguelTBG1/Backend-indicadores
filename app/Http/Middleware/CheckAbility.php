@@ -15,10 +15,15 @@ class CheckAbility
      */
     public function handle(Request $request, Closure $next, $ability)
     {
+
+
         // REvisamos si el usuario esta auntenticado
         if (!$request->user()) {
             return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
         }
+
+        /* BORRAR ESTO PARA QUE FUNCIONEN LOS PERMISOS OTRA VEZ */
+        return $next($request);
 
         // Separamos el recurso del permiso
         [$recurso, $permiso] = explode('_', $ability, 2);
