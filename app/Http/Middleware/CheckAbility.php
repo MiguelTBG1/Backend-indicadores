@@ -15,8 +15,6 @@ class CheckAbility
      */
     public function handle(Request $request, Closure $next, $ability)
     {
-
-
         // REvisamos si el usuario esta auntenticado
         if (!$request->user()) {
             return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
