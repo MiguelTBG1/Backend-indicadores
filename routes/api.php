@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccionesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\IndicadoresController;
 use GuzzleHttp\Middleware;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\EjesController;
+use App\Http\Controllers\RecursosController;
+use App\Http\Controllers\RolesController;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
@@ -41,26 +44,35 @@ Route::middleware(['auth.sanctum'])->group(function () {
     Route::delete('/plantillas/{id}', [PlantillaController::class, 'destroy'])->middleware(['abilities:plantillas_borrar']);
     Route::get('/plantillas/{id}/campos', [PlantillaController::class, 'getFields'])->middleware((['abilities:plantillas_leer']));
 
-// DOCUMENTOS
-Route::get('/documentos/{id}', [DocumentoController::class, 'index'])->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos_leer']);
-Route::get('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'show']) -> middleware(['abilities:documentos_leer']);
-Route::post('/documentos/{id}', [DocumentoController::class, 'store'])->middleware(['abilities:documentos_crear']);
-Route::post('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'update'])->middleware(['abilities:documentos_actualizar']);
-Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'destroy'])->middleware(['abilities:documentos_borrar']);
-Route::get('/documentos/plantillas', [DocumentoController::class, 'templateNames']);
+    // DOCUMENTOS
+    Route::get('/documentos/{id}', [DocumentoController::class, 'index'])->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos_leer']);
+    Route::get('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'show'])->middleware(['abilities:documentos_leer']);
+    Route::post('/documentos/{id}', [DocumentoController::class, 'store'])->middleware(['abilities:documentos_crear']);
+    Route::post('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'update'])->middleware(['abilities:documentos_actualizar']);
+    Route::delete('/documentos/{plantillaName}/{documentId}', [DocumentoController::class, 'destroy'])->middleware(['abilities:documentos_borrar']);
+    Route::get('/documentos/plantillas', [DocumentoController::class, 'templateNames']);
 
-// EJES
-Route::get('/ejes', [EjesController::class, 'index']);
-Route::get('/ejes/{id}', [EjesController::class, 'show']);
-Route::post('/ejes', [EjesController::class, 'store']);
-Route::put('/ejes/{id}', [EjesController::class, 'update']);
-Route::delete('/ejes/{id}', [EjesController::class, 'destroy']);
+    // EJES
+    Route::get('/ejes', [EjesController::class, 'index']);
+    Route::get('/ejes/{id}', [EjesController::class, 'show']);
+    Route::post('/ejes', [EjesController::class, 'store']);
+    Route::put('/ejes/{id}', [EjesController::class, 'update']);
+    Route::delete('/ejes/{id}', [EjesController::class, 'destroy']);
 
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout']);
 
     /* RUTAS PARA USUARIOS */
     Route::post('/register', [UsersController::class, 'register']);
+
+    /* ACCIONES */
+    Route::get('/acciones', [AccionesController::class, 'index']);
+
+    /* RECURSOS */
+    Route::get('/recursos', [RecursosController::class, 'index']);
+
+    /* ROLES */
+    Route::get('/roles', [RolesController::class, 'index']);
 });
 
 // Reporte PDF

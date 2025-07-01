@@ -2,36 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Operacion;
+use App\Models\Accion;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Controlador para operaciones crud de las operaciones permitidas en el sistema (CRUD).
  */
-class OperacionesController extends Controller
+class AccionesController extends Controller
 {
     /**
      * Obtiene todos los roles
      * @return JsonResponse La respuesta con las operaciones
      */
-    public static function getAll()
+    public static function index()
     {
-        $operaciones = Operacion::all();
+        $acciones = Accion::all();
 
-        if ($operaciones->isEmpty()) {
+        if ($acciones->isEmpty()) {
             return response()->json([
                 'success' => true,
-                'message' => 'No se encontraron indicadores',
-                'indicadores' => []
+                'message' => 'No se encontraron acciones',
+                'acciones' => []
             ], Response::HTTP_OK);
         }
 
         // Retornamos la respuesta con los indicadores
         return response()->json([
             'success' => true,
-            'message' => 'Operaciones encontradas',
-            'indicadores' => $operaciones,
+            'message' => 'Acciones encontradas',
+            'acciones' => $acciones,
         ], Response::HTTP_OK);
     }
 
