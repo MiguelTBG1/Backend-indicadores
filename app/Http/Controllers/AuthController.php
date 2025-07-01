@@ -10,12 +10,14 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
- 
+
+
     /**
      * Inicia sesion de un usuario y regresa un token
      */
     public function login(Request $request)
     {
+        try{
         // Validamos que recibieron los datos recibidos
         $request->validate([
             'email' => 'required|string|email',
@@ -42,27 +44,34 @@ class AuthController extends Controller
 
         // Eliminamos los campos innecesarios de la respuesta
         $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad']);
-        
+
         // Respuesta exitosa
         return response()->json([
             'message' => 'Login exitoso',
             'user' => $user,
             'token' => $token
         ], Response::HTTP_OK);
+    }catch (\Exception $e) {
+        // En caso de error, regresamos un mensaje genérico
+        return response()->json([
+            'message' => 'Error al iniciar sesión',
+            'error' => $e->getMessage()
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+}
 
     /**
      * Cierra la sesión del usuario y elimina todos sus tokens
      */
     public function logout(Request $request) {
         $user = $request->user();
-        
+
         if ($user) {
             $user->tokens()->delete();
-            
+
             return response()->json(['message' => 'Logout exitoso'], Response::HTTP_OK);
         }
-        
+
         return response()->json(['message' => 'No se pudo realizar el logout'], Response::HTTP_UNAUTHORIZED);
     }
 }
