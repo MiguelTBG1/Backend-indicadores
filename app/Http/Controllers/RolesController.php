@@ -31,8 +31,8 @@ class RolesController extends Controller
     /** Guarda un nuevo rol */
     public function store(Request $request) {
         $request->validate([
-            'nombre' => 'string|require',
-            'descripcion' => 'string|require',
+            'nombre' => 'string|required',
+            'descripcion' => 'string|required',
             'permisos' => 'array|nullable',
             'permisos.*.recurso' => 'required|string',
             'permisos.*.acciones' => 'array|required',

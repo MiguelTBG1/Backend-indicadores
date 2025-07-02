@@ -73,7 +73,7 @@ Route::middleware(['auth.sanctum'])->group(function () {
 
     /* ROLES */
     Route::get('/roles', [RolesController::class, 'index']);
-    Route::post('/roles', [RolesController::class], 'store');
+    Route::post('/roles', [RolesController::class, 'store']);
 });
 
 // Reporte PDF
