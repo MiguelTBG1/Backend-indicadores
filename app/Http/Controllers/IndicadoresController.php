@@ -339,7 +339,7 @@ class IndicadoresController extends Controller
                 }
 
                 $configuracion['campo'] = $configuracion['campo'] . "." . $subNombreCampo;
-          } else{
+            } else{
 
 
             $pipelineSub = [];
@@ -447,11 +447,27 @@ class IndicadoresController extends Controller
 
 
         // Agregamos la operación al pipeline
-        $pipeline[] = [
-            '$project' => [
-                'resultado' => $operacion
-            ]
-        ];
+        if($configuracion['operacion'] === 'distinto'){
+            $pipeline[] = [
+                '$project' => [
+                    'resultado' => $operacion
+                ]
+            ];
+        }else{
+            $pipeline[] = [
+                '$group' => [
+                    '_id' => null,
+                    'resultadoOperacion' => $operacion,
+                ]
+            ];
+
+            $pipeline[] = [
+                '$project' => [
+                    'resultado' => '$resultadoOperacion',
+                ]
+            ];
+        }
+
 
         // Log para depuración
         Log::info('Pipeline de agregación: ', $pipeline);
@@ -459,8 +475,11 @@ class IndicadoresController extends Controller
         // Ejecutamos el pipeline
         $cursor = $collection->aggregate($pipeline);
 
+
+
         // Retornamos el resultado
         $resultados = iterator_to_array($cursor);
+        Log::info('Cursor obtenido de la agregación', $resultados);
         if (empty($resultados)) {
             return 0; // Si no hay resultados, retornamos 0
         }
