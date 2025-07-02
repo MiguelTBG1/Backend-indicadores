@@ -23,19 +23,39 @@ class UsersController extends Controller
             'apellido_paterno' => 'required|string',
             'apellido_materno' => 'required|string',
             'edad' => 'required|integer',
-            'genero' => 'required|string',
-            'estado' => 'required|string',
-            'ocupacion' => 'required|string',
-            'escolaridad' => 'required|string',
+            'genero' => 'string',
+            'estado' => 'string',
+            'ocupacion' => 'string',
+            'escolaridad' => 'string',
             'roles' => 'array|nullable',
             'permisos' => 'array|nullable',
             'permisos.*.recurso' => 'required|string',
             'permisos.*.acciones' => 'array|required',
-            'negaciones' => 'array|nullable',
-            'negaciones.*.recurso' => 'required|string',
-            'negaciones.*.acciones' => 'array|required',
             'funciones_permitidas' => 'array|nullable',
         ]);
+
+        // Ejemplo de un registro válido:
+        //
+        // {
+        //   "email": "usuario@ejemplo.com",
+        //   "password": "contraseñaSegura123",
+        //   "nombre": "Juan",
+        //   "apellido_paterno": "Pérez",
+        //   "apellido_materno": "García",
+        //   "edad": 30,
+        //   "genero": "masculino",
+        //   "estado": "CDMX",
+        //   "ocupacion": "Ingeniero",
+        //   "escolaridad": "Licenciatura",
+        //   "roles": ["user"],
+        //   "permisos": [
+        //     {
+        //       "recurso": "usuarios",
+        //       "acciones": ["ver", "crear"]
+        //     }
+        //   ],
+        //   "funciones_permitidas": ["exportar", "importar"]
+        // }
 
         $user = User::create([
             'email' => $request->email,
