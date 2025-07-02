@@ -34,33 +34,9 @@ class UsersController extends Controller
             'funciones_permitidas' => 'array|nullable',
         ]);
 
-        // Ejemplo de un registro válido:
-        //
-        // {
-        //   "email": "usuario@ejemplo.com",
-        //   "password": "contraseñaSegura123",
-        //   "nombre": "Juan",
-        //   "apellido_paterno": "Pérez",
-        //   "apellido_materno": "García",
-        //   "edad": 30,
-        //   "genero": "masculino",
-        //   "estado": "CDMX",
-        //   "ocupacion": "Ingeniero",
-        //   "escolaridad": "Licenciatura",
-        //   "roles": ["user"],
-        //   "permisos": [
-        //     {
-        //       "recurso": "usuarios",
-        //       "acciones": ["ver", "crear"]
-        //     }
-        //   ],
-        //   "funciones_permitidas": ["exportar", "importar"]
-        // }
-
         $user = User::create([
             'email' => $request->email,
             'password' => Hash::make($request->password), // Hashea la contraseña
-            'roles' => ['user'], // Definimos roles como un array
             'nombre' => $request->nombre,
             'apellido_paterno' => $request->apellido_paterno,
             'apellido_materno' => $request->apellido_materno,

@@ -47,13 +47,13 @@ class AuthController extends Controller
         // Eliminamos los campos innecesarios de la respuesta
         $user -> makeHidden(['apellido_materno', 'apellido_paterno','email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles']);
         
-        $permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
+        //$permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
         // Respuesta exitosa
         return response()->json([
             'message' => 'Login exitoso',
             'user' => $user,
             'token' => $token,
-            'permisos' => $permisosEncriptados,
+            'permisos' => $permisos,
         ], Response::HTTP_OK);
     }catch (\Exception $e) {
         // En caso de error, regresamos un mensaje genérico
