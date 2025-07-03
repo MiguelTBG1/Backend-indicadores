@@ -107,10 +107,10 @@ class IndicadoresController extends Controller
             });
 
             // Procesamos la configuración
-            $resultado = $resultado->map(function ($indicador) use ($request) {
+            $resultado = $resultado->map(function ($indicador) use ($inicioDate,$finDate) {
                 if (isset($indicador['configuracion'])) {
-                    $indicador['configuracion']['fecha_inicio'] = $request->input('inicio');
-                    $indicador['configuracion']['fecha_fin'] = $request->input('fin');
+                    $indicador['configuracion']['fecha_inicio'] = $inicioDate;
+                    $indicador['configuracion']['fecha_fin'] = $finDate;
                     $indicador['numerador'] = $this->calculateNumerador($indicador['configuracion']);
                 }
                 return $indicador;
@@ -328,12 +328,27 @@ class IndicadoresController extends Controller
                 }
 
                 if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
+                    // Buscar campo de fecha que se aplicará el filtro
+                    $campoFecha = '';
+
+                    foreach($campos as $campo){
+                        if($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])){
+                            foreach($campo['subcampos'] as $subcampo){
+                                if($subcampo['filterable'] === true && $subcampo['type'] === 'date'){
+                                    $campoFecha = $subcampo['name'];
+                                    break 2; // Salimos de ambos bucles
+                                }
+                            }
+
+                        }
+                    }
+
                         // Filtrar fecha  de registro
                     $pipeline[] = [
                         '$match' => [
-                            $nombreCampo . '.fecha de creación' => [
-                                '$gte' => new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000),
-                                '$lte' => new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)
+                            $nombreCampo . '.' . $campoFecha => [
+                                '$gte' => $configuracion['fecha_inicio'],
+                                '$lte' => $configuracion['fecha_fin']
                             ]
                         ]
                     ];
@@ -372,10 +387,25 @@ class IndicadoresController extends Controller
                 }
 
                 if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
-                        // Filtrar fecha  de registro
+                    // Buscar campo de fecha que se aplicará el filtro
+                    $campoFecha = '';
+
+                    foreach($campos as $campo){
+                        if($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])){
+                            foreach($campo['subcampos'] as $subcampo){
+                                if($subcampo['filterable'] === true && $subcampo['type'] === 'date'){
+                                    $campoFecha = $subcampo['name'];
+                                    break 2; // Salimos de ambos bucles
+                                }
+                            }
+
+                        }
+                    }
+
+                    // Filtrar por fecha
                     $condiciones[] = [
-                        '$gte' => ["\$\$campo.fecha de creación", new UTCDateTime(strtotime($configuracion['fecha_inicio']) * 1000)],
-                        '$lte' => ["\$\$campo.fecha de creación", new UTCDateTime(strtotime($configuracion['fecha_fin']) * 1000)]
+                        '$gte' => ["\$\$campo." . $campoFecha, $configuracion['fecha_inicio']],
+                        '$lte' => ["\$\$campo." . $campoFecha, $configuracion['fecha_fin']]
                     ];
                 }
 

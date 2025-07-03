@@ -302,9 +302,6 @@ class DocumentoController extends Controller
             $client = new MongoClient(config('database.connections.mongodb.url'));
             $db = $client->selectDatabase(config('database.connections.mongodb.database'));
 
-            Log::info('id', $documentId);
-
-
             // Obtener el documento de la colección MongoDB
             $documento = $db->selectCollection($plantillaName)->findOne(['_id' => new ObjectId($documentId)]);
 
