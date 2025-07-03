@@ -13,6 +13,7 @@ use MongoDB\Client as MongoClient;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Log;
 use App\Models\Plantillas;
+use DateTime;
 
 class IndicadoresController extends Controller
 {
@@ -516,6 +517,9 @@ class IndicadoresController extends Controller
                 'numerador' => 'nullable|numeric',
                 'denominador' => 'nullable|numeric',
                 'departamento' => 'required|string|max:255',
+                'actividad' => 'nullable|string|max:500',
+                'causa' => 'nullable|string|max:500',
+                'accion' => 'nullable|string|max:500',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
@@ -533,17 +537,17 @@ class IndicadoresController extends Controller
                 'numerador',
                 'denominador',
                 'departamento',
+                'actividad',
+                'causa',
+                'accion',
                 'fecha_inicio',
                 'fecha_fin'
             ]);
 
             // Convertir las fechas a UTCDateTime
-            if (isset($data['fecha_inicio'])) {
-                $data['fecha_inicio'] = new UTCDateTime(strtotime($data['fecha_inicio']) * 1000);
-            }
-            if (isset($data['fecha_fin'])) {
-                $data['fecha_fin'] = new UTCDateTime(strtotime($data['fecha_fin']) * 1000);
-            }
+            $data['fecha_inicio'] = new \DateTime($data['fecha_inicio']);
+            $data['fecha_fin'] = new \DateTime($data['fecha_fin']);
+
 
             // Creamos un indicador con los datos del request
             $indicador = Indicadores::create($data);
@@ -563,11 +567,11 @@ class IndicadoresController extends Controller
         } catch (Exception $e) {
             // Manejo de errores
             // Logueamos el error
-            Log::error('Error al insertar el indicador: ' . $e->getMessage());
+            Log::error('Error al crear el indicador: ' . $e->getMessage());
             // Retornamos el mensaje de error
             return response()->json([
                 'success' => false,
-                'message' => 'Error del sistema al insertar el indicador',
+                'message' => 'Error al crear el indicador',
                 'error' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -725,8 +729,6 @@ class IndicadoresController extends Controller
      */
     public function update($id, Request $request) {
         try {
-            Log::info('Datos del request para actualizar indicador: ', $request->all());
-
             // Validar el formato de la id
             if(!preg_match('/^[a-f0-9]{24}$/', $id)) {
                 throw new Exception('ID de indicador no válido', Response::HTTP_BAD_REQUEST);
@@ -748,6 +750,9 @@ class IndicadoresController extends Controller
                 'numerador' => 'nullable|numeric',
                 'denominador' => 'nullable|numeric',
                 'departamento' => 'required|string|max:255',
+                'actividad' => 'nullable|string|max:500',
+                'causa' => 'nullable|string|max:500',
+                'accion' => 'nullable|string|max:500',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
@@ -765,6 +770,9 @@ class IndicadoresController extends Controller
                 'numerador',
                 'denominador',
                 'departamento',
+                'actividad',
+                'causa',
+                'accion',
                 'fecha_inicio',
                 'fecha_fin'
             ]);
