@@ -7,10 +7,58 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use PHPUnit\Framework\MockObject\Stub\ReturnStub;
+use Symfony\Component\HttpFoundation\Response;
+
+use function PHPUnit\Framework\isEmpty;
 
 class UsersController extends Controller
 {
 
+    /**
+     * Retorna todos los usuarios
+     */
+    public function index()
+    {
+        $users = User::all();
+
+        if ($users->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'No se encontraron usuarios',
+                'users' => []
+            ], Response::HTTP_OK);
+        }
+
+        // Retornamos la respuesta con los usuarios
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuarios encontrados',
+            'users' => $users,
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Obtiene solo un usuario mediante su id
+     */
+    public function show($userId)
+    {
+        $user = User::find($userId);
+
+        if ($user) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario encontrado',
+                'user' => $user
+            ], Response::HTTP_OK);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado',
+                'user' => []
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
     /**
      * Registra un nuevo usuario.
      */
@@ -51,92 +99,80 @@ class UsersController extends Controller
             'roles' => $request->roles ?? [], // Asegura que roles sea un array
         ]);
 
-        return response()->json(['message' => '¡Usuario creado exitosamente!', 'datosCONseguidos' => $request->all()], 201);
+        return response()->json([
+            'message' => '¡Usuario creado exitosamente!',
+            'Usuario' => $user
+        ], Response::HTTP_CREATED);
     }
-
-
-    public function store(Request $request)
-    {
-        // Valida los datos del formulario
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'apellido_materno' => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'roles' => 'array', // Asegura que los roles sean un array
-        ]);
-
-        // Crea un nuevo usuario con los datos proporcionados
-        $user = User::create([
-            'nombre' => $request->nombre,
-            'apellido_materno' => $request->apellido_materno,
-            'apellido_paterno' => $request->apellido_paterno,
-            'email' => $request->email,
-            'password' => Hash::make($request->password), // Hashea la contraseña
-            'roles' => $request->roles, // Asigna los roles como un array
-
-        ]);
-
-
-        return response()->json(['message' => '¡Usuario creado exitosamente!']);
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
-    }
-
-    public function listUsers()
-    {
-        $rolesAdministrativos = ['capturista', 'carrusel', 'plantillas', 'administrador', 'validador'];
-        $users = User::whereIn('roles', $rolesAdministrativos)->get();
-        return response()->json($users);
-    }
-
 
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $user = User::find($id);
 
-        return response()->json(['message' => 'Usuario eliminado exitosamente']);
+        if ($user) {
+            $user->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario eliminado exitosamente'
+            ], Response::HTTP_OK);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado'
+            ], Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::find($id);
 
-        $rules = [
-            'nombre' => 'required|string|max:255',
-            'apellido_materno' => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'roles' => 'array'
-        ];
+        if ($user) {
+            $request->validate([
+                'email' => 'string|email',
+                'nombre' => 'string',
+                'apellido_paterno' => 'string',
+                'apellido_materno' => 'string',
+                'edad' => 'integer',
+                'genero' => 'string',
+                'estado' => 'string',
+                'ocupacion' => 'string',
+                'escolaridad' => 'string',
+                'roles' => 'array|nullable',
+                'permisos' => 'array|nullable',
+                'permisos.*.recurso' => 'string',
+                'permisos.*.acciones' => 'array',
+                'funciones_permitidas' => 'array|nullable',
+            ]);
 
-        // Aplicar la validación del correo electrónico solo si se proporciona un nuevo correo electrónico
-        if ($request->email !== $user->email) {
-            $rules['email'] = 'required|string|email|max:255|unique:users,email';
+            // Actualiza solo los campos presentes en la solicitud
+            $user->email = $request->has('email') ? $request->email : $user->email;
+            $user->nombre = $request->has('nombre') ? $request->nombre : $user->nombre;
+            $user->apellido_paterno = $request->has('apellido_paterno') ? $request->apellido_paterno : $user->apellido_paterno;
+            $user->apellido_materno = $request->has('apellido_materno') ? $request->apellido_materno : $user->apellido_materno;
+            $user->edad = $request->has('edad') ? $request->edad : $user->edad;
+            $user->genero = $request->has('genero') ? $request->genero : $user->genero;
+            $user->estado = $request->has('estado') ? $request->estado : $user->estado;
+            $user->ocupacion = $request->has('ocupacion') ? $request->ocupacion : $user->ocupacion;
+            $user->escolaridad = $request->has('escolaridad') ? $request->escolaridad : $user->escolaridad;
+            $user->roles = $request->has('roles') ? $request->roles : $user->roles;
+            $user->permisos = $request->has('permisos') ? $request->permisos : $user->permisos;
+            $user->funciones_permitidas = $request->has('funciones_permitidas') ? $request->funciones_permitidas : $user->funciones_permitidas;
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario actualizado exitosamente',
+                'user' => $user
+            ]);
         } else {
-            $rules['email'] = 'required|string|email|max:255';
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado',
+                'user' => []
+            ], Response::HTTP_NOT_FOUND);
         }
-
-        // Validar la solicitud
-        $validatedData = $request->validate($rules);
-
-        // Actualizar los campos del usuario
-        $user->update($validatedData);
-
-        // Si la contraseña está presente y no está vacía, actualizarla
-        if ($request->filled('password')) {
-            $user->update(['password' => Hash::make($request->password)]);
-        }
-
-        return response()->json(['message' => 'Usuario actualizado exitosamente']);
     }
 }

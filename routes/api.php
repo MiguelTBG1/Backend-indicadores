@@ -62,8 +62,6 @@ Route::middleware(['auth.sanctum'])->group(function () {
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    /* RUTAS PARA USUARIOS */
-    Route::post('/register', [UsersController::class, 'register']);
 
     /* ACCIONES */
     Route::get('/acciones', [AccionesController::class, 'index']);
@@ -74,14 +72,15 @@ Route::middleware(['auth.sanctum'])->group(function () {
     /* ROLES */
     Route::get('/roles', [RolesController::class, 'index']);
     Route::post('/roles', [RolesController::class, 'store']);
+
+    /* USUARIOS */
+    Route::get('/usuarios', [UsersController::class, 'index']);
+    Route::get('/usuarios/{id}', [UsersController::class, 'show']);
+    Route::post('/register', [UsersController::class, 'register']);
+    Route::put('/usuarios/{id}', [UsersController::class, 'update']);
+    Route::delete('/usuarios/{id}', [UsersController::class, 'destroy']);
+
 });
 
 // Reporte PDF
 Route::get('/generate-invoice-pdf', [ReporteController::class, 'generatePdf']);
-
-// RUTAS USUARIOS
-Route::post('/users', [UsersController::class, 'store'])->name('users.store');
-
-Route::get('/list-users', [UsersController::class, 'listUsers'])->name('users.list');
-Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users.destroy');
-Route::put('/users/{id}', [UsersController::class, 'update'])->name('users.update');
