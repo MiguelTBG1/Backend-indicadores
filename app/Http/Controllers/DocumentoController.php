@@ -12,6 +12,7 @@ use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use DateTimeZone;
+use DateTimeImmutable;
 
 
 
@@ -78,9 +79,6 @@ class DocumentoController extends Controller
             // Validar los datos de entrada
             $validatos = Validator::make($request->all(), [
                 'document_data' => 'required|array',
-            ], [
-                'document_data.required' => 'El campo document_data es obligatorio.',
-                'document_data.array' => 'El campo document_data debe ser un array.',
             ]);
 
             // Verifica si la validación falla
@@ -118,36 +116,53 @@ class DocumentoController extends Controller
                 $documentData['Recurso Digital'] = $uploadedFiles;
             }
 
-            // Buscar los campos que tengan un valor en formato stringjson
+            Log::info('Datos', $documentData);
+
+            // Formateamos los datos recibido a un array valido
             foreach ($documentData as $key => $value) {
+                // Solo procesamos valores que sean string
                 if (is_string($value)) {
-                    // Verifica si el valor tiene un formato de un string JSON
-                    if (is_array(json_decode($value, true))) {
-                        // Convierte el string JSON a un array
-                        $documentData[$key] = json_decode($value, true);
-                        // Si algún es una fecha, convertirla a UTCDateTime
-                        foreach ($documentData[$key] as $index => $data){
+                    $decoded = json_decode($value, true);
+
+                    // Verificamos si es JSON válido
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $documentData[$key] = $decoded;
+                    }
+
+                    // Si NO es JSON válido, se queda como string (ej: "juan", "2025-07-19")
+                }
+
+            }
+
+            Log::info('Datos2', $documentData);
+
+            // Buscar los campos que tengan un valor en formato de fecha
+            foreach ($documentData as $key => $value) {
+
+                    // Verifica si es un arreglo
+                    if (is_array($documentData[$key])) {
+
+                        // Si es un arreglo, recorremos sus elementos
+                        foreach ($value as $index => $data){
                             foreach ($data as $subKey => $subValue) {
-                                //Log::info("SubKey: $subKey, SubValue: $subValue");
-                                if (is_string($subValue) && strtotime($subValue) !== false) {
-                                    // Convertir la fecha a UTCDateTime
-                                    $documentData[$key][$index][$subKey] = new DateTime(strtotime($subValue) * 1000);
-                                    $documentData[$key][$index][$subKey]->setTimezone(new DateTimeZone('UTC'));
+
+                                // Verificar si el valor es un string y se puede convertir a fecha
+                                if (is_string($documentData[$key][$index][$subKey]) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key][$index][$subKey])) {
+                                    // Convertir a UTCDateTime
+                                    $documentData[$key][$index][$subKey] = new UTCDateTime(new DateTimeImmutable($documentData[$key][$index][$subKey]));
                                 }
                             }
                         }
 
+                    // Verificamos si es una fecha y la convertimos a UTCDateTime
+                    }elseif(preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key])) {
+                        // Convertir la fecha a UTCDateTime
+                        $documentData[$key] = new UTCDateTime(new DateTimeImmutable($documentData[$key]));
                     }
 
-                    // Verificamos si es una fecha y la convertimos a UTCDateTime
-                    if (strtotime($value) !== false) {
-                        // Convertir la fecha a UTCDateTime
-                        $documentData[$key] = new DateTime(strtotime($value) * 1000);
-                        $documentData[$key]->setTimezone(new DateTimeZone('UTC'));
-                    }
-                }
             }
 
+            Log::info('Datos3', $documentData);
 
             // Obtener el nombre de la colección de la plantilla
             $collectionName = $plantilla -> nombre_coleccion;
@@ -222,7 +237,7 @@ class DocumentoController extends Controller
                     if( $key === '_id' && is_array($documents[$index][$key]) && isset($documents[$index][$key]['$oid'])) {
 
                         // Convertir el ObjectId a string
-                        $documents[$index][$key] = (string) $documents[$index][$key]['$oid'];
+                        //$documents[$index][$key] = (string) $documents[$index][$key]['$oid'];
 
 
                     } else{
@@ -286,6 +301,8 @@ class DocumentoController extends Controller
             // Conexión a MongoDB
             $client = new MongoClient(config('database.connections.mongodb.url'));
             $db = $client->selectDatabase(config('database.connections.mongodb.database'));
+
+            Log::info('id', $documentId);
 
 
             // Obtener el documento de la colección MongoDB
