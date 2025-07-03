@@ -516,6 +516,9 @@ class IndicadoresController extends Controller
                 'numerador' => 'nullable|numeric',
                 'denominador' => 'nullable|numeric',
                 'departamento' => 'required|string|max:255',
+                'actividad' => 'nullable|string|max:500',
+                'causa' => 'nullable|string|max:500',
+                'accion' => 'nullable|string|max:500',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
