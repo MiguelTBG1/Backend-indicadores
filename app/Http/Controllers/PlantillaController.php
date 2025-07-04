@@ -127,7 +127,7 @@ class PlantillaController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function getFields($id)
+    public function getSecciones($id)
     {
         try {
             // Validar el ID
@@ -145,17 +145,17 @@ class PlantillaController extends Controller
 
             // Obtener el nombre de la plantilla y los campos de la plantilla
             $nombrePlantilla = $plantilla->nombre_plantilla;
-            $campos = $plantilla->campos;
+            $secciones = $plantilla->secciones;
 
-            // Verificar si hay campos
-            if (empty($campos)) {
-                throw new \Exception('No hay campos disponibles para esta plantilla', 404);
+            // Verificar si hay secciones
+            if (empty($secciones)) {
+                throw new \Exception('No hay secciones disponibles para esta plantilla', 404);
             }
 
             // Devolver la respuesta JSON
             return response()->json([
                 'nombre_plantilla' => $nombrePlantilla,
-                'campos' => $campos
+                'secciones' => $secciones,
             ], 200);
 
         } catch (\Exception $e) {
@@ -199,19 +199,6 @@ class PlantillaController extends Controller
             // Tipos de campos que se permiten en subform
             $tiposCamposPermitidosSubform = array_diff($tiposCamposPermitidos, ['subform']);
 
-
-            // Validar la solicitud
-            $validator = Validator::make($request->all(), [
-                'campos' => 'required|array|min:1',
-                'campos.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'campos.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
-                'campos.*options' => 'required_if:fields.*.type,select|array|min:1',
-                'campos.*.required' => 'required|boolean',
-                'campos.*.subcampos' => 'required_if:fields.*.type,subform|array|min:1',
-                'campos.*.subcampos.*.name' => 'required_if:fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'campos.*.subcampos.*.type' => 'required_if:fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
-                'campos.*.subcampos.*.required' => 'required_if:fields.*.type,subform|boolean'
-            ]);
              // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'secciones' => 'required|array|min:1',
@@ -232,7 +219,7 @@ class PlantillaController extends Controller
             }
 
             $plantilla->update([
-                'campos' => $request->input('campos'),
+                'secciones' => $request->input('secciones'),
             ]);
 
             // Verificar si la plantilla se actualizó correctamente

@@ -42,7 +42,7 @@ Route::middleware(['auth.sanctum'])->group(function () {
     Route::post('/plantillas', [PlantillaController::class, 'store'])->middleware(['abilities:plantillas_crear']);
     Route::put('/plantillas/{id}', [PlantillaController::class, 'update'])->middleware(['abilities:plantillas_actualizar']);
     Route::delete('/plantillas/{id}', [PlantillaController::class, 'destroy'])->middleware(['abilities:plantillas_borrar']);
-    Route::get('/plantillas/{id}/campos', [PlantillaController::class, 'getFields'])->middleware((['abilities:plantillas_leer']));
+    Route::get('/plantillas/{id}/secciones', [PlantillaController::class, 'getSecciones'])->middleware((['abilities:plantillas_leer']));
 
     // DOCUMENTOS
     Route::get('/documentos/{id}', [DocumentoController::class, 'index'])->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos_leer']);
