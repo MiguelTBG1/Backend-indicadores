@@ -90,13 +90,13 @@ class PlantillaController extends Controller
             $collectionName = str_replace(' ','', $plantillaName) . "_data";
 
             // Filtrar datos no serializables en `campos`
-            $fields = $request->input('fields');
+            $secciones = $request->input('secciones');
 
             // Agregar la plantilla a la colección de Plantillas
             $plantilla = Plantillas::create([
                 'nombre_plantilla' => $plantillaName,
                 'nombre_coleccion' => $collectionName,
-                'campos' => $fields,
+                'secciones' => $secciones,
             ]);
 
             // Verificar si la plantilla se creó correctamente
