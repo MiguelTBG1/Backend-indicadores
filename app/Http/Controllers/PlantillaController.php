@@ -61,15 +61,17 @@ class PlantillaController extends Controller
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'fields' => 'required|array|min:1',
-                'fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
-                'fields.*options' => 'required_if:fields.*.type,select|array|min:1',
-                'fields.*.required' => 'required|boolean',
-                'fields.*.subcampos' => 'required_if:fields.*.type,subform|array|min:1',
-                'fields.*.subcampos.*.name' => 'required_if:fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'fields.*.subcampos.*.type' => 'required_if:fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
-                'fields.*.subcampos.*.required' => 'required_if:fields.*.type,subform|boolean'
+                'secciones' => 'required|array|min:1',
+                'secciones.*.nombre' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'secciones.*.fields' => 'required|array|min:1',
+                'secciones.*.fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'secciones.*.fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
+                'secciones.*.fields.*.options' => 'required_if:secciones.*.fields.*.type,select|array|min:1',
+                'secciones.*.fields.*.required' => 'required|boolean',
+                'secciones.*.fields.*.subcampos' => 'required_if:secciones.*.fields.*.type,subform|array|min:1',
+                'secciones.*.fields.*.subcampos.*.name' => 'required_if:secciones.*.fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'secciones.*.fields.*.subcampos.*.type' => 'required_if:secciones.*.fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
+                'secciones.*.fields.*.subcampos.*.required' => 'required_if:secciones.*.fields.*.type,subform|boolean'
             ]);
 
 
@@ -85,7 +87,7 @@ class PlantillaController extends Controller
             }
 
             // Formar el nombre de la colección eliminando espacios
-            $collectionName = "template_" . str_replace(' ','', $plantillaName) . "_data";
+            $collectionName = str_replace(' ','', $plantillaName) . "_data";
 
             // Filtrar datos no serializables en `campos`
             $fields = $request->input('fields');
