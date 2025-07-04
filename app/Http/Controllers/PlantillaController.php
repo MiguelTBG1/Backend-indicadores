@@ -212,6 +212,20 @@ class PlantillaController extends Controller
                 'campos.*.subcampos.*.type' => 'required_if:fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
                 'campos.*.subcampos.*.required' => 'required_if:fields.*.type,subform|boolean'
             ]);
+             // Validar la solicitud
+            $validator = Validator::make($request->all(), [
+                'secciones' => 'required|array|min:1',
+                'secciones.*.nombre' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'secciones.*.fields' => 'required|array|min:1',
+                'secciones.*.fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'secciones.*.fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
+                'secciones.*.fields.*.options' => 'required_if:secciones.*.fields.*.type,select|array|min:1',
+                'secciones.*.fields.*.required' => 'required|boolean',
+                'secciones.*.fields.*.subcampos' => 'required_if:secciones.*.fields.*.type,subform|array|min:1',
+                'secciones.*.fields.*.subcampos.*.name' => 'required_if:secciones.*.fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'secciones.*.fields.*.subcampos.*.type' => 'required_if:secciones.*.fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
+                'secciones.*.fields.*.subcampos.*.required' => 'required_if:secciones.*.fields.*.type,subform|boolean'
+            ]);
 
             if ($validator->fails()) {
                 throw new \Exception(json_encode($validator->errors()), 422);

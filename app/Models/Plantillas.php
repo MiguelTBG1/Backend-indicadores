@@ -9,7 +9,7 @@ class Plantillas extends Model
 
     protected $connection = 'mongodb'; // Esto es para asegurar que use MongoDB
 
-    protected $collection = 'Templates';
+    protected $collection = 'Plantillas'; // Nombre de la colección en MongoDB
 
     protected $primaryKey = '_id'; // MongoDB usa _id como clave primaria
 
@@ -18,7 +18,7 @@ class Plantillas extends Model
     protected $fillable = [
         'nombre_plantilla',
         'nombre_coleccion',
-        'campos',
+        'secciones',
         'created_at',
         'updated_at'
     ];
