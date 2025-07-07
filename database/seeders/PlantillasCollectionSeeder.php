@@ -21,7 +21,7 @@ class PlantillasCollectionSeeder extends Seeder
                 'nombre_coleccion' => 'Alumnos_data',
                 'secciones' => [
                     [
-                        'nombre_seccion' => 'Información Personal',
+                        'nombre' => 'Información Personal',
                         'fields' => [
                             [ 'name' => 'Nombres', 'type' => 'text', 'required' => true ],
                             [ 'name' => 'Apellidos', 'type' => 'text', 'required' => true ],
@@ -32,7 +32,7 @@ class PlantillasCollectionSeeder extends Seeder
                         ]
                     ],
                     [
-                        'nombre_seccion' => 'Información Académica',
+                        'nombre' => 'Información Académica',
                         'fields' => [
                             [ 'name' => 'Fecha de inscripción', 'type' => 'date', 'required' => true ],
                             [ 'name' => 'Estado', 'type' => 'select',
