@@ -97,7 +97,7 @@ class PlantillasCollectionSeeder extends Seeder
                 'nombre_coleccion' => 'Profesores_data',
                 'secciones' => [
                     [
-                        'nombre_seccion' => 'Información Personal',
+                        'nombre' => 'Información Personal',
                         'fields' => [
                             [ 'name' => 'Nombres', 'type' => 'text', 'required' => true ],
                             [ 'name' => 'Apellidos', 'type' => 'text', 'required' => true ],
@@ -108,7 +108,7 @@ class PlantillasCollectionSeeder extends Seeder
                         ]
                     ],
                     [
-                        'nombre_seccion' => 'Información Académica',
+                        'nombre' => 'Información Académica',
                         'fields' => [
                             [
                                 'name' => 'Estado',
