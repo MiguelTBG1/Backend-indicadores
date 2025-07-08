@@ -14,6 +14,7 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\EjesController;
 use App\Http\Controllers\RecursosController;
 use App\Http\Controllers\RolesController;
+use Database\Seeders\RolesSeeder;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
@@ -71,7 +72,10 @@ Route::middleware(['auth.sanctum'])->group(function () {
 
     /* ROLES */
     Route::get('/roles', [RolesController::class, 'index']);
+    Route::get('/roles/{rolId}', [RolesController::class, 'show']);
     Route::post('/roles', [RolesController::class, 'store']);
+    Route::delete('roles/{rolId}', [RolesController::class, 'destroy']);
+    Route::put('roles/{rolId}', [RolesController::class, 'update']);
 
     /* USUARIOS */
     Route::get('/usuarios', [UsersController::class, 'index']);
