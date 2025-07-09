@@ -223,8 +223,41 @@ class IndicadoresController extends Controller
         // Creamos el pipeline de agregación
         $pipeline = [];
 
+        // Procesamos los datos para formatear la estructura y eliminar las secciones
+        // Etapa 1: Aplanar los fields de todas las secciones
+        $pipeline[] = [
+            '$project' => [
+                'datosAplanados' => [
+                '$reduce' => [
+                    'input' => '$secciones',
+                    'initialValue' => (object)[], // 👈 Cambiado a objeto vacío
+                    'in' => [
+                    '$mergeObjects' => ['$$value', '$$this.fields']
+                    ]
+                ]
+                ]
+            ]
+        ];
+
+        // Etapa 2: Reemplazar el root con los datos aplanados
+        $pipeline[] = [
+            '$replaceRoot' => [
+                'newRoot' => [
+                    '$mergeObjects' => ['$$ROOT', '$datosAplanados']
+                ]
+            ]
+        ];
+
+        // Etapa 3: Eliminar campos auxiliares
+        $pipeline[] = [
+            '$project' => [
+                'datosAplanados' => 0,
+                'secciones' => 0
+            ]
+        ];
+
         // Validamos que la plantilla tenga el campo de configuración para obtener el tipo de campo
-        $campos = $plantilla->campos ?? [];
+        $secciones = $plantilla->secciones ?? [];
 
         // Validamos si hay condiciones
         if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
@@ -232,10 +265,12 @@ class IndicadoresController extends Controller
             foreach ($configuracion['condicion'] as $index => $condicion) {
                 $tipocampo = null;
 
-                foreach ($campos as $campo) {
-                    if (isset($campo['name']) && $campo['name'] == $condicion['campo']) {
-                        $tipocampo = $campo['type'] ?? null;
-                        break;
+                foreach ($secciones as $seccion) {
+                    foreach($seccion as $campo){
+                        if (isset($campo['name']) && $campo['name'] === $condicion['campo']) {
+                            $tipocampo = $campo['type'] ?? null;
+                            break 2;
+                        }
                     }
                 }
 
@@ -331,12 +366,27 @@ class IndicadoresController extends Controller
                     // Buscar campo de fecha que se aplicará el filtro
                     $campoFecha = '';
 
-                    foreach($campos as $campo){
-                        if($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])){
-                            foreach($campo['subcampos'] as $subcampo){
-                                if($subcampo['filterable'] === true && $subcampo['type'] === 'date'){
-                                    $campoFecha = $subcampo['name'];
-                                    break 2; // Salimos de ambos bucles
+                    foreach($secciones as $seccion){
+
+                        foreach($seccion['fields'] as $campo){
+
+                            /*
+                            foreach($campo as $key => $value){
+                                if($key === 'name' && $value === $configuracion['campo']){
+                                    $nombreCampo = $seccion['name'];
+                                    break 2;
+                                }
+                            }*/
+
+                            Log::info('campo', $campo);
+
+                            // Verificamos si el campo es un subform y tiene subcampos
+                            if($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])){
+                                foreach($campo['subcampos'] as $subcampo){
+                                    if($subcampo['filterable'] === true && $subcampo['type'] === 'date'){
+                                        $campoFecha = $subcampo['name'];
+                                        break 3;
+                                    }
                                 }
                             }
 
@@ -360,9 +410,11 @@ class IndicadoresController extends Controller
 
             $pipelineSub = [];
 
+            $condiciones = [];
+
             // Verificamos si hay condiciones en subConfiguración
             if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
-                $condiciones = [];
+
 
                 foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
                     $operador = match ($subCondicion['operador']) {
@@ -386,45 +438,66 @@ class IndicadoresController extends Controller
                     ];
                 }
 
-                if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
-                    // Buscar campo de fecha que se aplicará el filtro
-                    $campoFecha = '';
+            }
 
-                    foreach($campos as $campo){
-                        if($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])){
-                            foreach($campo['subcampos'] as $subcampo){
-                                if($subcampo['filterable'] === true && $subcampo['type'] === 'date'){
-                                    $campoFecha = $subcampo['name'];
-                                    break 2; // Salimos de ambos bucles
-                                }
+            // Filtramos por fecha si es necesario
+            if (isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])) {
+
+                Log::info('Filtrando por rango de fechas', [
+                    'fecha_inicio' => $configuracion['fecha_inicio'],
+                    'fecha_fin' => $configuracion['fecha_fin']
+                ]);
+
+            // Buscar campo de fecha que se aplicará el filtro
+            $campoFecha = '';
+
+            foreach ($secciones as $seccion) {
+                foreach ($seccion['fields'] as $campo) {
+                    if ($campo['name'] === $configuracion['campo'] &&
+                        $campo['type'] === 'subform' &&
+                        isset($campo['subcampos'])) {
+
+                        foreach ($campo['subcampos'] as $subcampo) {
+                            if (isset($subcampo['filterable']) && $subcampo['filterable'] === true && $subcampo['type'] === 'date') {
+                                $campoFecha = $subcampo['name'];
+                                break 3;
                             }
-
                         }
                     }
-
-                    // Filtrar por fecha
-                    $condiciones[] = [
-                        '$gte' => ["\$\$campo." . $campoFecha, $configuracion['fecha_inicio']],
-                        '$lte' => ["\$\$campo." . $campoFecha, $configuracion['fecha_fin']]
-                    ];
                 }
+                /**/
+            }
 
-                // Aplicamos filtro interno al arreglo
-                $pipelineSub[] = [
-                    '$addFields' => [
-                        'filtrado' => [
-                            '$filter' => [
-                                'input' => '$' . $nombreCampo,
-                                'as' => 'campo',
-                                'cond' => ['$and' => $condiciones]
-                            ]
+            Log::info('Campo de fecha encontrado', ['campoFecha' => $campoFecha]);
+
+            if (!empty($campoFecha)) {
+                // Filtrar por rango de fechas
+                $condiciones[] = [
+                    '$gte' => ['$$campo.Fecha de obtención', $configuracion['fecha_inicio']]
+                ];
+                $condiciones[] = [
+                    '$lte' => ['$$campo.Fecha de obtención', $configuracion['fecha_fin']]
+                ];
+            }
+        }
+
+        if (count($condiciones) > 0) {
+            // Aplicamos filtro interno al arreglo
+            $pipelineSub[] = [
+                '$addFields' => [
+                    'filtrado' => [
+                        '$filter' => [
+                            'input' => '$' . $nombreCampo,
+                            'as' => 'campo',
+                            'cond' => ['$and' => $condiciones]
                         ]
                     ]
-                ];
+                ]
+            ];
 
-                // Cambiamos el campo a contar
-                $nombreCampo = 'filtrado';
-            }
+            // Cambiamos el campo a contar
+            $nombreCampo = 'filtrado';
+        }
 
             // Agregar conteo o suma según sea necesario
             $operacionSub = match ($configuracion['subConfiguracion']['operacion']) {

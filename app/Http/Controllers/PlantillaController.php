@@ -122,7 +122,7 @@ class PlantillaController extends Controller
     }
 
     /**
-     * Función para obtener los campos de una plantilla por ID
+     * Función para obtener las secciones de una plantilla por ID
      * @param string $id
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception

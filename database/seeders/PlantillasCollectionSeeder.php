@@ -54,6 +54,24 @@ class PlantillasCollectionSeeder extends Seeder
                                         'type' => 'number',
                                         'required' => true,
                                         'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Fecha de evaluación',
+                                        'type' => 'date',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Comentarios',
+                                        'type' => 'text',
+                                        'required' => false,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Fecha de obtención',
+                                        'type' => 'date',
+                                        'required' => true,
+                                        'filterable' => true
                                     ]
                                 ]
                             ],
@@ -88,6 +106,37 @@ class PlantillasCollectionSeeder extends Seeder
                                     ]
                                 ]
                             ],
+                            [
+                                'name' => 'Becas',
+                                'type' => 'subform',
+                                'required' => false,
+                                'subcampos' => [
+                                    [
+                                        'name' => 'Nombre de la beca',
+                                        'type' => 'string',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Fecha de inicio',
+                                        'type' => 'date',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Fecha de término',
+                                        'type' => 'date',
+                                        'required' => true,
+                                        'filterable' => true
+                                    ],
+                                    [
+                                        'name' => 'Monto otorgado',
+                                        'type' => 'number',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ]
+                                ]
+                            ]
                         ]
                     ]
                 ]
@@ -130,6 +179,22 @@ class PlantillasCollectionSeeder extends Seeder
                                         "name" => "Año",
                                         "type" => "number",
                                         "required" => true
+                                    ],
+                                    [
+                                        "name" => "Institución",
+                                        "type" => "text",
+                                        "required" => true
+                                    ],
+                                    [
+                                        "name" => "Evidencia",
+                                        "type" => "file",
+                                        "required" => false
+                                    ],
+                                    [
+                                        "name" => "Fecha de obtención",
+                                        "type" => "date",
+                                        "required" => true,
+                                        "filterable" => true
                                     ]
                                 ]
                             ],
@@ -137,8 +202,7 @@ class PlantillasCollectionSeeder extends Seeder
                                 "name" => "Cursos impartidos",
                                 "type" => "subform",
                                 "required" => false,
-                                "subcampos" =>
-                                    [
+                                "subcampos" => [
                                         [
                                             "name" => "Nombre del curso",
                                             "type" => "string",
@@ -157,9 +221,116 @@ class PlantillasCollectionSeeder extends Seeder
                                         [
                                             "name" => "Fecha de término",
                                             "type" => "date",
-                                            "required" => true
+                                            "required" => true,
+                                            "filterable" => true
                                         ]
                                     ]
+                            ],
+                            [
+                                'name' => 'Especialidades Académicas',
+                                'type' => 'subform',
+                                'required' => false,
+                                'subcampos' => [
+                                    [
+                                        'name' => 'Nombre de la especialidad',
+                                        'type' => 'string',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Tipo de especialidad',
+                                        'type' => 'select',
+                                        'required' => true,
+                                        'options' => ['Diplomado', 'Maestría', 'Doctorado']
+                                    ],
+                                    [
+                                        'name' => 'Descripción',
+                                        'type' => 'text',
+                                        'required' => false,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Evidencia',
+                                        'type' => 'file',
+                                        'required' => false,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Institución',
+                                        'type' => 'string',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Fecha de obtención',
+                                        'type' => 'date',
+                                        'required' => true,
+                                        'filterable' => true
+                                    ]
+                                ]
+                            ],
+                            [
+                                'name' => 'Cursos y formación continua',
+                                'type' => 'subform',
+                                'required' => false,
+                                'subcampos' => [
+                                    [
+                                        'name' => 'Tipo de curso',
+                                        'type' => 'select',
+                                        'required' => true,
+                                        'options' => [
+                                            'Formación docente',
+                                            'Especialidad académica',
+                                            'Maestría',
+                                            'Doctorado',
+                                            'Taller pedagógico',
+                                            'Actualización disciplinar',
+                                            'Otro'
+                                        ]
+                                    ],
+                                    [
+                                        'name' => 'Nombre del curso o programa',
+                                        'type' => 'string',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Institución',
+                                        'type' => 'string',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Fecha de participación o término',
+                                        'type' => 'date',
+                                        'required' => true,
+                                        'filterable' => true
+                                    ],
+                                    [
+                                        'name' => 'Duración (horas o meses)',
+                                        'type' => 'number',
+                                        'required' => true,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Modalidad',
+                                        'type' => 'select',
+                                        'required' => true,
+                                        'options' => ['Presencial', 'En línea', 'Híbrido']
+                                    ],
+                                    [
+                                        'name' => 'Evidencia',
+                                        'type' => 'file',
+                                        'required' => false,
+                                        'filterable' => false
+                                    ],
+                                    [
+                                        'name' => 'Descripción o temas abordados',
+                                        'type' => 'text',
+                                        'required' => false,
+                                        'filterable' => false
+                                    ]
+                                ]
                             ]
                         ]
                     ]
