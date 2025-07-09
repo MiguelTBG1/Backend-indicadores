@@ -1,0 +1,962 @@
+openapi: 3.0.3
+info:
+  title: 'Laravel API Documentation'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8000'
+tags:
+  -
+    name: Endpoints
+    description: ''
+paths:
+  /api/user:
+    get:
+      summary: ''
+      operationId: getApiUser
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Authentication required'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Authentication required'
+      tags:
+        - Endpoints
+      security: []
+  /api/login:
+    post:
+      summary: 'Inicia sesion de un usuario y regresa un token'
+      operationId: iniciaSesionDeUnUsuarioYRegresaUnToken
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/indicadores:
+    get:
+      summary: 'Obtiene todos los indicadores'
+      operationId: obtieneTodosLosIndicadores
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Inserta un nuevo indicador en la base de datos'
+      operationId: insertaUnNuevoIndicadorEnLaBaseDeDatos
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  '/api/indicadores/{id}':
+    get:
+      summary: 'Obtiene un indicador por su ID'
+      operationId: obtieneUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Actualiza un indicador por su ID'
+      operationId: actualizaUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: 'Borra un indicador por su ID'
+      operationId: borraUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the indicadore.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/indicadores/{id}/configuracion':
+    put:
+      summary: 'Agrega o actualiza la configuración de un indicador por su ID'
+      operationId: agregaOActualizaLaConfiguracinDeUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    get:
+      summary: 'Obtener la configuración de un indicador por su ID'
+      operationId: obtenerLaConfiguracinDeUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the indicadore.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/indicadores/filterByDates:
+    post:
+      summary: 'Obtiene todos los indicadores filtrado por rango de fechas'
+      operationId: obtieneTodosLosIndicadoresFiltradoPorRangoDeFechas
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/indicadores/upload:
+    post:
+      summary: 'Carga un archivo Excel y guarda los indicadores en la base de datos'
+      operationId: cargaUnArchivoExcelYGuardaLosIndicadoresEnLaBaseDeDatos
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/plantillas:
+    get:
+      summary: 'Función para obtener todas las plantillas'
+      operationId: funcinParaObtenerTodasLasPlantillas
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Función para crear una nueva plantilla'
+      operationId: funcinParaCrearUnaNuevaPlantilla
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  '/api/plantillas/{id}':
+    put:
+      summary: 'Función para actualizar una plantilla por ID'
+      operationId: funcinParaActualizarUnaPlantillaPorID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: 'Función para eliminar una plantilla por ID'
+      operationId: funcinParaEliminarUnaPlantillaPorID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the plantilla.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/plantillas/{id}/secciones':
+    get:
+      summary: 'Función para obtener las secciones de una plantilla por ID'
+      operationId: funcinParaObtenerLasSeccionesDeUnaPlantillaPorID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the plantilla.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/documentos/{id}':
+    get:
+      summary: 'Obtiene todos los documentos de una plantilla específica.'
+      operationId: obtieneTodosLosDocumentosDeUnaPlantillaEspecfica
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiDocumentosId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the documento.'
+        example: 922815dFbEa128eAeaAAa185
+        required: true
+        schema:
+          type: string
+  '/api/documentos/{plantillaName}/{documentId}':
+    get:
+      summary: ''
+      operationId: getApiDocumentosPlantillaNameDocumentId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: ''
+      operationId: postApiDocumentosPlantillaNameDocumentId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiDocumentosPlantillaNameDocumentId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: plantillaName
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: documentId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/documentos/plantillas:
+    get:
+      summary: ''
+      operationId: getApiDocumentosPlantillas
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+  /api/ejes:
+    get:
+      summary: 'Función para obtener todos los ejes.'
+      operationId: funcinParaObtenerTodosLosEjes
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Función para insertar un nuevo eje.'
+      operationId: funcinParaInsertarUnNuevoEje
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  '/api/ejes/{id}':
+    get:
+      summary: 'Función para obtener un eje por ID.'
+      operationId: funcinParaObtenerUnEjePorID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiEjesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiEjesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the eje.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/roles:
+    get:
+      summary: 'Retorna todos los roles validos'
+      operationId: retornaTodosLosRolesValidos
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    post:
+      summary: 'Guarda un nuevo rol'
+      operationId: guardaUnNuevoRol
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                descripcion:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                permisos:
+                  type: array
+                  description: ''
+                  example: null
+                  items:
+                    type: object
+                    nullable: true
+                    properties:
+                      recurso:
+                        type: string
+                        description: ''
+                        example: architecto
+                        nullable: false
+                      acciones:
+                        type: object
+                        description: ''
+                        example: []
+                        nullable: false
+                        properties: {  }
+                    required:
+                      - recurso
+                      - acciones
+                funciones_permitidas:
+                  type: object
+                  description: ''
+                  example: null
+                  nullable: true
+                  properties: {  }
+              required:
+                - nombre
+                - descripcion
+      security: []
+  '/api/roles/{rolId}':
+    get:
+      summary: 'Devuelve un rol en especifico'
+      operationId: devuelveUnRolEnEspecifico
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: 'Borra un rol en especifico'
+      operationId: borraUnRolEnEspecifico
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: 'Actualiza un rol'
+      operationId: actualizaUnRol
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                descripcion:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                permisos:
+                  type: array
+                  description: ''
+                  example: null
+                  items:
+                    type: object
+                    nullable: true
+                    properties:
+                      recurso:
+                        type: string
+                        description: ''
+                        example: architecto
+                        nullable: false
+                      acciones:
+                        type: object
+                        description: ''
+                        example: null
+                        nullable: false
+                        properties: {  }
+                funciones_permitidas:
+                  type: object
+                  description: ''
+                  example: null
+                  nullable: true
+                  properties: {  }
+      security: []
+    parameters:
+      -
+        in: path
+        name: rolId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/usuarios:
+    get:
+      summary: 'Retorna todos los usuarios'
+      operationId: retornaTodosLosUsuarios
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+  '/api/usuarios/{id}':
+    get:
+      summary: 'Obtiene solo un usuario mediante su id'
+      operationId: obtieneSoloUnUsuarioMedianteSuId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+    put:
+      summary: ''
+      operationId: putApiUsuariosId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiUsuariosId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the usuario.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/register:
+    post:
+      summary: 'Registra un nuevo usuario.'
+      operationId: registraUnNuevoUsuario
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: gbailey@example.net
+                  nullable: false
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+                  nullable: false
+                nombre:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                apellido_paterno:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                apellido_materno:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                edad:
+                  type: integer
+                  description: ''
+                  example: 16
+                  nullable: false
+                genero:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                estado:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                ocupacion:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                escolaridad:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                roles:
+                  type: object
+                  description: ''
+                  example: null
+                  nullable: true
+                  properties: {  }
+                permisos:
+                  type: array
+                  description: ''
+                  example: null
+                  items:
+                    type: object
+                    nullable: true
+                    properties:
+                      recurso:
+                        type: string
+                        description: ''
+                        example: architecto
+                        nullable: false
+                      acciones:
+                        type: object
+                        description: ''
+                        example: []
+                        nullable: false
+                        properties: {  }
+                    required:
+                      - recurso
+                      - acciones
+                funciones_permitidas:
+                  type: object
+                  description: ''
+                  example: null
+                  nullable: true
+                  properties: {  }
+              required:
+                - email
+                - password
+                - nombre
+                - apellido_paterno
+                - apellido_materno
+                - edad
+      security: []
+  /api/logout:
+    post:
+      summary: 'Cierra la sesión del usuario y elimina todos sus tokens'
+      operationId: cierraLaSesinDelUsuarioYEliminaTodosSusTokens
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/acciones:
+    get:
+      summary: 'Obtiene todos los roles'
+      operationId: obtieneTodosLosRoles
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+  /api/recursos:
+    get:
+      summary: 'Retorna todos los recursos registrados en el sistema'
+      operationId: retornaTodosLosRecursosRegistradosEnElSistema
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación no proporcionado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación no proporcionado'
+      tags:
+        - Endpoints
+      security: []
+  /api/generate-invoice-pdf:
+    get:
+      summary: ''
+      operationId: getApiGenerateInvoicePdf
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: !!binary JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSID4+CmVuZG9iagoyIDAgb2JqCjw8IC9UeXBlIC9PdXRsaW5lcyAvQ291bnQgMCA+PgplbmRvYmoKMyAwIG9iago8PCAvVHlwZSAvUGFnZXMKL0tpZHMgWzYgMCBSCl0KL0NvdW50IDEKL1Jlc291cmNlcyA8PAovUHJvY1NldCA0IDAgUgovRm9udCA8PCAKL0YxIDggMCBSCi9GMiA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAuMDAwIDAuMDAwIDU5NS4yODAgODQxLjg5MF0KID4+CmVuZG9iago0IDAgb2JqClsvUERGIC9UZXh0IF0KZW5kb2JqCjUgMCBvYmoKPDwKL1Byb2R1Y2VyICj+/wBkAG8AbQBwAGQAZgAgADMALgAxAC4AMAAgACsAIABDAFAARABGKQovQ3JlYXRpb25EYXRlIChEOjIwMjUwNzA5MTkwOTM2KzAwJzAwJykKL01vZERhdGUgKEQ6MjAyNTA3MDkxOTA5MzYrMDAnMDAnKQovVGl0bGUgKP7/AEYAYQBjAHQAdQByAGEpCj4+CmVuZG9iago2IDAgb2JqCjw8IC9UeXBlIC9QYWdlCi9NZWRpYUJveCBbMC4wMDAgMC4wMDAgNTk1LjI4MCA4NDEuODkwXQovUGFyZW50IDMgMCBSCi9Db250ZW50cyA3IDAgUgo+PgplbmRvYmoKNyAwIG9iago8PCAvRmlsdGVyIC9GbGF0ZURlY29kZQovTGVuZ3RoIDc0NiA+PgpzdHJlYW0KeJyVlk1v00AQhu/9FSPRA0h0u99r90gFiApQBYZL1YOVmBIpTargCIl/zL9gHGdmx46N4BKlr2b3fbx+audMK601yM/dw9mrCkwsVSgKSLFQLhiolnD5xoL1SkP1DeDu+Zt60e53NTx79/HrhdU2XGhtXtxDdQOvq24L65OKOkJyXsWi7LcwYGzeoll8r69Al5c6XXZbyOW4ShtcrYPSLk2svl6vmk3bXMHNvt7A7e9d84vXa1XEBPLz01sMU4CfoOEG7gDu8cvy7NgSi6iSM/AIJmCDtZys4XM35EqDUVIGL+gRKAiFKoM/zCCxx4KIe+GRRRfoyATx7W673C/aLWOaYJRNVtTbGFVx6Mr13VT0SfRzMgQw+OeBfZbgut60q2W9ZIKuz3gjCLy3+K0cEHRT4XBMRMDJkAAvpsf/yxk0i9UWvmxWbb1b5aPw3qiyKAVIiHg40Q9AOjh3yAiEEwESIt7zw140xcnojvmiv9ZZ3Grb1muGJFtCqZwtpS3HRNqCUdJe2OKMCsGObcHrts5N+P2+fmq3T6eucDm7IsqzGdTOybCeXZntN6eScDVLIqqzElTNybCaJZmtPjcvre4eR6d6MALrIRCyDITAiUDIMtAUJ6NbRHr8BygpgjuVNklFjolUxCGctkIR7ZUJeqyIcapwZqL+w3b/ozk1hLvZENGdfaByTobtbMhsvT01hKvZEFGdfaBqTobVbMhs9bkNk3pwP+sh+rMM1M+J6M8y0BQno9tDesxThkk3cJtgg3TjmBzd6IZCwmeXdWKIEikQrivxnc0ChYTPSl+MBAr4BPV26g1cNYt1vZx4ITEiKyQQaSoz0pRklFr1kJSMKEm0ecyJRxEDsmgCkKYyIE1JQClfD0jJCJB0nAc8T9M6MiXrKChpKlPSlKSUivaUlEhKqWg/RclYiaO0/3wt3Rqn8VjwBlmHN2rqt9jhNQk1PNUP9e4K5OKgE3IUw8V29BB1g3/nP7HuO0IKZW5kc3RyZWFtCmVuZG9iago4IDAgb2JqCjw8IC9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovTmFtZSAvRjEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKPj4KZW5kb2JqCjkgMCBvYmoKPDwgL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMgovQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkCi9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nCj4+CmVuZG9iagp4cmVmCjAgMTAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNzQgMDAwMDAgbiAKMDAwMDAwMDEyMCAwMDAwMCBuIAowMDAwMDAwMjg0IDAwMDAwIG4gCjAwMDAwMDAzMTMgMDAwMDAgbiAKMDAwMDAwMDQ4OCAwMDAwMCBuIAowMDAwMDAwNTkxIDAwMDAwIG4gCjAwMDAwMDE0MDkgMDAwMDAgbiAKMDAwMDAwMTUxNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDEwCi9Sb290IDEgMCBSCi9JbmZvIDUgMCBSCi9JRFs8ODhjZjRkOGEwZGY3YjE5MWQyZWYxYzEyODQ0YjRmNjI+PDg4Y2Y0ZDhhMGRmN2IxOTFkMmVmMWMxMjg0NGI0ZjYyPl0KPj4Kc3RhcnR4cmVmCjE2MjgKJSVFT0YK
+      tags:
+        - Endpoints
+      security: []
