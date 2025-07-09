@@ -14,26 +14,31 @@ class RecursosSeeder extends Seeder
     {
         $recursos = [
             [
+                "clave" => "*",
                 "nombre" => "*",
                 "descripcion" => "Permisos en todas las tablas",
                 "tipo" => "estatico"
             ],
             [
+                "clave" => "usuarios",
                 "nombre" => "Usuarios",
-                "descripcion" => "Gestión de usuarios del sistema",
-                "tipo" => 'estatico'
+                "tipo" => 'estatico',
+                "descripcion" => "Gestión de usuarios del sistema"
             ],
             [
+                "claves" => "indicadores",
                 "nombre" => "Indicadores",
                 "descripcion" => "Colección de indicadores del sistema",
                 "tipo" => 'estatico'
             ],
             [
+                "clave" => "Plantillas",
                 "nombre" => "Plantillas",
                 "descripcion" => "Todas las plantillas para la creación de documentos",
                 "tipo" => 'estatico'
             ],
             [
+                "clave" => "clave_prueba",
                 "nombre" => "Documentos",
                 "descripcion" => "Todos los documentos del sistema",
                 "tipo" => 'patron',
