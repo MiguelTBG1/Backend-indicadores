@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use App\Models\Comentario;
 
 use Laravel\Sanctum\HasApiTokens;
@@ -8,6 +9,7 @@ use MongoDB\Laravel\Eloquent\Model;
 
 use App\Models\Accion;
 use App\Models\Recurso;
+
 class User extends Model
 {
     use HasApiTokens;
@@ -62,69 +64,60 @@ class User extends Model
     {
         return $this->morphMany(PersonalAccessToken::class, 'tokenable');
     }
-    
+
     /**
      * Obtiene los permisos del usuario.
      *
      * @return array String[] Lista de permisos del usuario con el formato 'recurso_permiso'.
      */
-    public function getPermisos() {
+    public function getPermisos()
+    {
         $permisosStr = [];
 
-        // Variable para almacenar todos los permisos del usuario
-        $permisosTotales = $this->permisos;
+        // Recorremos los permisos de los roles
+        if (is_array($this->roles)) {
+            foreach ($this->roles as $roleId) {
+                // Comprobamos que exista el rol
+                $rol = Rol::find($roleId);
+                if (!$rol) continue;
 
-        // Conseguimos los permisos de los roles del usuario
-        if( empty($this->roles) || !is_array($permisosTotales))
-        {
-            foreach ($this->roles as $role) {
-                // Buscamos el rol en la colección de roles
-                $rol = Rol::find($role);
-
-                //Recorremos los permisos del rol
-                foreach($rol->permisos as $permiso){
-                    // Conseguimos el nombre del recurso
-                    $recursoId = $permiso['recurso'];
-                    $recurso = Recurso::find($recursoId)->nombre;
-
-                        // Recorremos las acciones del permiso
-                    foreach($permiso['acciones'] as $accion) {
-                        // Buscamos la acción en la colección de acciones
-                        $accionObj = Accion::find($accion);
-                        $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
-
-                        // Generamos la cadena de permiso
-                        $permisosStr[] = strtolower("{$recurso}_{$nombreAccion}");
-                    }
+                // Recorremos los permisos
+                foreach ($rol->permisos as $permiso) {
+                    // Formateamos
+                    $permisosStr[] = $this->buildPermisoStrings($permiso);
                 }
             }
         }
 
-        // Verificamos si permisos no es null o vacío
-        if (empty($permisosTotales) || !is_array($permisosTotales)) {
-            return $permisosStr;
-        }
-
-        // Recorremos los permisos del usuario
-        foreach ($permisosTotales as $permiso) {
-            // Conseguimos las ids del recurso y la accion
-            $recursoId = $permiso['recurso'];
-            
-            // Conseguimos el nombre del recurso
-            $recurso = Recurso::find($recursoId)->nombre;
-            $acciones = [];
-
-            // Recorremos las acciones del permiso
-            foreach($permiso['acciones'] as $accion) {
-                // Buscamos la acción en la colección de acciones
-                $accionObj = Accion::find($accion);
-                $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
-
-                // Generamos la cadena de permiso
-                $permisosStr[] = strtolower("{$recurso}_{$nombreAccion}");
+        // 2. Permisos directos
+        if (is_array($this->permisos)) {
+            foreach ($this->permisos as $permiso) {
+                $permisosStr[] = $this->buildPermisoStrings($permiso);
             }
         }
 
-        return $permisosStr;
+        // Aplanar el array si es necesario
+        return array_unique(array_merge(...$permisosStr));
+    }
+
+    /**
+     * Genera el arreglo de permisos
+     */
+    private function buildPermisoStrings(array $permiso): array
+    {
+        // Comprobamos que exista el recurso
+        $recurso = optional(Recurso::find($permiso['recurso']))->nombre ?? 'recurso_desconocido';
+
+        // Inicializamos el arreglo de recursos
+        $permisos = [];
+
+        // Recorremos las acciones
+        foreach ($permiso['acciones'] ?? [] as $accionId) {
+            $accion = optional(Accion::find($accionId))->nombre ?? 'accion_desconocida';
+            // Formateamos a la estructura recurso_accion
+            $permisos[] = strtolower("{$recurso}_{$accion}");
+        }
+
+        return $permisos;
     }
 }
