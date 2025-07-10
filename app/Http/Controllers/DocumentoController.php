@@ -459,7 +459,10 @@ class DocumentoController extends Controller
             unset($documento['Recurso_Digital']);
 
             // Guardar la lista final de archivos
-            $updateData['Recurso Digital'] = $archivosActuales;
+            if( empty($archivosActuales) ) {
+                $updateData['Recurso Digital'] = $archivosActuales;
+            }
+
             // Actualizar el documento en la colección de MongoDB
             $result = $db->selectCollection($plantillaName)->updateOne(
                 ['_id' => new ObjectId($documentId)],
