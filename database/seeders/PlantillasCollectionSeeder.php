@@ -153,7 +153,12 @@ class PlantillasCollectionSeeder extends Seeder
                             [ 'name' => 'Correo electrónico', 'type' => 'email', 'required' => true ],
                             [ 'name' => 'Teléfono', 'type' => 'text', 'required' => false ],
                             [ 'name' => 'Especialidad', 'type' => 'text', 'required' => true ],
-                            [ 'name' => 'Fecha de contratación', 'type' => 'date', 'required' => true ]
+                            [ 'name' => 'Fecha de contratación', 'type' => 'date', 'required' => true ],
+                            [ 'name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
+                                [ 'name' => 'Idioma', 'type' => 'text', 'required' => true ],
+                                [ 'name' => 'Nivel de competencia', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado'] ],
+                                [ 'name' => 'Certificación', 'type' => 'file', 'required' => false ]
+                            ]]
                         ]
                     ],
                     [

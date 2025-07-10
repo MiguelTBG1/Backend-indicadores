@@ -152,7 +152,7 @@ class DocumentosSeeder extends Seeder
                                 'Fecha de nacimiento' => '2001-09-05',
                                 'Correo electrónico' => 'jorge.sanchez@example.com',
                                 'Teléfono' => '9984567890',
-                                'Dirección' => 'Calle Reforma 101'
+                                'Dirección' => 'Calle Reforma 101',
                             ]
                         ],
                         [
@@ -274,7 +274,11 @@ class DocumentosSeeder extends Seeder
                             'Correo electrónico' => 'javier.ruiz@universidad.edu',
                             'Teléfono' => '9981234567',
                             'Especialidad' => 'Matemáticas Aplicadas',
-                            'Fecha de contratación' => new UTCDateTime(strtotime('2018-08-15') * 1000)
+                            'Fecha de contratación' => new UTCDateTime(strtotime('2018-08-15') * 1000),
+                            'Idiomas' => [
+                                [ 'nombre' => 'Inglés', 'nivel' => 'Intermedio', 'certificacion' => null ],
+                                [ 'nombre' => 'Francés', 'nivel' => 'Básico', 'certificacion' => null ]
+                            ]
                         ]
                     ],
                     [
@@ -342,7 +346,8 @@ class DocumentosSeeder extends Seeder
                             'Correo electrónico' => 'sofia.castro@universidad.edu',
                             'Teléfono' => '9982345678',
                             'Especialidad' => 'Lenguaje y Comunicación',
-                            'Fecha de contratación' => new UTCDateTime(strtotime('2020-02-01') * 1000)
+                            'Fecha de contratación' => new UTCDateTime(strtotime('2020-02-01') * 1000),
+                            'Idiomas' =>[]
                         ]
                     ],
                     [
@@ -416,7 +421,11 @@ class DocumentosSeeder extends Seeder
                             'Correo electrónico' => 'carlos.mendez@universidad.edu',
                             'Teléfono' => '9983456789',
                             'Especialidad' => 'Ciencias Ambientales',
-                            'Fecha de contratación' => new UTCDateTime(strtotime('2019-05-10') * 1000)
+                            'Fecha de contratación' => new UTCDateTime(strtotime('2019-05-10') * 1000),
+                            'Idiomas' => [
+                                [ 'nombre' => 'Inglés', 'nivel' => 'Intermedio', 'certificacion' => null ],
+                                [ 'nombre' => 'Chino', 'nivel' => 'Básico', 'certificacion' => null ]
+                            ]
                         ]
                     ],
                     [
@@ -484,7 +493,8 @@ class DocumentosSeeder extends Seeder
                             'Correo electrónico' => 'javier.torres@universidad.edu',
                             'Teléfono' => '9984561230',
                             'Especialidad' => 'Ingeniería de Software',
-                            'Fecha de contratación' => new UTCDateTime(strtotime('2017-09-01') * 1000)
+                            'Fecha de contratación' => new UTCDateTime(strtotime('2017-09-01') * 1000),
+                            'Idiomas' =>[]
                         ]
                     ],
                     [
@@ -552,7 +562,10 @@ class DocumentosSeeder extends Seeder
                             'Correo electrónico' => 'elena.vazquez@universidad.edu',
                             'Teléfono' => '9987654321',
                             'Especialidad' => 'Psicología Educativa',
-                            'Fecha de contratación' => new UTCDateTime(strtotime('2016-03-10') * 1000)
+                            'Fecha de contratación' => new UTCDateTime(strtotime('2016-03-10') * 1000),
+                            'Idiomas' => [
+                                [ 'nombre' => 'Inglés', 'nivel' => 'Avanzado', 'certificacion' => null ],
+                            ]
                         ]
                     ],
                     [

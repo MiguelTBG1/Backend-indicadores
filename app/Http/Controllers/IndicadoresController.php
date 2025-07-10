@@ -263,16 +263,22 @@ class IndicadoresController extends Controller
         if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
             // Verificar si un campo en la condicion es subform
             foreach ($configuracion['condicion'] as $index => $condicion) {
-                $tipocampo = null;
+                $tipocampo = '';
 
                 foreach ($secciones as $seccion) {
-                    foreach($seccion as $campo){
+                    foreach($seccion['fields'] as $campo){
                         if (isset($campo['name']) && $campo['name'] === $condicion['campo']) {
-                            $tipocampo = $campo['type'] ?? null;
+                            Log::info('Campo encontrado en la sección', [
+                                'campo' => $campo['name'],
+                                'tipo' => $campo['type'] ?? 'desconocido'
+                            ]);
+                            $tipocampo = $campo['type'] ?? '';
                             break 2;
                         }
                     }
                 }
+
+                Log::info("tipocampo: $tipocampo");
 
                 if ($tipocampo === 'subform') {
                     // Agregar etapa al pipeline

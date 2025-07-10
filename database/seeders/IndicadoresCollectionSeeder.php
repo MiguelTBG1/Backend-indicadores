@@ -20,6 +20,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Evaluación institucional con los criterios SEAES',
                 'denominador' => 1,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -29,6 +30,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Programas de licenciatura acreditados',
                 'denominador' => 9,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -38,6 +40,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Matrícula en programas de licenciatura acreditados',
                 'denominador' => 9,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -47,6 +50,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Porcentaje de programas de posgrado registrados en el SNP',
                 'denominador' => 6,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -56,6 +60,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Numero de programas de posgrado autorizados',
                 'denominador' => 1,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -65,6 +70,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de docentes participantes en cursos de formación docente de licenciatura',
                 'denominador' => 100,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -74,6 +80,13 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de docentes con grado de especialidad',
                 'denominador' => 3,
                 'numerador' => 0,
+                'porcentaje' => 0,
+                'configuracion' => [
+                    'coleccion' => 'Profesores_data',
+                    'operacion' => 'contar',
+                    'campo' => null,
+                    'condicion' => [ [ 'campo' => 'Especialidades Académicas', 'operador' => 'mayor', 'valor' => '0' ] ]
+                ],
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -83,6 +96,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de académicos con reconocimiento al perfil deseable vigente',
                 'denominador' => 29,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -92,6 +106,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de docentes de licenciatura con competencias digitales',
                 'denominador' => 55,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -101,6 +116,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de académicos de licenciatura formados en recursos educativos digitales, en ambientes virtuales de aprendizaje',
                 'denominador' => 5,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -110,6 +126,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de personal de apoyo y asistencia a la educación que tomaron al menos un curso de capacitación presencial o a distancia',
                 'denominador' => 70,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -119,6 +136,13 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de docentes con habilidad de comunicación en una segunda lengua ',
                 'denominador' => 5,
                 'numerador' => 0,
+                'porcentaje' => 0,
+                'configuracion' => [
+                    'coleccion' => 'Profesores_data',
+                    'operacion' => 'contar',
+                    'campo' => null,
+                    'condicion' => [ [ 'campo' => 'Idiomas', 'operador' => 'mayor', 'valor' => '0' ] ]
+                ],
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -128,6 +152,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de académicos (Licenciatura) que participan en programas de movilidad o intercambio académico nacional e internacional',
                 'denominador' => 17,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -137,6 +162,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Porcentaje de programas académicos con elementos orientados hacia el desarrollo sustentable y la inclusión',
                 'denominador' => 18,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -146,6 +172,13 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Número de estudiantes de licenciatura beneficiados con una beca',
                 'denominador' => 750,
                 'numerador' => 0,
+                'porcentaje' => 0,
+                'configuracion' => [
+                    'coleccion' => 'Alumnos_data',
+                    'operacion' => 'contar',
+                    'campo' => null,
+                    'condicion' => [ [ 'campo' => 'Cursos', 'operador' => 'mayor', 'valor' => '0' ] ]
+                ],
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -155,6 +188,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Matrícula de licenciatura',
                 'denominador' => 3650,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -164,6 +198,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Matrícula de posgrado',
                 'denominador' => 90,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -173,6 +208,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Matrícula de educación no escolarizada -en linea o virtual y a distancia- y mixta',
                 'denominador' => 130,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -182,6 +218,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'índica de eficiencia terminal de licenciatura',
                 'denominador' => 280,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -191,6 +228,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Programas académicos en modalidad no escolarizada -en línea o virtual y a distancia- y mixta',
                 'denominador' => 5,
                 'numerador' => 0,
+                'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ]
