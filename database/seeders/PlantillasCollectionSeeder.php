@@ -312,7 +312,7 @@ class PlantillasCollectionSeeder extends Seeder
                                         'filterable' => true
                                     ],
                                     [
-                                        'name' => 'Duración (horas o meses)',
+                                        'name' => 'Duración en horas',
                                         'type' => 'number',
                                         'required' => true,
                                         'filterable' => false
