@@ -23,12 +23,12 @@ class PlantillasCollectionSeeder extends Seeder
                     [
                         'nombre' => 'Información Personal',
                         'fields' => [
-                            [ 'name' => 'Nombres', 'type' => 'text', 'required' => true ],
-                            [ 'name' => 'Apellidos', 'type' => 'text', 'required' => true ],
+                            [ 'name' => 'Nombres', 'type' => 'string', 'required' => true ],
+                            [ 'name' => 'Apellidos', 'type' => 'string', 'required' => true ],
                             [ 'name' => 'Fecha de nacimiento', 'type' => 'date', 'required' => true ],
-                            [ 'name' => 'Correo electrónico', 'type' => 'email', 'required' => true ],
+                            [ 'name' => 'Correo electrónico', 'type' => 'string', 'required' => true ],
                             [ 'name' => 'Teléfono', 'type' => 'number', 'required' => false ],
-                            [ 'name' => 'Dirección', 'type' => 'text', 'required' => false ]
+                            [ 'name' => 'Dirección', 'type' => 'string', 'required' => false ]
                         ]
                     ],
                     [
@@ -63,7 +63,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     ],
                                     [
                                         'name' => 'Comentarios',
-                                        'type' => 'text',
+                                        'type' => 'string',
                                         'required' => false,
                                         'filterable' => false
                                     ],
@@ -148,14 +148,14 @@ class PlantillasCollectionSeeder extends Seeder
                     [
                         'nombre' => 'Información Personal',
                         'fields' => [
-                            [ 'name' => 'Nombres', 'type' => 'text', 'required' => true ],
-                            [ 'name' => 'Apellidos', 'type' => 'text', 'required' => true ],
-                            [ 'name' => 'Correo electrónico', 'type' => 'email', 'required' => true ],
-                            [ 'name' => 'Teléfono', 'type' => 'text', 'required' => false ],
-                            [ 'name' => 'Especialidad', 'type' => 'text', 'required' => true ],
+                            [ 'name' => 'Nombres', 'type' => 'string', 'required' => true ],
+                            [ 'name' => 'Apellidos', 'type' => 'string', 'required' => true ],
+                            [ 'name' => 'Correo electrónico', 'type' => 'string', 'required' => true ],
+                            [ 'name' => 'Teléfono', 'type' => 'string', 'required' => false ],
+                            [ 'name' => 'Especialidad', 'type' => 'string', 'required' => true ],
                             [ 'name' => 'Fecha de contratación', 'type' => 'date', 'required' => true ],
                             [ 'name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
-                                [ 'name' => 'Idioma', 'type' => 'text', 'required' => true ],
+                                [ 'name' => 'Idioma', 'type' => 'string', 'required' => true ],
                                 [ 'name' => 'Nivel de competencia', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado'] ],
                                 [ 'name' => 'Certificación', 'type' => 'file', 'required' => false ]
                             ]]
@@ -177,7 +177,7 @@ class PlantillasCollectionSeeder extends Seeder
                                 'subcampos' => [
                                     [
                                         'name' => "Nivel",
-                                        "type" => "text",
+                                        "type" => "string",
                                         "required" => true
                                     ],
                                     [
@@ -187,7 +187,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     ],
                                     [
                                         "name" => "Institución",
-                                        "type" => "text",
+                                        "type" => "string",
                                         "required" => true
                                     ],
                                     [
@@ -250,7 +250,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     ],
                                     [
                                         'name' => 'Descripción',
-                                        'type' => 'text',
+                                        'type' => 'string',
                                         'required' => false,
                                         'filterable' => false
                                     ],
@@ -331,7 +331,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     ],
                                     [
                                         'name' => 'Descripción o temas abordados',
-                                        'type' => 'text',
+                                        'type' => 'string',
                                         'required' => false,
                                         'filterable' => false
                                     ]

@@ -199,6 +199,11 @@ class PlantillaController extends Controller
             // Tipos de campos que se permiten en subform
             $tiposCamposPermitidosSubform = array_diff($tiposCamposPermitidos, ['subform']);
 
+            Log::info('Validando solicitud para actualizar plantilla', [
+                'id' => $id,
+                'secciones' => $request->input('secciones')
+            ]);
+
              // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'secciones' => 'required|array|min:1',
