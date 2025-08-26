@@ -20,7 +20,7 @@ class DocumentosSeeder extends Seeder
                             'fields' => [
                                 'Nombres' => 'Laura',
                                 'Apellidos' => 'Martínez',
-                                'Fecha de nacimiento' => '2003-04-15',
+                                'Fecha de nacimiento' => new UTCDateTime(strtotime('2003-04-15') * 1000),
                                 'Correo electrónico' => 'laura.mtz@example.com',
                                 'Teléfono' => '9981234567',
                                 'Dirección' => 'Av. Universidad 123'
@@ -29,7 +29,7 @@ class DocumentosSeeder extends Seeder
                         [
                             'nombre' => 'Información Académica',
                             'fields' => [
-                                'Fecha de inscripción' => '2024-08-01',
+                                'Fecha de inscripción' => new UTCDateTime(strtotime('2024-08-01') * 1000),
                                 'Estado' => 'Activo',
                                 'Notas' => [
                                     ['Asignatura' => 'Física', 'Nota' => 90, 'Fecha de obtención' => new UTCDateTime(strtotime('2025-07-01') * 1000)],
@@ -70,7 +70,7 @@ class DocumentosSeeder extends Seeder
                             'fields' => [
                                 'Nombres' => 'Carlos',
                                 'Apellidos' => 'González',
-                                'Fecha de nacimiento' => '2002-11-22',
+                                'Fecha de nacimiento' => new UTCDateTime(strtotime('2002-11-22') * 1000),
                                 'Correo electrónico' => 'carlos.gnz@example.com',
                                 'Teléfono' => '9982345678',
                                 'Dirección' => 'Calle Hidalgo 456'
@@ -79,7 +79,7 @@ class DocumentosSeeder extends Seeder
                         [
                             'nombre' => 'Información Académica',
                             'fields' => [
-                                'Fecha de inscripción' => '2024-08-02',
+                                'Fecha de inscripción' => new UTCDateTime(strtotime('2024-08-02') * 1000),
                                 'Estado' => 'Inactivo',
                                 'Notas' => [
                                     ['Asignatura' => 'Álgebra', 'Nota' => 78, 'Fecha de obtención' => new UTCDateTime(strtotime('2024-08-01') * 1000)],
@@ -113,7 +113,7 @@ class DocumentosSeeder extends Seeder
                             'fields' => [
                                 'Nombres' => 'Ana',
                                 'Apellidos' => 'López',
-                                'Fecha de nacimiento' => '2004-03-10',
+                                'Fecha de nacimiento' => new UTCDateTime(strtotime('2004-03-10') * 1000),
                                 'Correo electrónico' => 'ana.lopez@example.com',
                                 'Teléfono' => '9983456789',
                                 'Dirección' => 'Calle 5 de Mayo 789'
@@ -122,7 +122,7 @@ class DocumentosSeeder extends Seeder
                         [
                             'nombre' => 'Información Académica',
                             'fields' => [
-                                'Fecha de inscripción' => '2024-08-03',
+                                'Fecha de inscripción' => new UTCDateTime(strtotime('2024-08-03') * 1000),
                                 'Estado' => 'Activo',
                                 'Notas' => [
                                     ['Asignatura' => 'Biología', 'Nota' => 92, 'Fecha de obtención' => new UTCDateTime(strtotime('2025-08-01') * 1000)],
@@ -149,7 +149,7 @@ class DocumentosSeeder extends Seeder
                             'fields' => [
                                 'Nombres' => 'Jorge',
                                 'Apellidos' => 'Sánchez',
-                                'Fecha de nacimiento' => '2001-09-05',
+                                'Fecha de nacimiento' => new UTCDateTime(strtotime('2001-09-05') * 1000),
                                 'Correo electrónico' => 'jorge.sanchez@example.com',
                                 'Teléfono' => '9984567890',
                                 'Dirección' => 'Calle Reforma 101',
@@ -158,7 +158,7 @@ class DocumentosSeeder extends Seeder
                         [
                             'nombre' => 'Información Académica',
                             'fields' => [
-                                'Fecha de inscripción' => '2024-08-04',
+                                'Fecha de inscripción' => new UTCDateTime(strtotime('2024-08-04') * 1000),
                                 'Estado' => 'Activo',
                                 'Notas' => [
                                     ['Asignatura' => 'Historia', 'Nota' => 80, 'Fecha de obtención' => new UTCDateTime(strtotime('2025-08-01') * 1000)],
@@ -198,7 +198,7 @@ class DocumentosSeeder extends Seeder
                             'fields' => [
                                 'Nombres' => 'Lucía',
                                 'Apellidos' => 'Pérez',
-                                'Fecha de nacimiento' => '2005-06-18',
+                                'Fecha de nacimiento' => new UTCDateTime(strtotime('2005-06-18') * 1000),
                                 'Correo electrónico' => 'lucia.perez@example.com',
                                 'Teléfono' => '9985678901',
                                 'Dirección' => 'Boulevard Kukulcán 202'
@@ -207,7 +207,7 @@ class DocumentosSeeder extends Seeder
                         [
                             'nombre' => 'Información Académica',
                             'fields' => [
-                                'Fecha de inscripción' => '2024-08-05',
+                                'Fecha de inscripción' => new UTCDateTime(strtotime('2024-08-05') * 1000),
                                 'Estado' => 'En espera',
                                 'Notas' => [
                                     ['Asignatura' => 'Arte', 'Nota' => 95, 'Fecha de obtención' => new UTCDateTime(strtotime('2025-08-01') * 1000)],

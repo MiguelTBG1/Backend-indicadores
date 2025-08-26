@@ -193,105 +193,113 @@ class DocumentoController extends Controller
      */
     public function index($id)
     {
-        // Verifica si la id de la plantilla es válida
-        if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
-            return response()->json(['error' => 'ID de plantilla no válido'], 400);
-        }
+        try{
 
-        // Obtener el nombre de la plantilla
-        $plantilla = Plantillas::find($id);
-
-        // Verifica si la plantilla existe
-        if (!$plantilla) {
-            return response()->json(['error' => 'Plantilla no encontrada'], 404);
-        }
-
-        // Obtener el nombre de la colección de la plantilla
-        $collectionName = $plantilla->nombre_coleccion; // Nombre de la colección en MongoDB
-
-        // Conexión a MongoDB
-        $client = new MongoClient(config('database.connections.mongodb.url'));
-        $db = $client->selectDatabase(config('database.connections.mongodb.database'));
-
-        // Verifica si la colección existe
-        $collections = $db->listCollections();
-        $collectionExists = false;
-        // Verifica si la colección existe en la base de datos
-        foreach ($collections as $collection) {
-            if ($collection->getName() === $collectionName) {
-                $collectionExists = true;
-                break;
+            // Verifica si la id de la plantilla es válida
+            if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
+                throw new \Exception('ID de plantilla no válido: ' . $id);
             }
-        }
 
-        if ($collectionExists) {
+            // Obtener la plantilla
+            $plantilla = Plantillas::find($id);
+
+            // Verifica si la plantilla existe
+            if (!$plantilla) {
+                throw new \Exception('Plantilla no encontrada con la ID: ' . $id);
+            }
+
+            // Obtener el nombre de la colección de la plantilla
+            $collectionName = $plantilla->nombre_coleccion; // Nombre de la colección en MongoDB
+
+            // Conexión a MongoDB
+            $client = new MongoClient(config('database.connections.mongodb.url'));
+            $db = $client->selectDatabase(config('database.connections.mongodb.database'));
+
+            // Verifica si la colección existe
+            $collections = $db->listCollections();
+            $collectionExists = false;
+
+            // Verifica si la colección existe en la base de datos
+            foreach ($collections as $collection) {
+                if ($collection->getName() === $collectionName) {
+                    $collectionExists = true;
+                    break;
+                }
+            }
+
+            if(!$collectionExists){
+                throw new \Exception(('Colección no encontra'));
+            }
+
             // Obtener todos los documentos de la colección
             $documents = json_decode(json_encode($db->selectCollection($collectionName)->find()->toArray()), true);
 
 
             // Convertir los documentos a un formato legible
             foreach ($documents as $index => $document) {
-                foreach ($document as $key => $value) {
-
-                    // Formateamos la id
-                    if( $key === '_id' && is_array($documents[$index][$key]) && isset($documents[$index][$key]['$oid'])) {
-
-                        // Convertir el ObjectId a string
-                        //$documents[$index][$key] = (string) $documents[$index][$key]['$oid'];
 
 
-                    } else{
+                foreach ($document['secciones'] as $indexSecciones => $valueSecciones) {
+                    foreach ($valueSecciones['fields'] as $fieldKey => $fieldValue){
 
-                        // Verificar si el valor es un array
-                        if (is_array($documents[$index][$key])) {
-
-                            foreach ($value as $subIndex => $data) {
-                                foreach ($data as $subKey => $subValue) {
-
-                                    // Si es un campo de tipo fecha de MongoDB
-                                    if (is_array($documents[$index][$key][$subIndex][$subKey]) &&
-                                        isset($documents[$index][$key][$subIndex][$subKey]['$date']) &&
-                                        is_array($documents[$index][$key][$subIndex][$subKey]['$date']) &&
-                                        isset($documents[$index][$key][$subIndex][$subKey]['$date']['$numberLong'])) {
-
-                                        // Convertir el timestamp a DateTime
-                                        $timestamp = (int)$documents[$index][$key][$subIndex][$subKey]['$date']['$numberLong'] / 1000;
-                                        $dt = new DateTime("@$timestamp");
-                                        $dt->setTimezone(new DateTimeZone('UTC')); // Puedes cambiar a tu zona horaria
-
-                                        // Reemplazar por fecha formateada
-                                        $documents[$index][$key][$subIndex][$subKey] = $dt->format('Y-m-d');
-                                    }
-                                }
-                            }
-                        }
+                        /*Log::info('Fecha '.$fieldKey.': ', [
+                            'fields' => $documents[$index]['secciones'][$indexSecciones]['fields'] ?? null,
+                        ]);*/
 
                         // Si es un campo de tipo fecha de MongoDB
-                        if (is_array($documents[$index][$key]) &&
-                            isset($documents[$index][$key]['$date']) &&
-                            is_array($documents[$index][$key]['$date']) &&
-                            isset($documents[$index][$key]['$date']['$numberLong'])) {
+                        if (is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]) &&
+                            isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']) &&
+                            is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']) &&
+                            isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']['$numberLong'])) {
+
+
                             // Convertir el timestamp a DateTime
-                            $timestamp = (int)$documents[$index][$key]['$date']['$numberLong'] / 1000;
+                            $timestamp = (int)$documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']['$numberLong'] / 1000;
                             $dt = new DateTime("@$timestamp");
                             $dt->setTimezone(new DateTimeZone('UTC')); // Puedes cambiar a tu zona horar
                             // Reemplazar por fecha formateada
-                            $documents[$index][$key] = $dt->format('Y-m-d');
+                            $documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey] = $dt->format('Y-m-d');
+
+                            // En caso contrario, Verificar si es un arreglo de un subformulario
+                        }elseif(is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey])){
+
+                            //Recorremos los elemmentos del subformulario
+                            foreach($fieldValue as $indexSubform => $valueSubform){
+                                foreach($valueSubform as $keySubform => $fieldSubform){
+
+                                    // Si es un campo de tipo fecha de MongoDB
+                                    if (is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]) &&
+                                        isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']) &&
+                                        is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']) &&
+                                        isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']['$numberLong'])) {
+
+                                        // Convertir el timestamp a DateTime
+                                        $timestamp = (int)$documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']['$numberLong'] / 1000;
+                                        $dt = new DateTime("@$timestamp");
+                                        $dt->setTimezone(new DateTimeZone('UTC')); // Puedes cambiar a tu zona horar
+                                        // Reemplazar por fecha formateada
+                                        $documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform] = $dt->format('Y-m-d');
+                                    }
+                                }
+                            }
+
                         }
+
                     }
+
                 }
-
             }
-
-            Log::info("datos: ",$documents);
-
-            // Buscar los campos que tengan un valor en formato stringjson
 
             // Devolver los documentos en formato JSON
 
             return response()->json($documents);
-        } else {
-            return response()->json(['error' => "La colección '{$plantilla -> nombre_plantilla}' no existe."], 404);
+
+        }catch(\Exception $e){
+            // Registrar el error en el log
+            Log::error("Error al obtener los  documentos: " . $e->getMessage());
+
+            // Registrar el error completo
+            return response()->json(['message' => 'Error al obtener documentos', 'error' => $e->getMessage()], 500);
         }
     }
 
