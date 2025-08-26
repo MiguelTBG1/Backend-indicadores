@@ -79,6 +79,7 @@ class UsersController extends Controller
             'permisos' => 'array|nullable',
             'permisos.*.recurso' => 'required|string',
             'permisos.*.acciones' => 'array|required',
+            'permisos.*.activo' => 'boolean|nullable',
             'funciones_permitidas' => 'array|nullable',
         ]);
 
@@ -94,7 +95,6 @@ class UsersController extends Controller
             'ocupacion' => $request->ocupacion,
             'escolaridad' => $request->escolaridad,
             'permisos' => $request->permisos ?? [], // Asegura que permisos sea un array
-            'negaciones' => $request->negaciones ?? [], // Asegura que neg
             'funciones_permitidas' => $request->funciones_permitidas ?? [], // Asegura que funciones_permitidas sea un array
             'roles' => $request->roles ?? [], // Asegura que roles sea un array
         ]);
