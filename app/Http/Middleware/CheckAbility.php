@@ -32,7 +32,8 @@ class CheckAbility
         ];
 
         // Banderas
-        $hasAbility = false;
+        // PERMISOS DESACTIVADOS
+        $hasAbility = true;
         
         //Reccorremos el arreglo de hablidades permitidas y preguntamos si el token de usuario tiene ese permiso
         foreach ($abilitiesToCheck as $ab) {
