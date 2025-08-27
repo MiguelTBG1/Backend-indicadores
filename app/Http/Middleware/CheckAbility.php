@@ -31,9 +31,9 @@ class CheckAbility
             "*_*",
         ];
 
-        // BAndera
+        // Banderas
         $hasAbility = false;
-
+        
         //Reccorremos el arreglo de hablidades permitidas y preguntamos si el token de usuario tiene ese permiso
         foreach ($abilitiesToCheck as $ab) {
             if ($request->user()->tokenCan($ab)) {

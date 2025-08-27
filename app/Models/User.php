@@ -9,6 +9,7 @@ use MongoDB\Laravel\Eloquent\Model;
 
 use App\Models\Accion;
 use App\Models\Recurso;
+use Illuminate\Support\Facades\Log;
 
 class User extends Model
 {
@@ -34,7 +35,6 @@ class User extends Model
         'escolaridad',
         'roles',
         'permisos',
-        'negaciones',
         'funciones_permitidas'
     ];
 
@@ -72,32 +72,57 @@ class User extends Model
      */
     public function getPermisos()
     {
-        $permisosStr = [];
+        // Arreglo para almacenar todos los permisos
+        $allowedStr = []; // Permisos asignados
+        $deniedStr = []; // Permisos negados
 
         // Recorremos los permisos de los roles
         if (is_array($this->roles)) {
             foreach ($this->roles as $roleId) {
+
                 // Comprobamos que exista el rol
                 $rol = Rol::find($roleId);
                 if (!$rol) continue;
 
-                // Recorremos los permisos
-                foreach ($rol->permisos as $permiso) {
-                    // Formateamos
-                    $permisosStr[] = $this->buildPermisoStrings($permiso);
+                // --- Allowed ---
+                if (!empty($rol->permisos['allowed'])) {
+                    foreach ($rol->permisos['allowed'] as $permiso) {
+                        $allowedStr[] = ($this->buildPermisoStrings($permiso));
+                    }
+                }
+
+                // --- Denied ---
+                // Aqui filtramos los permisos que sean negados explicitamente
+                if (!empty($rol->permisos['denied'])) {
+                    foreach ($rol->permisos['denied'] as $permiso) {
+                        $deniedStr[] = $this->buildPermisoStrings($permiso);
+                    }
                 }
             }
         }
 
-        // 2. Permisos directos
-        if (is_array($this->permisos)) {
-            foreach ($this->permisos as $permiso) {
-                $permisosStr[] = $this->buildPermisoStrings($permiso);
+        // Recorremos los permisos particulares
+        if (!empty($this->permisos['allowed'])) {
+            $allowed = $this->permisos['allowed'];
+            foreach ($allowed as $permiso) {
+                $allowedStr[] = $this->buildPermisoStrings($permiso);
             }
         }
 
+
+        // QUitamos los permisos negados particulares
+        if (!empty($this->permisos['denied'])) {
+            $denied = $this->permisos['denied'];
+            foreach ($denied as $permisoNegado) {
+                $deniedStr = $this->buildPermisoStrings($permisoNegado);
+            }
+        }
+
+        $allowedStr = array_unique(array_merge(...$allowedStr));
+        $deniedStr = array_unique(array_merge(...$deniedStr));
+        $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
         // Aplanar el array si es necesario
-        return array_unique(array_merge(...$permisosStr));
+        return array_unique(array_merge($permisos));
     }
 
     /**
@@ -119,5 +144,55 @@ class User extends Model
         }
 
         return $permisos;
+    }
+
+    /**
+     * Expande los comodines remplazandolos por todos sus versiones simples
+     */
+    function buildFinalAbilities(array $allow, array $deny): array
+    {
+        $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
+        Log::debug($allRecursos);
+        $allAcciones = Accion::pluck('nombre')->toArray();
+
+        $resolved = [];
+
+        foreach ($allow as $perm) {
+            [$recurso, $accion] = explode('_', $perm);
+            Log::debug("Recurso: {$recurso}     Accion: {$accion}");
+            // Caso 1: comodín total
+            if ($recurso === '*' && $accion === '*') {
+                foreach ($allRecursos as $r) {
+                    foreach ($allAcciones as $a) {
+                        $resolved[] = "{$r}_{$a}";
+                    }
+                }
+                continue;
+            }
+
+            // Caso 2: comodín de acción
+            if ($recurso === '*') {
+                foreach ($allRecursos as $r) {
+                    $resolved[] = "{$r}_{$accion}";
+                }
+                continue;
+            }
+
+            // Caso 3: comodín de recurso
+            if ($accion === '*') {
+                foreach ($allAcciones as $a) {
+                    $resolved[] = "{$recurso}_{$a}";
+                }
+                continue;
+            }
+
+            // Caso 4: permiso específico
+            $resolved[] = $perm;
+        }
+
+        // Aplicamos deny
+        $resolved = array_diff($resolved, $deny);
+
+        return array_values(array_unique($resolved));
     }
 }

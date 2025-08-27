@@ -36,9 +36,11 @@ class RolesSeeder extends Seeder
                 'descripcion' => 'Acceso completo al sistema',
                 'permisos' => [
                     'allowed' => [
-                        'recurso' => $todosRecursos->_id,
-                        'acciones' => [
-                            $todosAcciones->_id
+                        [
+                            'recurso' => $todosRecursos->_id,
+                            'acciones' => [
+                                $todosAcciones->_id
+                            ]
                         ]
                     ]
                 ]
