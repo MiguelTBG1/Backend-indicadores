@@ -223,6 +223,66 @@ class PlantillaController extends Controller
                             Log::warning("Colección de origen no encontrada: " . $optionsSource);
                         }
                     }
+
+                    if($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])){
+                        // Recorremos los subcampos
+                        foreach($field['subcampos'] as $indexSubcampo => $subcampo){
+
+                            if($subcampo['type'] === 'select' && isset($subcampo['dataSource']) && isArray($subcampo['dataSource'])){
+                                // Guardamos dataSource
+                                $optionsSource = $subcampo['dataSource'];
+
+                                //Buscamos el nombre de la colección
+                                $nombreColeccion = Plantillas::find($optionsSource['plantillaId'])->nombre_coleccion ?? null;
+
+                                // Validamos si se encontro la coleccion
+                                if(!$nombreColeccion){
+                                    throw new \Exception('No se encontró la plantilla para el campo select: ' . $subcampo['name'], 404);
+                                }
+
+                                // Verificamos si la colección de origen existe
+                                $sourceCollectionExists = false;
+                                foreach ($collections as $collection) {
+                                    if ($collection->getName() === $nombreColeccion) {
+                                        $sourceCollectionExists = true;
+                                        break;
+                                    }
+                                }
+
+                                if($sourceCollectionExists){
+                                    // Obtenemos los documentos de la colección de origen
+                                    $Documents = json_decode(json_encode($db->selectCollection($nombreColeccion)->find()->toArray()), true);
+
+                                    $options = [];
+                                    foreach($Documents as $indexDoc => $doc){
+
+                                        foreach($doc['secciones'] as $indexSeccion => $seccion){
+                                            foreach($seccion['fields'] as $keyField => $fields){
+
+                                                /*Log::info('Fecha '.$keyField.': ', [
+                                                    'fields' => $fields ?? null,
+                                                ]);*/
+
+                                                if($optionsSource['campoGuardar'] == $keyField){
+                                                    $campoGuardar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
+                                                }
+                                                if($optionsSource['campoMostrar'] == $keyField){
+                                                    $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField]?? null;
+                                                }
+                                            }
+                                        }
+                                        $options[] = [
+                                            'campoMostrar' => $campoMostrar,
+                                            'campoGuardar' => $campoGuardar
+                                        ];
+                                    }
+
+                                    // Actualizamos las opciones del subcampo en la plantilla
+                                    $secciones[$index]['fields'][$indexfield]['subcampos'][$indexSubcampo]['options'] = $options;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
