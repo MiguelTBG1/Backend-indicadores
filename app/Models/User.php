@@ -114,11 +114,12 @@ class User extends Model
         if (!empty($this->permisos['denied'])) {
             $denied = $this->permisos['denied'];
             foreach ($denied as $permisoNegado) {
-                $deniedStr = $this->buildPermisoStrings($permisoNegado);
+                $deniedStr[] = $this->buildPermisoStrings($permisoNegado);
             }
         }
 
         $allowedStr = array_unique(array_merge(...$allowedStr));
+        Log::debug($deniedStr);
         $deniedStr = array_unique(array_merge(...$deniedStr));
         $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
         // Aplanar el array si es necesario
