@@ -7,7 +7,11 @@ use App\Models\Plantillas;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use MongoDB\Client as MongoClient;
+use MongoDB\BSON\UTCDateTime;
+use MongoDB\BSON\ObjectId;
 use Exception;
+
+use function PHPUnit\Framework\isArray;
 
 class PlantillaController extends Controller
 {
@@ -150,6 +154,83 @@ class PlantillaController extends Controller
             if (empty($secciones)) {
                 throw new \Exception('No hay secciones disponibles para esta plantilla', 404);
             }
+
+            // Conexión a MongoDB
+            $client = new MongoClient(config('database.connections.mongodb.url'));
+            $db = $client->selectDatabase(config('database.connections.mongodb.database'));
+
+            // Verifica si la colección existe
+            $collections = $db->listCollections();
+
+            // Buscamos los campos que sean select dinamico
+            foreach($plantilla->secciones as $index => $seccion){
+                foreach($seccion['fields'] as $indexfield => $field){
+
+                    if($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])){
+                        // Guardamos dataSource
+                        $optionsSource = $field['dataSource'];
+
+                        //Buscamos el nombre de la colección
+                        $nombreColeccion = Plantillas::find($optionsSource['plantillaId'])->nombre_coleccion ?? null;
+
+                        // Validamos si se encontro la coleccion
+                        if(!$nombreColeccion){
+                            throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
+                        }
+
+                        // Verificamos si la colección de origen existe
+                        $sourceCollectionExists = false;
+                        foreach ($collections as $collection) {
+                            if ($collection->getName() === $nombreColeccion) {
+                                $sourceCollectionExists = true;
+                                break;
+                            }
+                        }
+
+                        if($sourceCollectionExists){
+                            // Obtenemos los documentos de la colección de origen
+                            $Documents = json_decode(json_encode($db->selectCollection($nombreColeccion)->find()->toArray()), true);
+
+
+
+                            $options = [];
+                            foreach($Documents as $indexDoc => $doc){
+
+                                foreach($doc['secciones'] as $indexSeccion => $seccion){
+                                    foreach($seccion['fields'] as $keyField => $fields){
+
+                                        /*Log::info('Fecha '.$keyField.': ', [
+                                            'fields' => $fields ?? null,
+                                        ]);*/
+
+                                        if($optionsSource['campoGuardar'] == $keyField){
+                                            $campoGuardar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
+                                        }
+                                        if($optionsSource['campoMostrar'] == $keyField){
+                                            $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField]?? null;
+                                        }
+                                    }
+                                }
+                                $options[] = [
+                                    'campoMostrar' => $campoMostrar,
+                                    'campoGuardar' => $campoGuardar
+                                ];
+                            }
+
+                            // Actualizamos las opciones del campo en la plantilla
+                            $secciones[$index]['fields'][$indexfield]['options'] = $options;
+                        }else{
+                            Log::warning("Colección de origen no encontrada: " . $optionsSource);
+                        }
+                    }
+                }
+            }
+
+            Log::info('Secciones obtenidas para la plantilla', [
+                'id' => $id,
+                'nombre_plantilla' => $nombrePlantilla,
+                'secciones' => $secciones
+            ]);
 
             // Devolver la respuesta JSON
             return response()->json([
@@ -318,4 +399,5 @@ class PlantillaController extends Controller
             ], $e->getCode() ?: 500);
         }
     }
+
 }
