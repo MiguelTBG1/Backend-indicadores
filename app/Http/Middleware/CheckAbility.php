@@ -20,9 +20,6 @@ class CheckAbility
             return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
         }
 
-        /* BORRAR ESTO PARA QUE FUNCIONEN LOS PERMISOS OTRA VEZ */
-        return $next($request);
-
         // Separamos el recurso del permiso
         [$recurso, $permiso] = explode('_', $ability, 2);
 
@@ -34,9 +31,10 @@ class CheckAbility
             "*_*",
         ];
 
-        // BAndera
-        $hasAbility = false;
-
+        // Banderas
+        // PERMISOS DESACTIVADOS
+        $hasAbility = true;
+        
         //Reccorremos el arreglo de hablidades permitidas y preguntamos si el token de usuario tiene ese permiso
         foreach ($abilitiesToCheck as $ab) {
             if ($request->user()->tokenCan($ab)) {

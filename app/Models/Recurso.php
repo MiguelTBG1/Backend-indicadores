@@ -13,9 +13,11 @@ class Recurso extends Model
     protected $guarded = ['_id'];
     
     protected $fillable = [
+        'clave',
         'nombre',
-        'descripcion',
         'tipo',
+        'grupo',
+        'descripcion',
         'patron_regex'
     ];
 }

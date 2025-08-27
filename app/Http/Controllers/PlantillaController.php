@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Plantillas;
+use App\Models\Recurso;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use MongoDB\Client as MongoClient;
@@ -91,6 +92,15 @@ class PlantillaController extends Controller
 
             // Formar el nombre de la colección eliminando espacios
             $collectionName = str_replace(' ','', $plantillaName) . "_data";
+
+            // Registramos la coleccion del documento a crear
+            Recurso::create([
+                'clave' => $collectionName,
+                'nombre' => $plantillaName,
+                'tipo' => 'dinamico',
+                'grupo' => 'documentos',
+                'descripcion' => "Documentos de la plantilla {$plantillaName}"
+            ]);
 
             // Filtrar datos no serializables en `campos`
             $secciones = $request->input('secciones');

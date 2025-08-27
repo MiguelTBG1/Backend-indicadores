@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use App\Models\Comentario;
 
 use Laravel\Sanctum\HasApiTokens;
@@ -8,6 +9,8 @@ use MongoDB\Laravel\Eloquent\Model;
 
 use App\Models\Accion;
 use App\Models\Recurso;
+use Illuminate\Support\Facades\Log;
+
 class User extends Model
 {
     use HasApiTokens;
@@ -32,7 +35,6 @@ class User extends Model
         'escolaridad',
         'roles',
         'permisos',
-        'negaciones',
         'funciones_permitidas'
     ];
 
@@ -62,69 +64,136 @@ class User extends Model
     {
         return $this->morphMany(PersonalAccessToken::class, 'tokenable');
     }
-    
+
     /**
      * Obtiene los permisos del usuario.
      *
      * @return array String[] Lista de permisos del usuario con el formato 'recurso_permiso'.
      */
-    public function getPermisos() {
-        $permisosStr = [];
+    public function getPermisos()
+    {
+        // Arreglo para almacenar todos los permisos
+        $allowedStr = []; // Permisos asignados
+        $deniedStr = []; // Permisos negados
 
-        // Variable para almacenar todos los permisos del usuario
-        $permisosTotales = $this->permisos;
+        // Recorremos los permisos de los roles
+        if (is_array($this->roles)) {
+            foreach ($this->roles as $roleId) {
 
-        // Conseguimos los permisos de los roles del usuario
-        if( empty($this->roles) || !is_array($permisosTotales))
-        {
-            foreach ($this->roles as $role) {
-                // Buscamos el rol en la colección de roles
-                $rol = Rol::find($role);
+                // Comprobamos que exista el rol
+                $rol = Rol::find($roleId);
+                if (!$rol) continue;
 
-                //Recorremos los permisos del rol
-                foreach($rol->permisos as $permiso){
-                    // Conseguimos el nombre del recurso
-                    $recursoId = $permiso['recurso'];
-                    $recurso = Recurso::find($recursoId)->nombre;
+                // --- Allowed ---
+                if (!empty($rol->permisos['allowed'])) {
+                    foreach ($rol->permisos['allowed'] as $permiso) {
+                        $allowedStr[] = ($this->buildPermisoStrings($permiso));
+                    }
+                }
 
-                        // Recorremos las acciones del permiso
-                    foreach($permiso['acciones'] as $accion) {
-                        // Buscamos la acción en la colección de acciones
-                        $accionObj = Accion::find($accion);
-                        $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
-
-                        // Generamos la cadena de permiso
-                        $permisosStr[] = strtolower("{$recurso}_{$nombreAccion}");
+                // --- Denied ---
+                // Aqui filtramos los permisos que sean negados explicitamente
+                if (!empty($rol->permisos['denied'])) {
+                    foreach ($rol->permisos['denied'] as $permiso) {
+                        $deniedStr[] = $this->buildPermisoStrings($permiso);
                     }
                 }
             }
         }
 
-        // Verificamos si permisos no es null o vacío
-        if (empty($permisosTotales) || !is_array($permisosTotales)) {
-            return $permisosStr;
-        }
-
-        // Recorremos los permisos del usuario
-        foreach ($permisosTotales as $permiso) {
-            // Conseguimos las ids del recurso y la accion
-            $recursoId = $permiso['recurso'];
-            
-            // Conseguimos el nombre del recurso
-            $recurso = Recurso::find($recursoId)->nombre;
-            $acciones = [];
-
-            // Recorremos las acciones del permiso
-            foreach($permiso['acciones'] as $accion) {
-                // Buscamos la acción en la colección de acciones
-                $accionObj = Accion::find($accion);
-                $nombreAccion = $accionObj ? $accionObj->nombre : 'accion_desconocida';
-
-                // Generamos la cadena de permiso
-                $permisosStr[] = strtolower("{$recurso}_{$nombreAccion}");
+        // Recorremos los permisos particulares
+        if (!empty($this->permisos['allowed'])) {
+            $allowed = $this->permisos['allowed'];
+            foreach ($allowed as $permiso) {
+                $allowedStr[] = $this->buildPermisoStrings($permiso);
             }
         }
 
-        return $permisosStr;
+
+        // QUitamos los permisos negados particulares
+        if (!empty($this->permisos['denied'])) {
+            $denied = $this->permisos['denied'];
+            foreach ($denied as $permisoNegado) {
+                $deniedStr[] = $this->buildPermisoStrings($permisoNegado);
+            }
+        }
+
+        $allowedStr = array_unique(array_merge(...$allowedStr));
+        Log::debug($deniedStr);
+        $deniedStr = array_unique(array_merge(...$deniedStr));
+        $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
+        // Aplanar el array si es necesario
+        return array_unique(array_merge($permisos));
+    }
+
+    /**
+     * Genera el arreglo de permisos
+     */
+    private function buildPermisoStrings(array $permiso): array
+    {
+        // Comprobamos que exista el recurso
+        $recurso = optional(Recurso::find($permiso['recurso']))->nombre ?? 'recurso_desconocido';
+
+        // Inicializamos el arreglo de recursos
+        $permisos = [];
+
+        // Recorremos las acciones
+        foreach ($permiso['acciones'] ?? [] as $accionId) {
+            $accion = optional(Accion::find($accionId))->nombre ?? 'accion_desconocida';
+            // Formateamos a la estructura recurso_accion
+            $permisos[] = strtolower("{$recurso}_{$accion}");
+        }
+
+        return $permisos;
+    }
+
+    /**
+     * Expande los comodines remplazandolos por todos sus versiones simples
+     */
+    function buildFinalAbilities(array $allow, array $deny): array
+    {
+        $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
+        Log::debug($allRecursos);
+        $allAcciones = Accion::pluck('nombre')->toArray();
+
+        $resolved = [];
+
+        foreach ($allow as $perm) {
+            [$recurso, $accion] = explode('_', $perm);
+            Log::debug("Recurso: {$recurso}     Accion: {$accion}");
+            // Caso 1: comodín total
+            if ($recurso === '*' && $accion === '*') {
+                foreach ($allRecursos as $r) {
+                    foreach ($allAcciones as $a) {
+                        $resolved[] = "{$r}_{$a}";
+                    }
+                }
+                continue;
+            }
+
+            // Caso 2: comodín de acción
+            if ($recurso === '*') {
+                foreach ($allRecursos as $r) {
+                    $resolved[] = "{$r}_{$accion}";
+                }
+                continue;
+            }
+
+            // Caso 3: comodín de recurso
+            if ($accion === '*') {
+                foreach ($allAcciones as $a) {
+                    $resolved[] = "{$recurso}_{$a}";
+                }
+                continue;
+            }
+
+            // Caso 4: permiso específico
+            $resolved[] = $perm;
+        }
+
+        // Aplicamos deny
+        $resolved = array_diff($resolved, $deny);
+
+        return array_values(array_unique($resolved));
     }
 }

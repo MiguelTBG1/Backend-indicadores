@@ -1,30 +1,18 @@
 # Sistema de gestor de indicadores (API)
 
-## Autentificacion
-Para iniciar sesion
-- [Login](api-endpoints/login.md) : POST `/api/login`
-
-Para cerrar sesion
-- [Logout](api-edpoints/logout.md) : POST `/api/logout`
-
-Siempre que se mande un token invalido se obtendra la siguiente respuesta.
-
-**Codigo:** `401` Unauthorized
-```json
-{
-    "success": false,
-    "message": "Token de autenticación inválido o expirado"
-}
+## Configuraciones
+### Sanctum
+Hay que configurar Sanctum para que use las librerias de MongoDB, para esto, una vez instalada todas las dependencias entramos a
+```
+/vendor/laravel/sanctum/src/PersonalAccessToken.php
 ```
 
-## Endpoints Abiertos
-Estos son los endpoints que no requieren autentificacion
+Y ahi remplazamos la linea:
+```php
+use Illuminate\Database\Eloquent\Model;
+```
 
-## Endpoints Cerrados
-Para estas rutas es necesario que mandes un token valido en los headers
-
-### Indicadores
-### Documentos
-### Plantillas
-### Ejes
-### Usuarios
+Por:
+```php
+use MongoDB\Laravel\Eloquent\Model;
+```
