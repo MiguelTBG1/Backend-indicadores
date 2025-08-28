@@ -213,9 +213,6 @@ class PlantillaController extends Controller
                                             'fields' => $fields ?? null,
                                         ]);*/
 
-                                        if($optionsSource['campoGuardar'] == $keyField){
-                                            $campoGuardar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
-                                        }
                                         if($optionsSource['campoMostrar'] == $keyField){
                                             $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField]?? null;
                                         }
@@ -223,7 +220,7 @@ class PlantillaController extends Controller
                                 }
                                 $options[] = [
                                     'campoMostrar' => $campoMostrar,
-                                    'campoGuardar' => $campoGuardar
+                                    'campoGuardar' => $doc['_id']['$oid']
                                 ];
                             }
 
@@ -273,9 +270,6 @@ class PlantillaController extends Controller
                                                     'fields' => $fields ?? null,
                                                 ]);*/
 
-                                                if($optionsSource['campoGuardar'] == $keyField){
-                                                    $campoGuardar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
-                                                }
                                                 if($optionsSource['campoMostrar'] == $keyField){
                                                     $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField]?? null;
                                                 }
@@ -283,7 +277,7 @@ class PlantillaController extends Controller
                                         }
                                         $options[] = [
                                             'campoMostrar' => $campoMostrar,
-                                            'campoGuardar' => $campoGuardar
+                                            'campoGuardar' => $doc['_id']['$oid']
                                         ];
                                     }
 
