@@ -355,7 +355,6 @@ class PlantillaController extends Controller
                 'secciones.*.fields' => 'required|array|min:1',
                 'secciones.*.fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'secciones.*.fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
-                'secciones.*.fields.*.options' => 'required_if:secciones.*.fields.*.type,select|array|min:1',
                 'secciones.*.fields.*.required' => 'required|boolean',
                 'secciones.*.fields.*.subcampos' => 'required_if:secciones.*.fields.*.type,subform|array|min:1',
                 'secciones.*.fields.*.subcampos.*.name' => 'required_if:secciones.*.fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
