@@ -15,26 +15,230 @@ class PlantillasCollectionSeeder extends Seeder
 
     public function run(): void
     {
-        //
-        $plantillas = [
-            [
-                '_id' => new ObjectId('68b0938423ed6ec87508548c'),
-                'nombre_plantilla' => 'Periodos',
-                'nombre_coleccion' => 'Periodos_data',
-                'secciones' => [
-                    [
-                        'nombre' => 'Información General',
-                        'fields' => [
-                            [
-                                'name' => 'Nombre periodo',
-                                'type' => 'string',
-                                'required' => true,
+        // Plantilla de periodos
+        Plantillas::create([
+            '_id' => new ObjectId('68b0938423ed6ec87508548c'),
+            'nombre_plantilla' => 'Periodos',
+            'nombre_coleccion' => 'Periodos_data',
+            'secciones' => [
+                [
+                    'nombre' => 'Información General',
+                    'fields' => [
+                        [
+                            'name' => 'Nombre periodo',
+                            'type' => 'string',
+                            'required' => true,
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
+        //Plantilla de Profesores
+        Plantillas::create([
+            '_id' => new ObjectId('68b0a68006688a676a0e6a5d'),
+            'nombre_plantilla' => 'Profesores',
+            'nombre_coleccion' => 'Profesores_data',
+            'secciones' => [
+                [
+                    'nombre' => 'Información Personal',
+                    'fields' => [
+                        ['name' => 'Nombres', 'type' => 'string', 'required' => true],
+                        ['name' => 'Apellidos', 'type' => 'string', 'required' => true],
+                        ['name' => 'Correo electrónico', 'type' => 'string', 'required' => true],
+                        ['name' => 'Teléfono', 'type' => 'string', 'required' => false],
+                        ['name' => 'Especialidad', 'type' => 'string', 'required' => true],
+                        ['name' => 'Fecha de contratación', 'type' => 'date', 'required' => true],
+                        ['name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
+                            ['name' => 'Idioma', 'type' => 'string', 'required' => true],
+                            ['name' => 'Nivel de competencia', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
+                            ['name' => 'Certificación', 'type' => 'file', 'required' => false]
+                        ]]
+                    ]
+                ],
+                [
+                    'nombre' => 'Información Académica',
+                    'fields' => [
+                        [
+                            'name' => 'Estado',
+                            'type' => 'select',
+                            'required' => true,
+                            'options' => ['Activo', 'Inactivo']
+                        ],
+                        [
+                            'name' => 'Niveles de estudio',
+                            'type' => 'subform',
+                            'required' => true,
+                            'subcampos' => [
+                                [
+                                    'name' => "Nivel",
+                                    "type" => "string",
+                                    "required" => true
+                                ],
+                                [
+                                    "name" => "Año",
+                                    "type" => "number",
+                                    "required" => true
+                                ],
+                                [
+                                    "name" => "Institución",
+                                    "type" => "string",
+                                    "required" => true
+                                ],
+                                [
+                                    "name" => "Evidencia",
+                                    "type" => "file",
+                                    "required" => false
+                                ],
+                                [
+                                    "name" => "Fecha de obtención",
+                                    "type" => "date",
+                                    "required" => true,
+                                    "filterable" => true
+                                ]
+                            ]
+                        ],
+                        [
+                            "name" => "Cursos impartidos",
+                            "type" => "subform",
+                            "required" => false,
+                            "subcampos" => [
+                                [
+                                    "name" => "Nombre del curso",
+                                    "type" => "string",
+                                    "required" => true
+                                ],
+                                [
+                                    "name" => "Evidencia",
+                                    "type" => "file",
+                                    "required" => false
+                                ],
+                                [
+                                    "name" => "Fecha de inicio",
+                                    "type" => "date",
+                                    "required" => true
+                                ],
+                                [
+                                    "name" => "Fecha de término",
+                                    "type" => "date",
+                                    "required" => true,
+                                    "filterable" => true
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'Especialidades Académicas',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                [
+                                    'name' => 'Nombre de la especialidad',
+                                    'type' => 'string',
+                                    'required' => true,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Tipo de especialidad',
+                                    'type' => 'select',
+                                    'required' => true,
+                                    'options' => ['Diplomado', 'Maestría', 'Doctorado']
+                                ],
+                                [
+                                    'name' => 'Descripción',
+                                    'type' => 'string',
+                                    'required' => false,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Evidencia',
+                                    'type' => 'file',
+                                    'required' => false,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Institución',
+                                    'type' => 'string',
+                                    'required' => true,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Fecha de obtención',
+                                    'type' => 'date',
+                                    'required' => true,
+                                    'filterable' => true
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'Cursos y formación continua',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                [
+                                    'name' => 'Tipo de curso',
+                                    'type' => 'select',
+                                    'required' => true,
+                                    'options' => [
+                                        'Formación docente',
+                                        'Especialidad académica',
+                                        'Maestría',
+                                        'Doctorado',
+                                        'Taller pedagógico',
+                                        'Actualización disciplinar',
+                                        'Otro'
+                                    ]
+                                ],
+                                [
+                                    'name' => 'Nombre del curso o programa',
+                                    'type' => 'string',
+                                    'required' => true,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Institución',
+                                    'type' => 'string',
+                                    'required' => true,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Fecha de participación o término',
+                                    'type' => 'date',
+                                    'required' => true,
+                                    'filterable' => true
+                                ],
+                                [
+                                    'name' => 'Duración en horas',
+                                    'type' => 'number',
+                                    'required' => true,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Modalidad',
+                                    'type' => 'select',
+                                    'required' => true,
+                                    'options' => ['Presencial', 'En línea', 'Híbrido']
+                                ],
+                                [
+                                    'name' => 'Evidencia',
+                                    'type' => 'file',
+                                    'required' => false,
+                                    'filterable' => false
+                                ],
+                                [
+                                    'name' => 'Descripción o temas abordados',
+                                    'type' => 'string',
+                                    'required' => false,
+                                    'filterable' => false
+                                ]
                             ]
                         ]
                     ]
                 ]
-            ],
-            [
+            ]
+        ]);
+
+        // Plantilla de alumnos
+        Plantillas::create([
                 'nombre_plantilla' => 'Alumnos',
                 'nombre_coleccion' => 'Alumnos_data',
                 'secciones' => [
@@ -79,8 +283,12 @@ class PlantillasCollectionSeeder extends Seeder
                                     [
                                         'name' => 'Asesor',
                                         'type' => 'select',
-                                        'options' => ['LISTA DE ASESORES'],
-                                        'required' => false
+                                        'required' => false,
+                                        'dataSource' => [
+                                            'plantillaId' => '68b0a68006688a676a0e6a5d',
+                                            'seccion' => 'Información Personal',
+                                            'campoMostrar' => 'Nombres',
+                                        ]
                                     ]
                                 ]
                             ]
@@ -146,8 +354,12 @@ class PlantillasCollectionSeeder extends Seeder
                                     [
                                         'name' => 'Asesor',
                                         'type' => 'select',
-                                        'options' => ['LISTA DE ASESORES'],
-                                        'required' => false
+                                        'required' => false,
+                                        'dataSource' => [
+                                            'plantillaId' => '68b0a68006688a676a0e6a5d',
+                                            'seccion' => 'Información Personal',
+                                            'campoMostrar' => 'Nombres',
+                                        ]
                                     ],
                                     [
                                         'name' => 'Período',
@@ -163,214 +375,7 @@ class PlantillasCollectionSeeder extends Seeder
                             ]
                         ]
                     ]
-
                 ]
-            ],
-            [
-                'nombre_plantilla' => 'Profesores',
-                'nombre_coleccion' => 'Profesores_data',
-                'secciones' => [
-                    [
-                        'nombre' => 'Información Personal',
-                        'fields' => [
-                            ['name' => 'Nombres', 'type' => 'string', 'required' => true],
-                            ['name' => 'Apellidos', 'type' => 'string', 'required' => true],
-                            ['name' => 'Correo electrónico', 'type' => 'string', 'required' => true],
-                            ['name' => 'Teléfono', 'type' => 'string', 'required' => false],
-                            ['name' => 'Especialidad', 'type' => 'string', 'required' => true],
-                            ['name' => 'Fecha de contratación', 'type' => 'date', 'required' => true],
-                            ['name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
-                                ['name' => 'Idioma', 'type' => 'string', 'required' => true],
-                                ['name' => 'Nivel de competencia', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
-                                ['name' => 'Certificación', 'type' => 'file', 'required' => false]
-                            ]]
-                        ]
-                    ],
-                    [
-                        'nombre' => 'Información Académica',
-                        'fields' => [
-                            [
-                                'name' => 'Estado',
-                                'type' => 'select',
-                                'required' => true,
-                                'options' => ['Activo', 'Inactivo']
-                            ],
-                            [
-                                'name' => 'Niveles de estudio',
-                                'type' => 'subform',
-                                'required' => true,
-                                'subcampos' => [
-                                    [
-                                        'name' => "Nivel",
-                                        "type" => "string",
-                                        "required" => true
-                                    ],
-                                    [
-                                        "name" => "Año",
-                                        "type" => "number",
-                                        "required" => true
-                                    ],
-                                    [
-                                        "name" => "Institución",
-                                        "type" => "string",
-                                        "required" => true
-                                    ],
-                                    [
-                                        "name" => "Evidencia",
-                                        "type" => "file",
-                                        "required" => false
-                                    ],
-                                    [
-                                        "name" => "Fecha de obtención",
-                                        "type" => "date",
-                                        "required" => true,
-                                        "filterable" => true
-                                    ]
-                                ]
-                            ],
-                            [
-                                "name" => "Cursos impartidos",
-                                "type" => "subform",
-                                "required" => false,
-                                "subcampos" => [
-                                    [
-                                        "name" => "Nombre del curso",
-                                        "type" => "string",
-                                        "required" => true
-                                    ],
-                                    [
-                                        "name" => "Evidencia",
-                                        "type" => "file",
-                                        "required" => false
-                                    ],
-                                    [
-                                        "name" => "Fecha de inicio",
-                                        "type" => "date",
-                                        "required" => true
-                                    ],
-                                    [
-                                        "name" => "Fecha de término",
-                                        "type" => "date",
-                                        "required" => true,
-                                        "filterable" => true
-                                    ]
-                                ]
-                            ],
-                            [
-                                'name' => 'Especialidades Académicas',
-                                'type' => 'subform',
-                                'required' => false,
-                                'subcampos' => [
-                                    [
-                                        'name' => 'Nombre de la especialidad',
-                                        'type' => 'string',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Tipo de especialidad',
-                                        'type' => 'select',
-                                        'required' => true,
-                                        'options' => ['Diplomado', 'Maestría', 'Doctorado']
-                                    ],
-                                    [
-                                        'name' => 'Descripción',
-                                        'type' => 'string',
-                                        'required' => false,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Evidencia',
-                                        'type' => 'file',
-                                        'required' => false,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Institución',
-                                        'type' => 'string',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Fecha de obtención',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => true
-                                    ]
-                                ]
-                            ],
-                            [
-                                'name' => 'Cursos y formación continua',
-                                'type' => 'subform',
-                                'required' => false,
-                                'subcampos' => [
-                                    [
-                                        'name' => 'Tipo de curso',
-                                        'type' => 'select',
-                                        'required' => true,
-                                        'options' => [
-                                            'Formación docente',
-                                            'Especialidad académica',
-                                            'Maestría',
-                                            'Doctorado',
-                                            'Taller pedagógico',
-                                            'Actualización disciplinar',
-                                            'Otro'
-                                        ]
-                                    ],
-                                    [
-                                        'name' => 'Nombre del curso o programa',
-                                        'type' => 'string',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Institución',
-                                        'type' => 'string',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Fecha de participación o término',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => true
-                                    ],
-                                    [
-                                        'name' => 'Duración en horas',
-                                        'type' => 'number',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Modalidad',
-                                        'type' => 'select',
-                                        'required' => true,
-                                        'options' => ['Presencial', 'En línea', 'Híbrido']
-                                    ],
-                                    [
-                                        'name' => 'Evidencia',
-                                        'type' => 'file',
-                                        'required' => false,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Descripción o temas abordados',
-                                        'type' => 'string',
-                                        'required' => false,
-                                        'filterable' => false
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-
-        ];
-
-        foreach ($plantillas as $plantilla) {
-            Plantillas::create($plantilla);
-        }
+        ]);
     }
 }
