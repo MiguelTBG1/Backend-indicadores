@@ -34,6 +34,25 @@ class PlantillasCollectionSeeder extends Seeder
             ]
         ]);
 
+        // Plantilla de Programas Educativos
+        Plantillas::create([
+            '_id' => new ObjectId('68b1df5f34dafa1c910aa02c'),
+            'nombre_plantilla' => 'Programa_educativo',
+            'nombre_coleccion' => 'Programa_educativo_data',
+            'secciones' => [
+                [
+                    'nombre' => 'Información General',
+                    'fields' => [
+                        [
+                            'name' => 'Nombre del programa',
+                            'type' => 'string',
+                            'required' => true
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
         //Plantilla de Profesores
         Plantillas::create([
             '_id' => new ObjectId('68b0a68006688a676a0e6a5d'),
@@ -239,143 +258,152 @@ class PlantillasCollectionSeeder extends Seeder
 
         // Plantilla de alumnos
         Plantillas::create([
-                'nombre_plantilla' => 'Alumnos',
-                'nombre_coleccion' => 'Alumnos_data',
-                'secciones' => [
-                    [
-                        'nombre' => 'Información General',
-                        'fields' => [
-                            ['name' => 'Nombre Completo', 'type' => 'string', 'required' => true],
-                            ['name' => 'Género', 'type' => 'select', 'required' => true, 'options' => ['Masculino', 'Femenino']],
-                            ['name' => 'Programa educativo', 'type' => 'select', 'required' => true, 'options' => ['AQUI RELACION A COLECCION PROGRAMA EDUCATIVO']],
-                            ['name' => 'Número de control', 'type' => 'string', 'required' => true]
-                        ]
-                    ],
-                    [
-                        'nombre' => 'Movilidad',
-                        'fields' => [
+            'nombre_plantilla' => 'Alumnos',
+            'nombre_coleccion' => 'Alumnos_data',
+            'secciones' => [
+                [
+                    'nombre' => 'Información General',
+                    'fields' => [
+                        ['name' => 'Nombre Completo', 'type' => 'string', 'required' => true],
+                        ['name' => 'Género', 'type' => 'select', 'required' => true, 'options' => ['Masculino', 'Femenino']],
+                        [
+                            'name' => 'Programa educativo',
+                            'type' => 'select',
+                            'required' => true,
+                            'dataSource' => [
+                                'plantillaId' => '68b1df5f34dafa1c910aa02c',
+                                'seccion' => 'Información General',
+                                'campoMostrar' => 'Nombre del programa'
+                            ]
+                        ],
+                        ['name' => 'Número de control', 'type' => 'string', 'required' => true]
+                    ]
+                ],
+                [
+                    'nombre' => 'Movilidad',
+                    'fields' => [
+                        [
+                            'name' => 'Participa en movilidad',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' =>
                             [
-                                'name' => 'Participa en movilidad',
-                                'type' => 'subform',
-                                'required' => false,
-                                'subcampos' =>
                                 [
-                                    [
-                                        'name' => 'Período de la movilidad',
-                                        'type' => 'select',
-                                        'required' => false,
-                                        'dataSource' => [
-                                            'plantillaId' => '68b0938423ed6ec87508548c',
-                                            'seccion' => 'Información General',
-                                            'campoMostrar' => 'Nombre periodo',
-                                        ]
-                                    ],
-                                    [
-                                        'name' => 'Lugar al que asistió',
-                                        'type' => 'string',
-                                        'required' => false
-                                    ],
-                                    [
-                                        'name' => 'Proyecto que realizó',
-                                        'type' => 'string',
-                                        'required' => false
-                                    ],
-                                    [
-                                        'name' => 'Asesor',
-                                        'type' => 'select',
-                                        'required' => false,
-                                        'dataSource' => [
-                                            'plantillaId' => '68b0a68006688a676a0e6a5d',
-                                            'seccion' => 'Información Personal',
-                                            'campoMostrar' => 'Nombres',
-                                        ]
+                                    'name' => 'Período de la movilidad',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'dataSource' => [
+                                        'plantillaId' => '68b0938423ed6ec87508548c',
+                                        'seccion' => 'Información General',
+                                        'campoMostrar' => 'Nombre periodo',
+                                    ]
+                                ],
+                                [
+                                    'name' => 'Lugar al que asistió',
+                                    'type' => 'string',
+                                    'required' => false
+                                ],
+                                [
+                                    'name' => 'Proyecto que realizó',
+                                    'type' => 'string',
+                                    'required' => false
+                                ],
+                                [
+                                    'name' => 'Asesor',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'dataSource' => [
+                                        'plantillaId' => '68b0a68006688a676a0e6a5d',
+                                        'seccion' => 'Información Personal',
+                                        'campoMostrar' => 'Nombres',
                                     ]
                                 ]
                             ]
                         ]
-                    ],
-                    [
-                        'nombre' => 'Eventos',
-                        'fields' => [
-                            [
-                                'name' => 'Participa en evento',
-                                'type' => 'subform',
-                                'required' => false,
-                                'subcampos' => [
-                                    [
-                                        'name' => 'Tipo de evento',
-                                        'type' => 'select',
-                                        'options' => ['Foro', 'Congreso', 'Concurso'],
-                                        'required' => false
-                                    ],
-                                    [
-                                        'name' => 'Nombre del evento',
-                                        'type' => 'string',
-                                        'required' => false
-                                    ],
-                                    [
-                                        'name' => 'Período',
-                                        'type' => 'select',
-                                        'required' => false,
-                                        'dataSource' => [
-                                            'plantillaId' => '68b0938423ed6ec87508548c',
-                                            'seccion' => 'Información General',
-                                            'campoMostrar' => 'Nombre periodo',
-                                        ]
-                                    ],
-                                    [
-                                        'name' => 'Institución',
-                                        'type' => 'select',
-                                        'options' => 'LISTA DE INSTITUCIONES?',
-                                        'required' => false
-                                    ],
-                                    [
-                                        'name' => 'Lugar',
-                                        'type' => 'string',
-                                        'required' => false
+                    ]
+                ],
+                [
+                    'nombre' => 'Eventos',
+                    'fields' => [
+                        [
+                            'name' => 'Participa en evento',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                [
+                                    'name' => 'Tipo de evento',
+                                    'type' => 'select',
+                                    'options' => ['Foro', 'Congreso', 'Concurso'],
+                                    'required' => false
+                                ],
+                                [
+                                    'name' => 'Nombre del evento',
+                                    'type' => 'string',
+                                    'required' => false
+                                ],
+                                [
+                                    'name' => 'Período',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'dataSource' => [
+                                        'plantillaId' => '68b0938423ed6ec87508548c',
+                                        'seccion' => 'Información General',
+                                        'campoMostrar' => 'Nombre periodo',
                                     ]
+                                ],
+                                [
+                                    'name' => 'Institución',
+                                    'type' => 'select',
+                                    'options' => 'LISTA DE INSTITUCIONES?',
+                                    'required' => false
+                                ],
+                                [
+                                    'name' => 'Lugar',
+                                    'type' => 'string',
+                                    'required' => false
                                 ]
                             ]
                         ]
-                    ],
-                    [
-                        'nombre' => 'Proyecto de investigación',
-                        'fields' => [
-                            [
-                                'name' => 'Participa en Proyecto de investigacion',
-                                'type' => 'subform',
-                                'required' => false,
-                                'subcampos' => [
-                                    [
-                                        'name' => 'Nombre del Proyecto',
-                                        'type' => 'string',
-                                        'required' => false
-                                    ],
-                                    [
-                                        'name' => 'Asesor',
-                                        'type' => 'select',
-                                        'required' => false,
-                                        'dataSource' => [
-                                            'plantillaId' => '68b0a68006688a676a0e6a5d',
-                                            'seccion' => 'Información Personal',
-                                            'campoMostrar' => 'Nombres',
-                                        ]
-                                    ],
-                                    [
-                                        'name' => 'Período',
-                                        'type' => 'select',
-                                        'required' => false,
-                                        'dataSource' => [
-                                            'plantillaId' => '68b0938423ed6ec87508548c',
-                                            'seccion' => 'Información General',
-                                            'campoMostrar' => 'Nombre periodo',
-                                        ]
+                    ]
+                ],
+                [
+                    'nombre' => 'Proyecto de investigación',
+                    'fields' => [
+                        [
+                            'name' => 'Participa en Proyecto de investigacion',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                [
+                                    'name' => 'Nombre del Proyecto',
+                                    'type' => 'string',
+                                    'required' => false
+                                ],
+                                [
+                                    'name' => 'Asesor',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'dataSource' => [
+                                        'plantillaId' => '68b0a68006688a676a0e6a5d',
+                                        'seccion' => 'Información Personal',
+                                        'campoMostrar' => 'Nombres',
+                                    ]
+                                ],
+                                [
+                                    'name' => 'Período',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'dataSource' => [
+                                        'plantillaId' => '68b0938423ed6ec87508548c',
+                                        'seccion' => 'Información General',
+                                        'campoMostrar' => 'Nombre periodo',
                                     ]
                                 ]
                             ]
                         ]
                     ]
                 ]
+            ]
         ]);
     }
 }
