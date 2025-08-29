@@ -234,28 +234,28 @@ class DocumentosSeeder extends Seeder
         $db = $client->selectDatabase(config('database.connections.mongodb.database'));
 
         // Buscar si la colección 'Alumnos_data' ya existe
-        $collectionName = 'Alumnos_data';
+        //$collectionName = 'Alumnos_data';
 
-        $collections = $db->listCollections([
-            'filter' => ['name' => $collectionName]
-        ]);
+        ///$collections = $db->listCollections([
+        //    'filter' => ['name' => $collectionName]
+        //]);
 
-        $exists = false;
-        foreach ($collections as $collection) {
-            if ($collection->getName() === $collectionName) {
-                $exists = true;
-                break;
-            }
-        }
+        //$exists = false;
+        //foreach ($collections as $collection) {
+        //    if ($collection->getName() === $collectionName) {
+         //       $exists = true;
+        //        break;
+        //    }
+        //}
 
-        // Si la colección no existe, crearla
-        if (!$exists) {
-            $db->createCollection($collectionName);
-        }
+       // // Si la colección no existe, crearla
+       // if (!$exists) {
+        //    $db->createCollection($collectionName);
+       // }
 
         // Insertar los documentos en la colección 'Alumnos_data'
-        $collection = $db->selectCollection($collectionName);
-        $collection->insertMany($alumnos);
+        //$collection = $db->selectCollection($collectionName);
+        //$collection->insertMany($alumnos);
 
 
         /**

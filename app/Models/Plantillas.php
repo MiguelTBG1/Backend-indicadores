@@ -13,9 +13,8 @@ class Plantillas extends Model
 
     protected $primaryKey = '_id'; // MongoDB usa _id como clave primaria
 
-    protected $guarded = ['_id'];
-
     protected $fillable = [
+        '_id',
         'nombre_plantilla',
         'nombre_coleccion',
         'secciones',

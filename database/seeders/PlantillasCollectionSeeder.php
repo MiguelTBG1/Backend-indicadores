@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Plantillas;
+use MongoDB\BSON\ObjectId;
 
 class PlantillasCollectionSeeder extends Seeder
 {
@@ -17,128 +18,152 @@ class PlantillasCollectionSeeder extends Seeder
         //
         $plantillas = [
             [
+                '_id' => new ObjectId('68b0938423ed6ec87508548c'),
+                'nombre_plantilla' => 'Periodos',
+                'nombre_coleccion' => 'Periodos_data',
+                'secciones' => [
+                    [
+                        'nombre' => 'Información General',
+                        'fields' => [
+                            [
+                                'name' => 'Nombre periodo',
+                                'type' => 'string',
+                                'required' => true,
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            [
                 'nombre_plantilla' => 'Alumnos',
                 'nombre_coleccion' => 'Alumnos_data',
                 'secciones' => [
                     [
-                        'nombre' => 'Información Personal',
+                        'nombre' => 'Información General',
                         'fields' => [
-                            [ 'name' => 'Nombres', 'type' => 'string', 'required' => true ],
-                            [ 'name' => 'Apellidos', 'type' => 'string', 'required' => true ],
-                            [ 'name' => 'Fecha de nacimiento', 'type' => 'date', 'required' => true ],
-                            [ 'name' => 'Correo electrónico', 'type' => 'string', 'required' => true ],
-                            [ 'name' => 'Teléfono', 'type' => 'number', 'required' => false ],
-                            [ 'name' => 'Dirección', 'type' => 'string', 'required' => false ]
+                            ['name' => 'Nombre Completo', 'type' => 'string', 'required' => true],
+                            ['name' => 'Género', 'type' => 'select', 'required' => true, 'options' => ['Masculino', 'Femenino']],
+                            ['name' => 'Programa educativo', 'type' => 'select', 'required' => true, 'options' => ['AQUI RELACION A COLECCION PROGRAMA EDUCATIVO']],
+                            ['name' => 'Número de control', 'type' => 'string', 'required' => true]
                         ]
                     ],
                     [
-                        'nombre' => 'Información Académica',
+                        'nombre' => 'Movilidad',
                         'fields' => [
-                            [ 'name' => 'Fecha de inscripción', 'type' => 'date', 'required' => true ],
-                            [ 'name' => 'Estado', 'type' => 'select',
-                              'required' => true,
-                              'options' => ['Activo', 'Inactivo'] ],
                             [
-                                'name' => 'Notas',
+                                'name' => 'Participa en movilidad',
                                 'type' => 'subform',
                                 'required' => false,
-                                'subcampos' => [
+                                'subcampos' =>
+                                [
                                     [
-                                        'name' => 'Asignatura',
-                                        'type' => 'string',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Nota',
-                                        'type' => 'number',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Fecha de evaluación',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => false
-                                    ],
-                                    [
-                                        'name' => 'Comentarios',
-                                        'type' => 'string',
+                                        'name' => 'Período de la movilidad',
+                                        'type' => 'select',
                                         'required' => false,
-                                        'filterable' => false
+                                        'dataSource' => [
+                                            'plantillaId' => '68b0938423ed6ec87508548c',
+                                            'seccion' => 'Información General',
+                                            'campoMostrar' => 'Nombre periodo',
+                                        ]
                                     ],
                                     [
-                                        'name' => 'Fecha de obtención',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => true
+                                        'name' => 'Lugar al que asistió',
+                                        'type' => 'string',
+                                        'required' => false
+                                    ],
+                                    [
+                                        'name' => 'Proyecto que realizó',
+                                        'type' => 'string',
+                                        'required' => false
+                                    ],
+                                    [
+                                        'name' => 'Asesor',
+                                        'type' => 'select',
+                                        'options' => ['LISTA DE ASESORES'],
+                                        'required' => false
                                     ]
                                 ]
-                            ],
+                            ]
+                        ]
+                    ],
+                    [
+                        'nombre' => 'Eventos',
+                        'fields' => [
                             [
-                                'name' => 'Cursos',
+                                'name' => 'Participa en evento',
                                 'type' => 'subform',
                                 'required' => false,
                                 'subcampos' => [
                                     [
-                                        'name' => 'Nombre del curso',
+                                        'name' => 'Tipo de evento',
+                                        'type' => 'select',
+                                        'options' => ['Foro', 'Congreso', 'Concurso'],
+                                        'required' => false
+                                    ],
+                                    [
+                                        'name' => 'Nombre del evento',
                                         'type' => 'string',
-                                        'required' => true,
-                                        'filterable' => false
+                                        'required' => false
                                     ],
                                     [
-                                        'name' => 'Evidencia',
-                                        'type' => 'file',
+                                        'name' => 'Período',
+                                        'type' => 'select',
                                         'required' => false,
-                                        'filterable' => false
+                                        'dataSource' => [
+                                            'plantillaId' => '68b0938423ed6ec87508548c',
+                                            'seccion' => 'Información General',
+                                            'campoMostrar' => 'Nombre periodo',
+                                        ]
                                     ],
                                     [
-                                        'name' => 'Fecha de inicio',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => false
+                                        'name' => 'Institución',
+                                        'type' => 'select',
+                                        'options' => 'LISTA DE INSTITUCIONES?',
+                                        'required' => false
                                     ],
                                     [
-                                        'name' => 'Fecha de término',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => true
+                                        'name' => 'Lugar',
+                                        'type' => 'string',
+                                        'required' => false
                                     ]
                                 ]
-                            ],
+                            ]
+                        ]
+                    ],
+                    [
+                        'nombre' => 'Proyecto de investigación',
+                        'fields' => [
                             [
-                                'name' => 'Becas',
+                                'name' => 'Participa en Proyecto de investigacion',
                                 'type' => 'subform',
                                 'required' => false,
                                 'subcampos' => [
                                     [
-                                        'name' => 'Nombre de la beca',
+                                        'name' => 'Nombre del Proyecto',
                                         'type' => 'string',
-                                        'required' => true,
-                                        'filterable' => false
+                                        'required' => false
                                     ],
                                     [
-                                        'name' => 'Fecha de inicio',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => false
+                                        'name' => 'Asesor',
+                                        'type' => 'select',
+                                        'options' => ['LISTA DE ASESORES'],
+                                        'required' => false
                                     ],
                                     [
-                                        'name' => 'Fecha de término',
-                                        'type' => 'date',
-                                        'required' => true,
-                                        'filterable' => true
-                                    ],
-                                    [
-                                        'name' => 'Monto otorgado',
-                                        'type' => 'number',
-                                        'required' => true,
-                                        'filterable' => false
+                                        'name' => 'Período',
+                                        'type' => 'select',
+                                        'required' => false,
+                                        'dataSource' => [
+                                            'plantillaId' => '68b0938423ed6ec87508548c',
+                                            'seccion' => 'Información General',
+                                            'campoMostrar' => 'Nombre periodo',
+                                        ]
                                     ]
                                 ]
                             ]
                         ]
                     ]
+
                 ]
             ],
             [
@@ -148,16 +173,16 @@ class PlantillasCollectionSeeder extends Seeder
                     [
                         'nombre' => 'Información Personal',
                         'fields' => [
-                            [ 'name' => 'Nombres', 'type' => 'string', 'required' => true ],
-                            [ 'name' => 'Apellidos', 'type' => 'string', 'required' => true ],
-                            [ 'name' => 'Correo electrónico', 'type' => 'string', 'required' => true ],
-                            [ 'name' => 'Teléfono', 'type' => 'string', 'required' => false ],
-                            [ 'name' => 'Especialidad', 'type' => 'string', 'required' => true ],
-                            [ 'name' => 'Fecha de contratación', 'type' => 'date', 'required' => true ],
-                            [ 'name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
-                                [ 'name' => 'Idioma', 'type' => 'string', 'required' => true ],
-                                [ 'name' => 'Nivel de competencia', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado'] ],
-                                [ 'name' => 'Certificación', 'type' => 'file', 'required' => false ]
+                            ['name' => 'Nombres', 'type' => 'string', 'required' => true],
+                            ['name' => 'Apellidos', 'type' => 'string', 'required' => true],
+                            ['name' => 'Correo electrónico', 'type' => 'string', 'required' => true],
+                            ['name' => 'Teléfono', 'type' => 'string', 'required' => false],
+                            ['name' => 'Especialidad', 'type' => 'string', 'required' => true],
+                            ['name' => 'Fecha de contratación', 'type' => 'date', 'required' => true],
+                            ['name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
+                                ['name' => 'Idioma', 'type' => 'string', 'required' => true],
+                                ['name' => 'Nivel de competencia', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
+                                ['name' => 'Certificación', 'type' => 'file', 'required' => false]
                             ]]
                         ]
                     ],
@@ -208,28 +233,28 @@ class PlantillasCollectionSeeder extends Seeder
                                 "type" => "subform",
                                 "required" => false,
                                 "subcampos" => [
-                                        [
-                                            "name" => "Nombre del curso",
-                                            "type" => "string",
-                                            "required" => true
-                                        ],
-                                        [
-                                            "name" => "Evidencia",
-                                            "type" => "file",
-                                            "required" => false
-                                        ],
-                                        [
-                                            "name" => "Fecha de inicio",
-                                            "type" => "date",
-                                            "required" => true
-                                        ],
-                                        [
-                                            "name" => "Fecha de término",
-                                            "type" => "date",
-                                            "required" => true,
-                                            "filterable" => true
-                                        ]
+                                    [
+                                        "name" => "Nombre del curso",
+                                        "type" => "string",
+                                        "required" => true
+                                    ],
+                                    [
+                                        "name" => "Evidencia",
+                                        "type" => "file",
+                                        "required" => false
+                                    ],
+                                    [
+                                        "name" => "Fecha de inicio",
+                                        "type" => "date",
+                                        "required" => true
+                                    ],
+                                    [
+                                        "name" => "Fecha de término",
+                                        "type" => "date",
+                                        "required" => true,
+                                        "filterable" => true
                                     ]
+                                ]
                             ],
                             [
                                 'name' => 'Especialidades Académicas',
@@ -347,6 +372,5 @@ class PlantillasCollectionSeeder extends Seeder
         foreach ($plantillas as $plantilla) {
             Plantillas::create($plantilla);
         }
-
     }
 }
