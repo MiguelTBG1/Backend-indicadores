@@ -6,6 +6,7 @@ use App\Models\Plantillas;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use PhpParser\Comment\Doc;
 
 class DatabaseSeeder extends Seeder
 {
@@ -27,6 +28,7 @@ class DatabaseSeeder extends Seeder
             PeriodosSeeder::class,
             ProfesoresSeeder::class,
             ProgramaEducativoSeeder::class,
+            DocumentosSeeder::class,
         ]);
     }
 }

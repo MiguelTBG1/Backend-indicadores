@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Client as MongoClient;
+use MongoDB\Laravel\Eloquent\Casts\ObjectId as CastsObjectId;
 
 class ProfesoresSeeder extends Seeder
 {
@@ -23,6 +24,71 @@ class ProfesoresSeeder extends Seeder
          */
 
          $profesores = [
+            [
+                '_id' => new ObjectId('686d545c64c3ad79300fd1c0'),
+                'secciones' => [
+                    [
+                        'nombre' => 'Información Personal',
+                        'fields' => [
+                            'Nombres' => 'Agustin',
+                            'Apellidos' => 'Esquivel Pat',
+                            'Correo electrónico' => 'agustin.pa@chetumal.tecnm.mx',
+                            'Teléfono' => '9831524672',
+                            'Especialidad' => 'Programación Web',
+                            'Fecha de contratación' => new UTCDateTime(strtotime('2000-08-15') * 1000),
+                            'Idiomas' => [
+                                [ 'Idioma' => 'Inglés', 'Nivel' => 'Intermedio', 'certificación' => null ],
+                                [ 'Idioma' => 'Francés', 'Nivel' => 'Básico', 'certificación' => null ]
+                            ]
+                        ]
+                    ],
+                    [
+                        'nombre' => 'Información Académica',
+                        'fields' => [
+                            'Estado' => 'Activo',
+                            'Niveles de estudio' => [
+                                [
+                                    'Nivel' => 'Licenciatura',
+                                    'Año' => 2010,
+                                    'Institución' => 'Instituto Tecnológico de Chetumal',
+                                    'Evidencia' => null,
+                                    'Fecha de obtención' => new UTCDateTime(strtotime('2010-06-15') * 1000)
+                                ]
+                            ],
+                            'Cursos impartidos' => [
+                                [
+                                    'Nombre del curso' => 'Framework Backend',
+                                    'Evidencia' => 'framework_backend_2025.pdf',
+                                    'Fecha de inicio' => new UTCDateTime(strtotime('2025-08-25') * 1000),
+                                    'Fecha de término' => new UTCDateTime(strtotime('2025-12-15') * 1000)
+                                ]
+                            ],
+                            'Especialidades Académicas' => [
+                                [
+                                    'Nombre de la especialidad' => 'Didáctica de las Matemáticas',
+                                    'Tipo de especialidad' => 'Diplomado',
+                                    'Descripción' => 'Formación pedagógica enfocada en enseñanza de matemáticas',
+                                    'Evidencia' => 'didactica_matematicas.pdf',
+                                    'Institución' => 'Universidad Pedagógica Nacional',
+                                    'Fecha de obtención' => new UTCDateTime(strtotime('2018-11-20') * 1000)
+                                ]
+                            ],
+                            'Cursos y formación continua' => [
+                                [
+                                    'Tipo de curso' => 'Formación docente',
+                                    'Nombre del curso o programa' => 'Gestión del Aula Virtual',
+                                    'Institución' => 'Universidad Virtual',
+                                    'Fecha de participación o término' => new UTCDateTime(strtotime('2024-08-20') * 1000),
+                                    'Duración (horas o meses)' => 40,
+                                    'Modalidad' => 'En línea',
+                                    'Evidencia' => 'aula_virtual_curso.pdf',
+                                    'Descripción o temas abordados' => 'Uso de herramientas digitales para enseñanza universitaria'
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ],
             [
                 '_id' => new ObjectId('686d545c64c3ad79300fd1b0'),
                 'secciones' => [

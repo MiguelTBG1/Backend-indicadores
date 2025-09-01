@@ -37,8 +37,8 @@ class PlantillasCollectionSeeder extends Seeder
         // Plantilla de Programas Educativos
         Plantillas::create([
             '_id' => new ObjectId('68b1df5f34dafa1c910aa02c'),
-            'nombre_plantilla' => 'Programa_educativo',
-            'nombre_coleccion' => 'Programa_educativo_data',
+            'nombre_plantilla' => 'Programa Educativo',
+            'nombre_coleccion' => 'ProgramaEducativo_data',
             'secciones' => [
                 [
                     'nombre' => 'Información General',
@@ -70,7 +70,7 @@ class PlantillasCollectionSeeder extends Seeder
                         ['name' => 'Fecha de contratación', 'type' => 'date', 'required' => true],
                         ['name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
                             ['name' => 'Idioma', 'type' => 'string', 'required' => true],
-                            ['name' => 'Nivel de competencia', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
+                            ['name' => 'Nivel', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
                             ['name' => 'Certificación', 'type' => 'file', 'required' => false]
                         ]]
                     ]

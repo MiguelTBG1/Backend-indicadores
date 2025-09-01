@@ -117,11 +117,31 @@ class ProgramaEducativoSeeder extends Seeder
                         ]
                     ]
                 ]
+            ],
+            [
+                'secciones' => [
+                    [
+                        'nombre' => 'Información General',
+                        'fields' => [
+                            'Nombre del programa' => 'Ingeniería en Sistemas Computacionales'
+                        ]
+                    ]
+                ]
+            ],
+            [
+                'secciones' => [
+                    [
+                        'nombre' => 'Información General',
+                        'fields' => [
+                            'Nombre del programa' => 'Ingeniería en Tecnologías de la Información y Comunicaciones'
+                        ]
+                    ]
+                ]
             ]
         ];
 
         // Verificar si la colección 'Programa_educativo_data' ya existe
-        $collectionName = 'Programa_educativo_data';
+        $collectionName = 'ProgramaEducativo_data';
 
         $collectionPrograma = $db->listCollections([
             'filter' => ['name' => $collectionName]
