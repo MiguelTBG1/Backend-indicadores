@@ -24,7 +24,9 @@ class DatabaseSeeder extends Seeder
             EjesCollectionSeeder::class,
             IndicadoresCollectionSeeder::class,
             PlantillasCollectionSeeder::class,
-            //DocumentosSeeder::class,
+            PeriodosSeeder::class,
+            ProfesoresSeeder::class,
+            ProgramaEducativoSeeder::class,
         ]);
     }
 }
