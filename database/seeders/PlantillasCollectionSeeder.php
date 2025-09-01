@@ -354,7 +354,7 @@ class PlantillasCollectionSeeder extends Seeder
                                 [
                                     'name' => 'Institución',
                                     'type' => 'select',
-                                    'options' => 'LISTA DE INSTITUCIONES?',
+                                    'options' => ['ITChetumal', 'UQROO', 'Modelo', 'Bizcaya'],
                                     'required' => false
                                 ],
                                 [
