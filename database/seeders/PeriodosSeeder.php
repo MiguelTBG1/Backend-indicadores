@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use MongoDB\Client as MongoClient;
+use MongoDB\BSON\ObjectId;
 
 class PeriodosSeeder extends Seeder
 {
@@ -20,6 +21,7 @@ class PeriodosSeeder extends Seeder
 
         $periodos = [
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee1'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -30,6 +32,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee2'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -40,6 +43,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee3'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -50,6 +54,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee4'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -60,6 +65,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee5'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -70,6 +76,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee6'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -80,6 +87,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee7'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -90,6 +98,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee8'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -100,6 +109,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000ee9'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -110,6 +120,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f10500ee10'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -120,6 +131,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa75013f105000e11'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -130,6 +142,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5e5fa75013f105000ee12'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
@@ -140,6 +153,7 @@ class PeriodosSeeder extends Seeder
                 ]
             ],
             [
+                '_id'=> new ObjectId('68b5ec5fa5013f105000ee13'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',

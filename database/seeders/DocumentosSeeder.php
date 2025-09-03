@@ -20,7 +20,7 @@ class DocumentosSeeder extends Seeder
                         'fields' => [
                             'Nombre Completo' => 'Daris Gael Martinez Galicia',
                             'Género'=> 'Masculino',
-                            'Programa educativo'=> '68b5e4491520fa82a80a06f6',
+                            'Programa educativo'=> '68b5ec5a75013f105000dd11',
                             'Número de control'=> '21394563'
                         ]
 
@@ -29,7 +29,7 @@ class DocumentosSeeder extends Seeder
                         'fields' => [
                             'Participa en movilidad' => [
                                 [
-                                    'Período de la movilidad' => '68b5e4481520fa82a80a06e0',
+                                    'Período de la movilidad' => '68b5ec5fa75013f105000ee1',
                                     'Lugar al que asistió'=> 'ITChetumal',
                                     'Proyecto que realizó'=> 'Indicadores',
                                     'Asesor' => '686d545c64c3ad79300fd1c0'
@@ -46,7 +46,7 @@ class DocumentosSeeder extends Seeder
                                 [
                                 'Tipo de evento'=> 'Concurso',
                                     'Nombre del evento'=> 'Indicadores Académicos',
-                                    'Período'=> '68b5e4481520fa82a80a06df',
+                                    'Período'=> '68b5ec5fa75013f105000ee1',
                                     'Institución'=> 'ITChetumal',
                                     'Lugar' => 'Centro de Innovacion'
                                 ],
@@ -60,7 +60,7 @@ class DocumentosSeeder extends Seeder
                             [
                                 'Nombre del Proyecto'=> 'Indicadores',
                                 'Asesor'=> '686d545c64c3ad79300fd1c0',
-                                'Período'=> '68b5e4481520fa82a80a06df'
+                                'Período'=> '68b5ec5fa75013f105000ee1'
                             ]
 
                             ]
