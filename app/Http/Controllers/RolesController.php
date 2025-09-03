@@ -9,9 +9,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Illuminate\Http\Request;
 
+/**
+ * @group Roles de usuario
+ * 
+ * Para manejar los roles de los usuarios
+ */
 class RolesController extends Controller
 {
-    /** Retorna todos los roles validos */
+    /** 
+     * Todos los roles
+     *
+     *  Devuelve todos los roles que existan en la base de datos.
+     */
     public function index()
     {
         $roles = Rol::all();
@@ -34,6 +43,8 @@ class RolesController extends Controller
 
     /**
      * Devuelve un rol en especifico
+     * 
+     * @urlParam rolId integer required El id del rol a devolver.
      */
     public function show($rolId)
     {
