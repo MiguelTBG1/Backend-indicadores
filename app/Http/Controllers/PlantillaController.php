@@ -65,7 +65,7 @@ class PlantillaController extends Controller
 
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
-                'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                /*'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'secciones' => 'required|array|min:1',
                 'secciones.*.nombre' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'secciones.*.fields' => 'required|array|min:1',
@@ -75,7 +75,7 @@ class PlantillaController extends Controller
                 'secciones.*.fields.*.subcampos' => 'required_if:secciones.*.fields.*.type,subform|array|min:1',
                 'secciones.*.fields.*.subcampos.*.name' => 'required_if:secciones.*.fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'secciones.*.fields.*.subcampos.*.type' => 'required_if:secciones.*.fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
-                'secciones.*.fields.*.subcampos.*.required' => 'required_if:secciones.*.fields.*.type,subform|boolean'
+                'secciones.*.fields.*.subcampos.*.required' => 'required_if:secciones.*.fields.*.type,subform|boolean'*/
             ]);
 
 
