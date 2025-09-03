@@ -1,18 +1,42 @@
 openapi: 3.0.3
 info:
   title: 'Documentación de la API del sistema de gestion de indicadores academicos'
-  description: ''
+  description: 'Esta documentación provee la informacion de como trabajar con nuestra API'
   version: 1.0.0
 servers:
   -
     url: 'http://localhost'
 tags:
   -
+    name: Authentification
+    description: ''
+  -
+    name: Documentos
+    description: ''
+  -
+    name: Ejes
+    description: "\nControlador para operaciones crud de las operaciones permitidas en el sistema (CRUD)."
+  -
     name: Endpoints
+    description: ''
+  -
+    name: Indicadores
+    description: "\nAPIs para administrar los indicadores"
+  -
+    name: Plantillas
+    description: ''
+  -
+    name: Recursos
+    description: ''
+  -
+    name: Reporte
     description: ''
   -
     name: 'Roles de usuario'
     description: "\nPara manejar los roles de los usuarios"
+  -
+    name: Users
+    description: ''
 components:
   securitySchemes:
     default:
@@ -23,272 +47,73 @@ security:
   -
     default: []
 paths:
-  /api/user:
-    get:
-      summary: ''
-      operationId: getApiUser
-      description: ''
-      parameters: []
-      responses:
-        500:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  message: 'Server Error'
-                properties:
-                  message:
-                    type: string
-                    example: 'Server Error'
-      tags:
-        - Endpoints
   /api/login:
     post:
-      summary: 'Inicia sesion de un usuario y regresa un token'
-      operationId: iniciaSesionDeUnUsuarioYRegresaUnToken
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-  /api/indicadores:
-    get:
-      summary: 'Obtiene todos los indicadores'
-      operationId: obtieneTodosLosIndicadores
-      description: ''
+      summary: Login
+      operationId: login
+      description: 'Inicia sesion de un usuario y regresa un token'
       parameters: []
       responses:
+        200:
+          description: 'Datos de inicio de sesion correctos'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '{ "message": "Login exitoso", "user": {"nombre": "Miguel", "id": "68b8634ccf157bf9880c1e7"}, "token": "68b898af531f622cbf0ba1", "permisos": ["usuarios_leer", "Plantillas_leer",]}'
         401:
-          description: ''
+          description: 'Datos de inicio de sesion incorrectos'
           content:
             application/json:
               schema:
                 type: object
                 example:
-                  success: false
-                  message: 'Token de autenticación inválido o expirado'
+                  message: 'Credenciales invalidas'
                 properties:
-                  success:
-                    type: boolean
-                    example: false
                   message:
                     type: string
-                    example: 'Token de autenticación inválido o expirado'
+                    example: 'Credenciales invalidas'
       tags:
-        - Endpoints
+        - Authentification
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'El correo del usuario'
+                  example: gbailey@example.net
+                  nullable: false
+                password:
+                  type: string
+                  description: 'La contraseña del usuario'
+                  example: '|]|{+-'
+                  nullable: false
+      security: []
+  /api/logout:
     post:
-      summary: 'Inserta un nuevo indicador en la base de datos'
-      operationId: insertaUnNuevoIndicadorEnLaBaseDeDatos
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-  '/api/indicadores/{id}':
-    get:
-      summary: 'Obtiene un indicador por su ID'
-      operationId: obtieneUnIndicadorPorSuID
-      description: ''
+      summary: Logout
+      operationId: logout
+      description: 'Cierra la sesión del usuario y elimina todos sus tokens'
       parameters: []
       responses:
-        401:
-          description: ''
+        200:
+          description: 'Logout exitoso'
           content:
             application/json:
               schema:
                 type: object
                 example:
-                  success: false
-                  message: 'Token de autenticación inválido o expirado'
+                  message: 'Logout exitoso'
                 properties:
-                  success:
-                    type: boolean
-                    example: false
                   message:
                     type: string
-                    example: 'Token de autenticación inválido o expirado'
+                    example: 'Logout exitoso'
       tags:
-        - Endpoints
-    put:
-      summary: 'Actualiza un indicador por su ID'
-      operationId: actualizaUnIndicadorPorSuID
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-    delete:
-      summary: 'Borra un indicador por su ID'
-      operationId: borraUnIndicadorPorSuID
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-    parameters:
-      -
-        in: path
-        name: id
-        description: 'The ID of the indicadore.'
-        example: architecto
-        required: true
-        schema:
-          type: string
-  '/api/indicadores/{id}/configuracion':
-    put:
-      summary: 'Agrega o actualiza la configuración de un indicador por su ID'
-      operationId: agregaOActualizaLaConfiguracinDeUnIndicadorPorSuID
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-    get:
-      summary: 'Obtener la configuración de un indicador por su ID'
-      operationId: obtenerLaConfiguracinDeUnIndicadorPorSuID
-      description: ''
-      parameters: []
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  success: false
-                  message: 'Token de autenticación inválido o expirado'
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: 'Token de autenticación inválido o expirado'
-      tags:
-        - Endpoints
-    parameters:
-      -
-        in: path
-        name: id
-        description: 'The ID of the indicadore.'
-        example: architecto
-        required: true
-        schema:
-          type: string
-  /api/indicadores/filterByDates:
-    post:
-      summary: 'Obtiene todos los indicadores filtrado por rango de fechas'
-      operationId: obtieneTodosLosIndicadoresFiltradoPorRangoDeFechas
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-  /api/indicadores/upload:
-    post:
-      summary: 'Carga un archivo Excel y guarda los indicadores en la base de datos'
-      operationId: cargaUnArchivoExcelYGuardaLosIndicadoresEnLaBaseDeDatos
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-  /api/plantillas:
-    get:
-      summary: 'Función para obtener todas las plantillas'
-      operationId: funcinParaObtenerTodasLasPlantillas
-      description: ''
-      parameters: []
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  success: false
-                  message: 'Token de autenticación inválido o expirado'
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: 'Token de autenticación inválido o expirado'
-      tags:
-        - Endpoints
-    post:
-      summary: 'Función para crear una nueva plantilla'
-      operationId: funcinParaCrearUnaNuevaPlantilla
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-  '/api/plantillas/{id}':
-    put:
-      summary: 'Función para actualizar una plantilla por ID'
-      operationId: funcinParaActualizarUnaPlantillaPorID
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-    delete:
-      summary: 'Función para eliminar una plantilla por ID'
-      operationId: funcinParaEliminarUnaPlantillaPorID
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-    parameters:
-      -
-        in: path
-        name: id
-        description: 'The ID of the plantilla.'
-        example: architecto
-        required: true
-        schema:
-          type: string
-  '/api/plantillas/{id}/secciones':
-    get:
-      summary: 'Función para obtener las secciones de una plantilla por ID'
-      operationId: funcinParaObtenerLasSeccionesDeUnaPlantillaPorID
-      description: ''
-      parameters: []
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  success: false
-                  message: 'Token de autenticación inválido o expirado'
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: 'Token de autenticación inválido o expirado'
-      tags:
-        - Endpoints
-    parameters:
-      -
-        in: path
-        name: id
-        description: 'The ID of the plantilla.'
-        example: architecto
-        required: true
-        schema:
-          type: string
+        - Authentification
   '/api/documentos/{id}':
     get:
       summary: 'Obtiene todos los documentos de una plantilla específica.'
@@ -313,7 +138,7 @@ paths:
                     type: string
                     example: 'Token de autenticación inválido o expirado'
       tags:
-        - Endpoints
+        - Documentos
     post:
       summary: ''
       operationId: postApiDocumentosId
@@ -321,7 +146,7 @@ paths:
       parameters: []
       responses: {  }
       tags:
-        - Endpoints
+        - Documentos
     parameters:
       -
         in: path
@@ -355,7 +180,7 @@ paths:
                     type: string
                     example: 'Token de autenticación inválido o expirado'
       tags:
-        - Endpoints
+        - Documentos
     post:
       summary: ''
       operationId: postApiDocumentosPlantillaNameDocumentId
@@ -363,7 +188,7 @@ paths:
       parameters: []
       responses: {  }
       tags:
-        - Endpoints
+        - Documentos
     delete:
       summary: ''
       operationId: deleteApiDocumentosPlantillaNameDocumentId
@@ -371,7 +196,7 @@ paths:
       parameters: []
       responses: {  }
       tags:
-        - Endpoints
+        - Documentos
     parameters:
       -
         in: path
@@ -391,9 +216,9 @@ paths:
           type: string
   /api/documentos/plantillas:
     get:
-      summary: ''
-      operationId: getApiDocumentosPlantillas
-      description: ''
+      summary: 'Obtener nombre plantillas'
+      operationId: obtenerNombrePlantillas
+      description: "Función para obtener los nombres de las plantillas que tengan documentos\nEsta función se conecta a la base de datos MongoDB y obtiene los nombres de las colecciones que cumplen con el patrón 'template_*_data'\nLuego, limpia los nombres de las colecciones para que no tengan el prefijo 'template_' y el sufijo '_data'\nFinalmente, devuelve los nombres de las plantillas en formato JSON"
       parameters: []
       responses:
         401:
@@ -413,7 +238,7 @@ paths:
                     type: string
                     example: 'Token de autenticación inválido o expirado'
       tags:
-        - Endpoints
+        - Documentos
   /api/ejes:
     get:
       summary: 'Función para obtener todos los ejes.'
@@ -438,7 +263,7 @@ paths:
                     type: string
                     example: 'Token de autenticación inválido o expirado'
       tags:
-        - Endpoints
+        - Ejes
     post:
       summary: 'Función para insertar un nuevo eje.'
       operationId: funcinParaInsertarUnNuevoEje
@@ -446,7 +271,7 @@ paths:
       parameters: []
       responses: {  }
       tags:
-        - Endpoints
+        - Ejes
   '/api/ejes/{id}':
     get:
       summary: 'Función para obtener un eje por ID.'
@@ -471,7 +296,7 @@ paths:
                     type: string
                     example: 'Token de autenticación inválido o expirado'
       tags:
-        - Endpoints
+        - Ejes
     put:
       summary: ''
       operationId: putApiEjesId
@@ -479,7 +304,7 @@ paths:
       parameters: []
       responses: {  }
       tags:
-        - Endpoints
+        - Ejes
     delete:
       summary: ''
       operationId: deleteApiEjesId
@@ -487,7 +312,7 @@ paths:
       parameters: []
       responses: {  }
       tags:
-        - Endpoints
+        - Ejes
     parameters:
       -
         in: path
@@ -497,202 +322,6 @@ paths:
         required: true
         schema:
           type: string
-  /api/usuarios:
-    get:
-      summary: 'Retorna todos los usuarios'
-      operationId: retornaTodosLosUsuarios
-      description: ''
-      parameters: []
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  success: false
-                  message: 'Token de autenticación inválido o expirado'
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: 'Token de autenticación inválido o expirado'
-      tags:
-        - Endpoints
-  '/api/usuarios/{id}':
-    get:
-      summary: 'Obtiene solo un usuario mediante su id'
-      operationId: obtieneSoloUnUsuarioMedianteSuId
-      description: ''
-      parameters: []
-      responses:
-        401:
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: object
-                example:
-                  success: false
-                  message: 'Token de autenticación inválido o expirado'
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: 'Token de autenticación inválido o expirado'
-      tags:
-        - Endpoints
-    put:
-      summary: ''
-      operationId: putApiUsuariosId
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-    delete:
-      summary: ''
-      operationId: deleteApiUsuariosId
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-    parameters:
-      -
-        in: path
-        name: id
-        description: 'The ID of the usuario.'
-        example: architecto
-        required: true
-        schema:
-          type: string
-  /api/register:
-    post:
-      summary: 'Registra un nuevo usuario.'
-      operationId: registraUnNuevoUsuario
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  description: validation.email.
-                  example: gbailey@example.net
-                  nullable: false
-                password:
-                  type: string
-                  description: ''
-                  example: '|]|{+-'
-                  nullable: false
-                nombre:
-                  type: string
-                  description: ''
-                  example: architecto
-                  nullable: false
-                apellido_paterno:
-                  type: string
-                  description: ''
-                  example: architecto
-                  nullable: false
-                apellido_materno:
-                  type: string
-                  description: ''
-                  example: architecto
-                  nullable: false
-                edad:
-                  type: integer
-                  description: ''
-                  example: 16
-                  nullable: false
-                genero:
-                  type: string
-                  description: ''
-                  example: architecto
-                  nullable: false
-                estado:
-                  type: string
-                  description: ''
-                  example: architecto
-                  nullable: false
-                ocupacion:
-                  type: string
-                  description: ''
-                  example: architecto
-                  nullable: false
-                escolaridad:
-                  type: string
-                  description: ''
-                  example: architecto
-                  nullable: false
-                roles:
-                  type: object
-                  description: ''
-                  example: null
-                  nullable: true
-                  properties: {  }
-                permisos:
-                  type: array
-                  description: ''
-                  example: null
-                  items:
-                    type: object
-                    nullable: true
-                    properties:
-                      recurso:
-                        type: string
-                        description: ''
-                        example: architecto
-                        nullable: false
-                      acciones:
-                        type: object
-                        description: ''
-                        example: []
-                        nullable: false
-                        properties: {  }
-                      activo:
-                        type: boolean
-                        description: ''
-                        example: false
-                        nullable: true
-                    required:
-                      - recurso
-                      - acciones
-                funciones_permitidas:
-                  type: object
-                  description: ''
-                  example: null
-                  nullable: true
-                  properties: {  }
-              required:
-                - email
-                - password
-                - nombre
-                - apellido_paterno
-                - apellido_materno
-                - edad
-  /api/logout:
-    post:
-      summary: 'Cierra la sesión del usuario y elimina todos sus tokens'
-      operationId: cierraLaSesinDelUsuarioYEliminaTodosSusTokens
-      description: ''
-      parameters: []
-      responses: {  }
-      tags:
-        - Endpoints
   /api/acciones:
     get:
       summary: 'Obtiene todos los roles'
@@ -717,7 +346,301 @@ paths:
                     type: string
                     example: 'Token de autenticación inválido o expirado'
       tags:
+        - Ejes
+  /api/user:
+    get:
+      summary: ''
+      operationId: getApiUser
+      description: ''
+      parameters: []
+      responses:
+        500:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Server Error'
+                properties:
+                  message:
+                    type: string
+                    example: 'Server Error'
+      tags:
         - Endpoints
+  /api/indicadores:
+    get:
+      summary: 'Obtener indicadores'
+      operationId: obtenerIndicadores
+      description: 'Retorna una lista de indicadores disponibles en el sistema.'
+      parameters: []
+      responses:
+        200:
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "scenario= \"No hay indicadores en la base de datos\" {\"success\": true,\n\"message\": \"No se encontraron indicadores\",\n\"indicadires\": [] }"
+        201:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Indicadores encontrados'
+                  indicadires:
+                    - Hola
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Indicadores encontrados'
+                  indicadires:
+                    type: array
+                    example:
+                      - Hola
+                    items:
+                      type: string
+      tags:
+        - Indicadores
+    post:
+      summary: 'Inserta un nuevo indicador en la base de datos'
+      operationId: insertaUnNuevoIndicadorEnLaBaseDeDatos
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Indicadores
+  '/api/indicadores/{id}':
+    get:
+      summary: 'Obtiene un indicador por su ID'
+      operationId: obtieneUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación inválido o expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación inválido o expirado'
+      tags:
+        - Indicadores
+    put:
+      summary: 'Actualiza un indicador por su ID'
+      operationId: actualizaUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Indicadores
+    delete:
+      summary: 'Borra un indicador por su ID'
+      operationId: borraUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Indicadores
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the indicadore.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/indicadores/{id}/configuracion':
+    put:
+      summary: 'Agrega o actualiza la configuración de un indicador por su ID'
+      operationId: agregaOActualizaLaConfiguracinDeUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Indicadores
+    get:
+      summary: 'Obtener la configuración de un indicador por su ID'
+      operationId: obtenerLaConfiguracinDeUnIndicadorPorSuID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación inválido o expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación inválido o expirado'
+      tags:
+        - Indicadores
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the indicadore.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/indicadores/filterByDates:
+    post:
+      summary: 'Obtener entre fechas'
+      operationId: obtenerEntreFechas
+      description: 'Obtiene todos los indicadores filtrado por rango de fechas'
+      parameters: []
+      responses: {  }
+      tags:
+        - Indicadores
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inicio:
+                  type: string
+                  description: 'La fecha de inicio'
+                  example: architecto
+                  nullable: false
+                fin:
+                  type: string
+                  description: 'La fecha de fin'
+                  example: architecto
+                  nullable: false
+                after_or_equa;:
+                  type: string
+                  description: HOla
+                  example: architecto
+                  nullable: false
+  /api/indicadores/upload:
+    post:
+      summary: 'Carga un archivo Excel y guarda los indicadores en la base de datos'
+      operationId: cargaUnArchivoExcelYGuardaLosIndicadoresEnLaBaseDeDatos
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Indicadores
+  /api/plantillas:
+    get:
+      summary: 'Función para obtener todas las plantillas'
+      operationId: funcinParaObtenerTodasLasPlantillas
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación inválido o expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación inválido o expirado'
+      tags:
+        - Plantillas
+    post:
+      summary: 'Función para crear una nueva plantilla'
+      operationId: funcinParaCrearUnaNuevaPlantilla
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Plantillas
+  '/api/plantillas/{id}':
+    put:
+      summary: 'Función para actualizar una plantilla por ID'
+      operationId: funcinParaActualizarUnaPlantillaPorID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Plantillas
+    delete:
+      summary: 'Función para eliminar una plantilla por ID'
+      operationId: funcinParaEliminarUnaPlantillaPorID
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Plantillas
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the plantilla.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/plantillas/{id}/secciones':
+    get:
+      summary: 'Función para obtener las secciones de una plantilla por ID'
+      operationId: funcinParaObtenerLasSeccionesDeUnaPlantillaPorID
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación inválido o expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación inválido o expirado'
+      tags:
+        - Plantillas
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the plantilla.'
+        example: architecto
+        required: true
+        schema:
+          type: string
   /api/recursos:
     get:
       summary: 'Retorna todos los recursos registrados en el sistema'
@@ -742,7 +665,7 @@ paths:
                     type: string
                     example: 'Token de autenticación inválido o expirado'
       tags:
-        - Endpoints
+        - Recursos
   /api/generate-invoice-pdf:
     get:
       summary: ''
@@ -756,9 +679,9 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: !!binary JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSID4+CmVuZG9iagoyIDAgb2JqCjw8IC9UeXBlIC9PdXRsaW5lcyAvQ291bnQgMCA+PgplbmRvYmoKMyAwIG9iago8PCAvVHlwZSAvUGFnZXMKL0tpZHMgWzYgMCBSCl0KL0NvdW50IDEKL1Jlc291cmNlcyA8PAovUHJvY1NldCA0IDAgUgovRm9udCA8PCAKL0YxIDggMCBSCi9GMiA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAuMDAwIDAuMDAwIDU5NS4yODAgODQxLjg5MF0KID4+CmVuZG9iago0IDAgb2JqClsvUERGIC9UZXh0IF0KZW5kb2JqCjUgMCBvYmoKPDwKL1Byb2R1Y2VyICj+/wBkAG8AbQBwAGQAZgAgADMALgAxAC4AMAAgACsAIABDAFAARABGKQovQ3JlYXRpb25EYXRlIChEOjIwMjUwOTAzMTYzMDM1KzAwJzAwJykKL01vZERhdGUgKEQ6MjAyNTA5MDMxNjMwMzUrMDAnMDAnKQovVGl0bGUgKP7/AEYAYQBjAHQAdQByAGEpCj4+CmVuZG9iago2IDAgb2JqCjw8IC9UeXBlIC9QYWdlCi9NZWRpYUJveCBbMC4wMDAgMC4wMDAgNTk1LjI4MCA4NDEuODkwXQovUGFyZW50IDMgMCBSCi9Db250ZW50cyA3IDAgUgo+PgplbmRvYmoKNyAwIG9iago8PCAvRmlsdGVyIC9GbGF0ZURlY29kZQovTGVuZ3RoIDc0NiA+PgpzdHJlYW0KeJyVlk1v00AQhu/9FSPRA0h0u99r90gFiApQBYZL1YOVmBIpTargCIl/zL9gHGdmx46N4BKlr2b3fbx+audMK601yM/dw9mrCkwsVSgKSLFQLhiolnD5xoL1SkP1DeDu+Zt60e53NTx79/HrhdU2XGhtXtxDdQOvq24L65OKOkJyXsWi7LcwYGzeoll8r69Au0tdXnZbyOW4ShtcrYPSLk2svl6vmk3bXMHNvt7A7e9d84vXa1XEBPLz01sMU4CfoOEG7gDu8cvy7NgSi6iSM/AIJmCDtZys4XM35EqDUVIGL+gRKAiFKoM/zCCxx4KIe+GRRRfoyATx7W673C/aLWOaYJRNVtTbGFVx6Mr13VT0SfRzMgQw+OeBfZbgut60q2W9ZIKuz3gjCLy3+K0cEHRT4XBMRMDJkAAvpsf/yxk0i9UWvmxWbb1b5aPw3qiyKAVIiHg40Q9AOjh3yAiEEwESIt7zw140xcnojvmiv9ZZ3Grb1muGJFtCqZwtpS3HRNqCUdJe2OKMCsGObcHrts5N+P2+fmq3T6eucDm7IsqzGdTOybCeXZntN6eScDVLIqqzElTNybCaJZmtPjcvre4eR6d6MALrIRCyDITAiUDIMtAUJ6NbRHr8BygpgjuVNklFjolUxCGctkIR7ZUJeqyIcapwZqL+w3b/ozk1hLvZENGdfaByTobtbMhsvT01hKvZEFGdfaBqTobVbMhs9bkNk3pwP+sh+rMM1M+J6M8y0BQno9tDesxThkk3cJtgg3TjmBzd6IZCwmeXdWKIEikQrivxnc0ChYTPSl+MBAr4BPV26g1cNYt1vZx4ITEiKyQQaSoz0pRklFr1kJSMKEm0ecyJRxEDsmgCkKYyIE1JQClfD0jJCJB0nAc8T9M6MiXrKChpKlPSlKSUivaUlEhKqWg/RclYiaO0/3wt3Rqn8VjwBlmHN2rqt9jhNQk1PNUP9e4K5OKgE3IUw8V29BB1g3/nP4moOz4KZW5kc3RyZWFtCmVuZG9iago4IDAgb2JqCjw8IC9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovTmFtZSAvRjEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKPj4KZW5kb2JqCjkgMCBvYmoKPDwgL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMgovQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkCi9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nCj4+CmVuZG9iagp4cmVmCjAgMTAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNzQgMDAwMDAgbiAKMDAwMDAwMDEyMCAwMDAwMCBuIAowMDAwMDAwMjg0IDAwMDAwIG4gCjAwMDAwMDAzMTMgMDAwMDAgbiAKMDAwMDAwMDQ4OCAwMDAwMCBuIAowMDAwMDAwNTkxIDAwMDAwIG4gCjAwMDAwMDE0MDkgMDAwMDAgbiAKMDAwMDAwMTUxNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDEwCi9Sb290IDEgMCBSCi9JbmZvIDUgMCBSCi9JRFs8OGQ2ZTJjZDVmMmJjYjBjYTQ2MTM1ODM2YjkyYTZkZmQ+PDhkNmUyY2Q1ZjJiY2IwY2E0NjEzNTgzNmI5MmE2ZGZkPl0KPj4Kc3RhcnR4cmVmCjE2MjgKJSVFT0YK
+                example: !!binary JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSID4+CmVuZG9iagoyIDAgb2JqCjw8IC9UeXBlIC9PdXRsaW5lcyAvQ291bnQgMCA+PgplbmRvYmoKMyAwIG9iago8PCAvVHlwZSAvUGFnZXMKL0tpZHMgWzYgMCBSCl0KL0NvdW50IDEKL1Jlc291cmNlcyA8PAovUHJvY1NldCA0IDAgUgovRm9udCA8PCAKL0YxIDggMCBSCi9GMiA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAuMDAwIDAuMDAwIDU5NS4yODAgODQxLjg5MF0KID4+CmVuZG9iago0IDAgb2JqClsvUERGIC9UZXh0IF0KZW5kb2JqCjUgMCBvYmoKPDwKL1Byb2R1Y2VyICj+/wBkAG8AbQBwAGQAZgAgADMALgAxAC4AMAAgACsAIABDAFAARABGKQovQ3JlYXRpb25EYXRlIChEOjIwMjUwOTAzMTk1NDIyKzAwJzAwJykKL01vZERhdGUgKEQ6MjAyNTA5MDMxOTU0MjIrMDAnMDAnKQovVGl0bGUgKP7/AEYAYQBjAHQAdQByAGEpCj4+CmVuZG9iago2IDAgb2JqCjw8IC9UeXBlIC9QYWdlCi9NZWRpYUJveCBbMC4wMDAgMC4wMDAgNTk1LjI4MCA4NDEuODkwXQovUGFyZW50IDMgMCBSCi9Db250ZW50cyA3IDAgUgo+PgplbmRvYmoKNyAwIG9iago8PCAvRmlsdGVyIC9GbGF0ZURlY29kZQovTGVuZ3RoIDc0NiA+PgpzdHJlYW0KeJyVlk1v00AQhu/9FSPRA0h0u99r90gFiApQBYZL1YOVmBIpTargCIl/zL9gHGdmx46N4BKlr2b3fbx+audMK601yM/dw9mrCkwsVSgKSLFQLhiolnD5xoL1SkP1DeDu+Zt60e53NTx79/HrhdU2XGhtXtxDdQOvq24L65OKOkJyXsWi7LcwYGzeoll8r69Au0tdXnZbyOW4ShtcrYPSLk2svl6vmk3bXMHNvt7A7e9d84vXa1XEBPLz01sMU4CfoOEG7gDu8cvy7NgSi6iSM/AIJmCDtZys4XM35EqDUVIGL+gRKAiFKoM/zCCxx4KIe+GRRRfoyATx7W673C/aLWOaYJRNVtTbGFVx6Mr13VT0SfRzMgQw+OeBfZbgut60q2W9ZIKuz3gjCLy3+K0cEHRT4XBMRMDJkAAvpsf/yxk0i9UWvmxWbb1b5aPw3qiyKAVIiHg40Q9AOjh3yAiEEwESIt7zw140xcnojvmiv9ZZ3Grb1muGJFtCqZwtpS3HRNqCUdJe2OKMCsGObcHrts5N+P2+fmq3T6eucDm7IsqzGdTOybCeXZntN6eScDVLIqqzElTNybCaJZmtPjcvre4eR6d6MALrIRCyDITAiUDIMtAUJ6NbRHr8BygpgjuVNklFjolUxCGctkIR7ZUJeqyIcapwZqL+w3b/ozk1hLvZENGdfaByTobtbMhsvT01hKvZEFGdfaBqTobVbMhs9bkNk3pwP+sh+rMM1M+J6M8y0BQno9tDesxThkk3cJtgg3TjmBzd6IZCwmeXdWKIEikQrivxnc0ChYTPSl+MBAr4BPV26g1cNYt1vZx4ITEiKyQQaSoz0pRklFr1kJSMKEm0ecyJRxEDsmgCkKYyIE1JQClfD0jJCJB0nAc8T9M6MiXrKChpKlPSlKSUivaUlEhKqWg/RclYiaO0/3wt3Rqn8VjwBlmHN2rqt9jhNQk1PNUP9e4K5OKgE3IUw8V29BB1g3/nP4moOz4KZW5kc3RyZWFtCmVuZG9iago4IDAgb2JqCjw8IC9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovTmFtZSAvRjEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKPj4KZW5kb2JqCjkgMCBvYmoKPDwgL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMgovQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkCi9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nCj4+CmVuZG9iagp4cmVmCjAgMTAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNzQgMDAwMDAgbiAKMDAwMDAwMDEyMCAwMDAwMCBuIAowMDAwMDAwMjg0IDAwMDAwIG4gCjAwMDAwMDAzMTMgMDAwMDAgbiAKMDAwMDAwMDQ4OCAwMDAwMCBuIAowMDAwMDAwNTkxIDAwMDAwIG4gCjAwMDAwMDE0MDkgMDAwMDAgbiAKMDAwMDAwMTUxNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDEwCi9Sb290IDEgMCBSCi9JbmZvIDUgMCBSCi9JRFs8Y2JiNGYwZDgzMmEyMjUxZTE0N2RmOWM4ZmI2M2M0MzQ+PGNiYjRmMGQ4MzJhMjI1MWUxNDdkZjljOGZiNjNjNDM0Pl0KPj4Kc3RhcnR4cmVmCjE2MjgKJSVFT0YK
       tags:
-        - Endpoints
+        - Reporte
   /api/roles:
     get:
       summary: 'Todos los roles'
@@ -932,3 +855,190 @@ paths:
         required: true
         schema:
           type: integer
+  /api/usuarios:
+    get:
+      summary: 'Retorna todos los usuarios'
+      operationId: retornaTodosLosUsuarios
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación inválido o expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación inválido o expirado'
+      tags:
+        - Users
+  '/api/usuarios/{id}':
+    get:
+      summary: 'Obtiene solo un usuario mediante su id'
+      operationId: obtieneSoloUnUsuarioMedianteSuId
+      description: ''
+      parameters: []
+      responses:
+        401:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de autenticación inválido o expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de autenticación inválido o expirado'
+      tags:
+        - Users
+    put:
+      summary: ''
+      operationId: putApiUsuariosId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Users
+    delete:
+      summary: ''
+      operationId: deleteApiUsuariosId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Users
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the usuario.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/register:
+    post:
+      summary: 'Registra un nuevo usuario.'
+      operationId: registraUnNuevoUsuario
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: validation.email.
+                  example: gbailey@example.net
+                  nullable: false
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+                  nullable: false
+                nombre:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                apellido_paterno:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                apellido_materno:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                edad:
+                  type: integer
+                  description: ''
+                  example: 16
+                  nullable: false
+                genero:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                estado:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                ocupacion:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                escolaridad:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: false
+                roles:
+                  type: object
+                  description: ''
+                  example: null
+                  nullable: true
+                  properties: {  }
+                permisos:
+                  type: array
+                  description: ''
+                  example: null
+                  items:
+                    type: object
+                    nullable: true
+                    properties:
+                      recurso:
+                        type: string
+                        description: ''
+                        example: architecto
+                        nullable: false
+                      acciones:
+                        type: object
+                        description: ''
+                        example: []
+                        nullable: false
+                        properties: {  }
+                      activo:
+                        type: boolean
+                        description: ''
+                        example: false
+                        nullable: true
+                    required:
+                      - recurso
+                      - acciones
+                funciones_permitidas:
+                  type: object
+                  description: ''
+                  example: null
+                  nullable: true
+                  properties: {  }
+              required:
+                - email
+                - password
+                - nombre
+                - apellido_paterno
+                - apellido_materno
+                - edad

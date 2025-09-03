@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf; // Importa la fachada de PDF
 
+/**
+ * @group Reporte
+ */
 class ReporteController extends Controller
 {
     public function generatePdf()

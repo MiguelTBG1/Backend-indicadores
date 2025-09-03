@@ -9,6 +9,9 @@ use Symfony\Component\Process\Process;
 use ZipArchive;
 
 
+/**
+ * @group Respaldo
+ */
 class RespaldoController extends Controller
 {
     public function createBackup()

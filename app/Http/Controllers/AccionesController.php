@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
+ * @group Ejes
+ * 
  * Controlador para operaciones crud de las operaciones permitidas en el sistema (CRUD).
  */
 class AccionesController extends Controller
@@ -39,7 +41,8 @@ class AccionesController extends Controller
      * Obtiene un rol por su ID
      * @return JsonResponse La respuesta con las operaciones
      */
-    public static function getById() {
+    public static function getById()
+    {
         // Verificamos que exista el ID
     }
 }

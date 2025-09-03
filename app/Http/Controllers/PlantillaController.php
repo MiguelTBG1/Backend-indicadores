@@ -14,6 +14,9 @@ use Exception;
 
 use function PHPUnit\Framework\isArray;
 
+/**
+ * @group Plantillas
+ */
 class PlantillaController extends Controller
 {
     /**
@@ -34,7 +37,6 @@ class PlantillaController extends Controller
 
             // Devolver la respuesta JSON
             return response()->json($plantillas, 200);
-
         } catch (Exception $e) {
 
             // Registrar el error en el log
@@ -91,7 +93,7 @@ class PlantillaController extends Controller
             }
 
             // Formar el nombre de la colección eliminando espacios
-            $collectionName = str_replace(' ','', $plantillaName) . "_data";
+            $collectionName = str_replace(' ', '', $plantillaName) . "_data";
 
             // Registramos la coleccion del documento a crear
             Recurso::create([
@@ -120,9 +122,7 @@ class PlantillaController extends Controller
             return response()->json([
                 'message' => 'Plantilla creada exitosamente',
             ], 201);
-
-        } catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en store: ' . $e->getMessage());
 
@@ -173,10 +173,10 @@ class PlantillaController extends Controller
             $collections = $db->listCollections();
 
             // Buscamos los campos que sean select dinamico
-            foreach($plantilla->secciones as $index => $seccion){
-                foreach($seccion['fields'] as $indexfield => $field){
+            foreach ($plantilla->secciones as $index => $seccion) {
+                foreach ($seccion['fields'] as $indexfield => $field) {
 
-                    if($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])){
+                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
                         // Guardamos dataSource
                         $optionsSource = $field['dataSource'];
 
@@ -184,7 +184,7 @@ class PlantillaController extends Controller
                         $nombreColeccion = Plantillas::find($optionsSource['plantillaId'])->nombre_coleccion ?? null;
 
                         // Validamos si se encontro la coleccion
-                        if(!$nombreColeccion){
+                        if (!$nombreColeccion) {
                             throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
                         }
 
@@ -197,24 +197,24 @@ class PlantillaController extends Controller
                             }
                         }
 
-                        if($sourceCollectionExists){
+                        if ($sourceCollectionExists) {
                             // Obtenemos los documentos de la colección de origen
                             $Documents = json_decode(json_encode($db->selectCollection($nombreColeccion)->find()->toArray()), true);
 
 
 
                             $options = [];
-                            foreach($Documents as $indexDoc => $doc){
+                            foreach ($Documents as $indexDoc => $doc) {
 
-                                foreach($doc['secciones'] as $indexSeccion => $seccion){
-                                    foreach($seccion['fields'] as $keyField => $fields){
+                                foreach ($doc['secciones'] as $indexSeccion => $seccion) {
+                                    foreach ($seccion['fields'] as $keyField => $fields) {
 
                                         /*Log::info('Fecha '.$keyField.': ', [
                                             'fields' => $fields ?? null,
                                         ]);*/
 
-                                        if($optionsSource['campoMostrar'] == $keyField){
-                                            $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField]?? null;
+                                        if ($optionsSource['campoMostrar'] == $keyField) {
+                                            $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
                                         }
                                     }
                                 }
@@ -226,16 +226,16 @@ class PlantillaController extends Controller
 
                             // Actualizamos las opciones del campo en la plantilla
                             $secciones[$index]['fields'][$indexfield]['options'] = $options;
-                        }else{
+                        } else {
                             Log::warning("Colección de origen no encontrada: " . $optionsSource);
                         }
                     }
 
-                    if($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])){
+                    if ($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])) {
                         // Recorremos los subcampos
-                        foreach($field['subcampos'] as $indexSubcampo => $subcampo){
+                        foreach ($field['subcampos'] as $indexSubcampo => $subcampo) {
 
-                            if($subcampo['type'] === 'select' && isset($subcampo['dataSource']) && isArray($subcampo['dataSource'])){
+                            if ($subcampo['type'] === 'select' && isset($subcampo['dataSource']) && isArray($subcampo['dataSource'])) {
                                 // Guardamos dataSource
                                 $optionsSource = $subcampo['dataSource'];
 
@@ -243,7 +243,7 @@ class PlantillaController extends Controller
                                 $nombreColeccion = Plantillas::find($optionsSource['plantillaId'])->nombre_coleccion ?? null;
 
                                 // Validamos si se encontro la coleccion
-                                if(!$nombreColeccion){
+                                if (!$nombreColeccion) {
                                     throw new \Exception('No se encontró la plantilla para el campo select: ' . $subcampo['name'], 404);
                                 }
 
@@ -256,22 +256,22 @@ class PlantillaController extends Controller
                                     }
                                 }
 
-                                if($sourceCollectionExists){
+                                if ($sourceCollectionExists) {
                                     // Obtenemos los documentos de la colección de origen
                                     $Documents = json_decode(json_encode($db->selectCollection($nombreColeccion)->find()->toArray()), true);
 
                                     $options = [];
-                                    foreach($Documents as $indexDoc => $doc){
+                                    foreach ($Documents as $indexDoc => $doc) {
 
-                                        foreach($doc['secciones'] as $indexSeccion => $seccion){
-                                            foreach($seccion['fields'] as $keyField => $fields){
+                                        foreach ($doc['secciones'] as $indexSeccion => $seccion) {
+                                            foreach ($seccion['fields'] as $keyField => $fields) {
 
                                                 /*Log::info('Fecha '.$keyField.': ', [
                                                     'fields' => $fields ?? null,
                                                 ]);*/
 
-                                                if($optionsSource['campoMostrar'] == $keyField){
-                                                    $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField]?? null;
+                                                if ($optionsSource['campoMostrar'] == $keyField) {
+                                                    $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
                                                 }
                                             }
                                         }
@@ -301,7 +301,6 @@ class PlantillaController extends Controller
                 'nombre_plantilla' => $nombrePlantilla,
                 'secciones' => $secciones,
             ], 200);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en getFields: ' . $e->getMessage());
@@ -348,7 +347,7 @@ class PlantillaController extends Controller
                 'secciones' => $request->input('secciones')
             ]);
 
-             // Validar la solicitud
+            // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'secciones' => 'required|array|min:1',
                 'secciones.*.nombre' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
@@ -379,7 +378,6 @@ class PlantillaController extends Controller
             return response()->json([
                 'message' => 'Plantilla actualizada exitosamente',
             ], 200);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en update: ' . $e->getMessage());
@@ -450,7 +448,6 @@ class PlantillaController extends Controller
             return response()->json([
                 'message' => 'Plantilla eliminada exitosamente'
             ], 200);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en delete: ' . $e->getMessage());
@@ -462,5 +459,4 @@ class PlantillaController extends Controller
             ], $e->getCode() ?: 500);
         }
     }
-
 }

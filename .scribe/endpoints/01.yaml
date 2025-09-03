@@ -1,105 +1,66 @@
-name: 'Roles de usuario'
-description: |-
-
-  Para manejar los roles de los usuarios
+name: Authentification
+description: ''
 endpoints:
   -
     httpMethods:
-      - GET
-    uri: api/roles
+      - POST
+    uri: api/login
     metadata:
-      groupName: 'Roles de usuario'
-      groupDescription: |-
-
-        Para manejar los roles de los usuarios
+      groupName: Authentification
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Todos los roles'
-      description: 'Devuelve todos los roles que existan en la base de datos.'
-      authenticated: true
+      title: Login
+      description: 'Inicia sesion de un usuario y regresa un token'
+      authenticated: false
       custom: []
     headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
       Content-Type: application/json
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        status: 401
-        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          vary: Origin
-        description: null
-        custom: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - GET
-    uri: 'api/roles/{rolId}'
-    metadata:
-      groupName: 'Roles de usuario'
-      groupDescription: |-
-
-        Para manejar los roles de los usuarios
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Devuelve un rol en especifico'
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      rolId:
-        name: rolId
-        description: 'El id del rol a devolver.'
-        required: true
-        example: 16
-        type: integer
+    bodyParameters:
+      email:
+        name: email
+        description: 'El correo del usuario'
+        required: false
+        example: gbailey@example.net
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-    cleanUrlParameters:
-      rolId: 16
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+      password:
+        name: password
+        description: 'La contraseña del usuario'
+        required: false
+        example: '|]|{+-'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      email: gbailey@example.net
+      password: '|]|{+-'
     fileParameters: []
     responses:
       -
+        status: 200
+        content: '{ "message": "Login exitoso", "user": {"nombre": "Miguel", "id": "68b8634ccf157bf9880c1e7"}, "token": "68b898af531f622cbf0ba1", "permisos": ["usuarios_leer", "Plantillas_leer",]}'
+        headers: []
+        description: 'Datos de inicio de sesion correctos'
+        custom: []
+      -
         status: 401
-        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
-        headers:
-          cache-control: 'no-cache, private'
-          content-type: application/json
-          vary: Origin
-        description: null
+        content: '{"message": "Credenciales invalidas"}'
+        headers: []
+        description: 'Datos de inicio de sesion incorrectos'
         custom: []
     responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    auth: []
     controller: null
     method: null
     route: null
@@ -107,16 +68,14 @@ endpoints:
   -
     httpMethods:
       - POST
-    uri: api/roles
+    uri: api/logout
     metadata:
-      groupName: 'Roles de usuario'
-      groupDescription: |-
-
-        Para manejar los roles de los usuarios
+      groupName: Authentification
+      groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Guarda un nuevo rol'
-      description: ''
+      title: Logout
+      description: 'Cierra la sesión del usuario y elimina todos sus tokens'
       authenticated: true
       custom: []
     headers:
@@ -127,235 +86,16 @@ endpoints:
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters:
-      nombre:
-        name: nombre
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      descripcion:
-        name: descripcion
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      permisos:
-        name: permisos
-        description: ''
-        required: false
-        example: null
-        type: 'object[]'
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-      funciones_permitidas:
-        name: funciones_permitidas
-        description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-      'permisos[].recurso':
-        name: 'permisos[].recurso'
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      'permisos[].acciones':
-        name: 'permisos[].acciones'
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      nombre: architecto
-      descripcion: architecto
-      permisos:
-        -
-          recurso: architecto
-          acciones: []
-    fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - DELETE
-    uri: 'api/roles/{rolId}'
-    metadata:
-      groupName: 'Roles de usuario'
-      groupDescription: |-
-
-        Para manejar los roles de los usuarios
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Borra un rol en especifico'
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      rolId:
-        name: rolId
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanUrlParameters:
-      rolId: architecto
-    queryParameters: []
-    cleanQueryParameters: []
     bodyParameters: []
     cleanBodyParameters: []
     fileParameters: []
-    responses: []
-    responseFields: []
-    auth:
-      - headers
-      - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - PUT
-    uri: 'api/roles/{rolId}'
-    metadata:
-      groupName: 'Roles de usuario'
-      groupDescription: |-
-
-        Para manejar los roles de los usuarios
-      subgroup: ''
-      subgroupDescription: ''
-      title: 'Actualiza un rol'
-      description: ''
-      authenticated: true
-      custom: []
-    headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters:
-      rolId:
-        name: rolId
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
+    responses:
+      -
+        status: 200
+        content: '{"message": "Logout exitoso"}'
+        headers: []
+        description: 'Logout exitoso'
         custom: []
-    cleanUrlParameters:
-      rolId: architecto
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      nombre:
-        name: nombre
-        description: ''
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      descripcion:
-        name: descripcion
-        description: ''
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      permisos:
-        name: permisos
-        description: ''
-        required: false
-        example: null
-        type: 'object[]'
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-      funciones_permitidas:
-        name: funciones_permitidas
-        description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-      'permisos[].recurso':
-        name: 'permisos[].recurso'
-        description: ''
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      'permisos[].acciones':
-        name: 'permisos[].acciones'
-        description: ''
-        required: false
-        example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      nombre: architecto
-      descripcion: architecto
-      permisos:
-        -
-          recurso: architecto
-    fileParameters: []
-    responses: []
     responseFields: []
     auth:
       - headers

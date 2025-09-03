@@ -12,6 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 use function PHPUnit\Framework\isEmpty;
 
+/**
+ * @group Users
+ */
 class UsersController extends Controller
 {
 

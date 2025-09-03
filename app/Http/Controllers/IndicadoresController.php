@@ -15,14 +15,32 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Plantillas;
 use DateTime;
 
+/**
+ * @group Indicadores
+ * 
+ * APIs para administrar los indicadores
+ */
 class IndicadoresController extends Controller
 {
     /**
-     * Obtiene todos los indicadores
+     * Obtener indicadores
+     * 
+     * Retorna una lista de indicadores disponibles en el sistema.
+     * 
      * @return JsonResponse La respuesta con los indicadores
+     * @response 201 {
+     * "success": true,
+     * "message": "Indicadores encontrados",
+     * "indicadires": ["Hola"]
+     * }
+     * 
+     * @response status=200 scenario= "No hay indicadores en la base de datos" {"success": true,
+     * "message": "No se encontraron indicadores",
+     * "indicadires": [] }
      */
     public function index()
     {
+
         try {
             // Obtenemos todos los indicadores
             $indicadores = Indicadores::all();
@@ -56,7 +74,6 @@ class IndicadoresController extends Controller
                 'message' => 'Indicadores encontrados',
                 'indicadores' => $indicadores,
             ], Response::HTTP_OK);
-
         } catch (Exception $e) {
             // Retornamos mensaje de error
             Log::error('Error al obtener los indicadores: ' . $e->getMessage());
@@ -67,8 +84,14 @@ class IndicadoresController extends Controller
         }
     }
 
-        /**
+    /**
+     * Obtener entre fechas
+     * 
      * Obtiene todos los indicadores filtrado por rango de fechas
+     * 
+     * @bodyParam inicio string La fecha de inicio
+     * @bodyParam fin string La fecha de fin
+     * @bodyParam after_or_equa; string HOla
      * @param Request $request Datos del rango de fecha
      * @return JsonResponse La respuesta con los indicadores
      */
@@ -81,7 +104,7 @@ class IndicadoresController extends Controller
                 'fin' => 'required|date|after_or_equal:inicio',
             ]);
 
-            if($validator->fails()) {
+            if ($validator->fails()) {
                 throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
@@ -90,8 +113,8 @@ class IndicadoresController extends Controller
 
             // Obtenemos los indicadores
             $indicadores = Indicadores::where('fecha_inicio', '<=', $finDate)
-                        ->where('fecha_fin', '>=', $inicioDate)
-                        ->get();
+                ->where('fecha_fin', '>=', $inicioDate)
+                ->get();
 
             // Primero convertimos los modelos a arrays
             $resultado = $indicadores->map(function ($indicador) {
@@ -107,7 +130,7 @@ class IndicadoresController extends Controller
             });
 
             // Procesamos la configuración
-            $resultado = $resultado->map(function ($indicador) use ($inicioDate,$finDate) {
+            $resultado = $resultado->map(function ($indicador) use ($inicioDate, $finDate) {
                 if (isset($indicador['configuracion'])) {
                     $indicador['configuracion']['fecha_inicio'] = $inicioDate;
                     $indicador['configuracion']['fecha_fin'] = $finDate;
@@ -122,7 +145,6 @@ class IndicadoresController extends Controller
                 'message' => 'Indicadores encontrados',
                 'indicadores' => $resultado, // Cambiado de $indicadores a $resultado
             ], Response::HTTP_OK);
-
         } catch (Exception $e) {
             Log::error('Error al obtener los indicadores: ' . $e->getMessage());
             return response()->json([
@@ -137,7 +159,8 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a obtener
      * @return JsonResponse La respuesta con el indicador
      */
-    public function show($id){
+    public function show($id)
+    {
         try {
             // Obtenemos el indicador por su ID
             $indicador = Indicadores::findOrFail($id);
@@ -148,7 +171,6 @@ class IndicadoresController extends Controller
                 'message' => 'Indicador encontrado',
                 'indicador' => $indicador
             ], Response::HTTP_OK);
-
         } catch (Exception $e) {
             // Retornamos mensaje de error
             Log::error('Error al obtener el indicador: ' . $e->getMessage());
@@ -163,7 +185,7 @@ class IndicadoresController extends Controller
      * Calcula el numerador de un indicador
      * @param array $configuracion Configuración del indicador
      * @return int El valor del numerador
-    */
+     */
     private function calculateNumerador($configuracion)
     {
         Log::info('Calculando numerador con configuración', $configuracion);
@@ -228,13 +250,13 @@ class IndicadoresController extends Controller
         $pipeline[] = [
             '$project' => [
                 'datosAplanados' => [
-                '$reduce' => [
-                    'input' => '$secciones',
-                    'initialValue' => (object)[], // 👈 Cambiado a objeto vacío
-                    'in' => [
-                    '$mergeObjects' => ['$$value', '$$this.fields']
+                    '$reduce' => [
+                        'input' => '$secciones',
+                        'initialValue' => (object)[], // 👈 Cambiado a objeto vacío
+                        'in' => [
+                            '$mergeObjects' => ['$$value', '$$this.fields']
+                        ]
                     ]
-                ]
                 ]
             ]
         ];
@@ -266,7 +288,7 @@ class IndicadoresController extends Controller
                 $tipocampo = '';
 
                 foreach ($secciones as $seccion) {
-                    foreach($seccion['fields'] as $campo){
+                    foreach ($seccion['fields'] as $campo) {
                         if (isset($campo['name']) && $campo['name'] === $condicion['campo']) {
                             Log::info('Campo encontrado en la sección', [
                                 'campo' => $campo['name'],
@@ -323,7 +345,7 @@ class IndicadoresController extends Controller
             }
         }
 
-        if( $configuracion['operacion'] === 'distinto'){
+        if ($configuracion['operacion'] === 'distinto') {
             $pipeline[] = [
                 '$unwind' => '$' . $configuracion['campo']
             ];
@@ -333,7 +355,7 @@ class IndicadoresController extends Controller
         if (isset($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && count($configuracion['subConfiguracion']) > 0) {
             $nombreCampo = $configuracion['campo'];
 
-            if($configuracion['operacion'] === 'distinto'){
+            if ($configuracion['operacion'] === 'distinto') {
                 $subNombreCampo = $configuracion['subConfiguracion']['campo'];
 
                 // Verificamos si hay condiciones en subConfiguración
@@ -364,17 +386,15 @@ class IndicadoresController extends Controller
                             ]
                         ];
                     }
-
-
                 }
 
-                if(isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])){
+                if (isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])) {
                     // Buscar campo de fecha que se aplicará el filtro
                     $campoFecha = '';
 
-                    foreach($secciones as $seccion){
+                    foreach ($secciones as $seccion) {
 
-                        foreach($seccion['fields'] as $campo){
+                        foreach ($seccion['fields'] as $campo) {
 
                             /*
                             foreach($campo as $key => $value){
@@ -387,19 +407,18 @@ class IndicadoresController extends Controller
                             Log::info('campo', $campo);
 
                             // Verificamos si el campo es un subform y tiene subcampos
-                            if($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])){
-                                foreach($campo['subcampos'] as $subcampo){
-                                    if($subcampo['filterable'] === true && $subcampo['type'] === 'date'){
+                            if ($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])) {
+                                foreach ($campo['subcampos'] as $subcampo) {
+                                    if ($subcampo['filterable'] === true && $subcampo['type'] === 'date') {
                                         $campoFecha = $subcampo['name'];
                                         break 3;
                                     }
                                 }
                             }
-
                         }
                     }
 
-                        // Filtrar fecha  de registro
+                    // Filtrar fecha  de registro
                     $pipeline[] = [
                         '$match' => [
                             $nombreCampo . '.' . $campoFecha => [
@@ -411,129 +430,130 @@ class IndicadoresController extends Controller
                 }
 
                 $configuracion['campo'] = $configuracion['campo'] . "." . $subNombreCampo;
-            } else{
+            } else {
 
 
-            $pipelineSub = [];
+                $pipelineSub = [];
 
-            $condiciones = [];
+                $condiciones = [];
 
-            // Verificamos si hay condiciones en subConfiguración
-            if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
+                // Verificamos si hay condiciones en subConfiguración
+                if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
 
 
-                foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
-                    $operador = match ($subCondicion['operador']) {
-                        'mayor' => '$gt',
-                        'menor' => '$lt',
-                        'igual' => '$eq',
-                        'diferente' => '$ne',
-                        'mayor_igual' => '$gte',
-                        'menor_igual' => '$lte',
-                        default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
-                    };
+                    foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
+                        $operador = match ($subCondicion['operador']) {
+                            'mayor' => '$gt',
+                            'menor' => '$lt',
+                            'igual' => '$eq',
+                            'diferente' => '$ne',
+                            'mayor_igual' => '$gte',
+                            'menor_igual' => '$lte',
+                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
+                        };
 
-                    $valor = $subCondicion['valor'];
-                    if (is_numeric($valor)) {
-                        $valor = (float)$valor;
-                        if ((int)$valor === $valor) $valor = (int)$valor;
+                        $valor = $subCondicion['valor'];
+                        if (is_numeric($valor)) {
+                            $valor = (float)$valor;
+                            if ((int)$valor === $valor) $valor = (int)$valor;
+                        }
+
+                        $condiciones[] = [
+                            "$operador" => ["\$\$campo" . "." . $subCondicion['campo'], $valor]
+                        ];
                     }
-
-                    $condiciones[] = [
-                        "$operador" => ["\$\$campo" . "." . $subCondicion['campo'], $valor]
-                    ];
                 }
 
-            }
+                // Filtramos por fecha si es necesario
+                if (isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])) {
 
-            // Filtramos por fecha si es necesario
-            if (isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])) {
+                    Log::info('Filtrando por rango de fechas', [
+                        'fecha_inicio' => $configuracion['fecha_inicio'],
+                        'fecha_fin' => $configuracion['fecha_fin']
+                    ]);
 
-                Log::info('Filtrando por rango de fechas', [
-                    'fecha_inicio' => $configuracion['fecha_inicio'],
-                    'fecha_fin' => $configuracion['fecha_fin']
-                ]);
+                    // Buscar campo de fecha que se aplicará el filtro
+                    $campoFecha = '';
 
-            // Buscar campo de fecha que se aplicará el filtro
-            $campoFecha = '';
+                    foreach ($secciones as $seccion) {
+                        foreach ($seccion['fields'] as $campo) {
+                            if (
+                                $campo['name'] === $configuracion['campo'] &&
+                                $campo['type'] === 'subform' &&
+                                isset($campo['subcampos'])
+                            ) {
 
-            foreach ($secciones as $seccion) {
-                foreach ($seccion['fields'] as $campo) {
-                    if ($campo['name'] === $configuracion['campo'] &&
-                        $campo['type'] === 'subform' &&
-                        isset($campo['subcampos'])) {
-
-                        foreach ($campo['subcampos'] as $subcampo) {
-                            if (isset($subcampo['filterable']) && $subcampo['filterable'] === true && $subcampo['type'] === 'date') {
-                                $campoFecha = $subcampo['name'];
-                                break 3;
+                                foreach ($campo['subcampos'] as $subcampo) {
+                                    if (isset($subcampo['filterable']) && $subcampo['filterable'] === true && $subcampo['type'] === 'date') {
+                                        $campoFecha = $subcampo['name'];
+                                        break 3;
+                                    }
+                                }
                             }
                         }
+                        /**/
+                    }
+
+                    Log::info('Campo de fecha encontrado', ['campoFecha' => $campoFecha]);
+
+                    if (!empty($campoFecha)) {
+                        // Filtrar por rango de fechas
+                        $condiciones[] = [
+                            '$gte' => ['$$campo.Fecha de obtención', $configuracion['fecha_inicio']]
+                        ];
+                        $condiciones[] = [
+                            '$lte' => ['$$campo.Fecha de obtención', $configuracion['fecha_fin']]
+                        ];
                     }
                 }
-                /**/
-            }
 
-            Log::info('Campo de fecha encontrado', ['campoFecha' => $campoFecha]);
-
-            if (!empty($campoFecha)) {
-                // Filtrar por rango de fechas
-                $condiciones[] = [
-                    '$gte' => ['$$campo.Fecha de obtención', $configuracion['fecha_inicio']]
-                ];
-                $condiciones[] = [
-                    '$lte' => ['$$campo.Fecha de obtención', $configuracion['fecha_fin']]
-                ];
-            }
-        }
-
-        if (count($condiciones) > 0) {
-            // Aplicamos filtro interno al arreglo
-            $pipelineSub[] = [
-                '$addFields' => [
-                    'filtrado' => [
-                        '$filter' => [
-                            'input' => '$' . $nombreCampo,
-                            'as' => 'campo',
-                            'cond' => ['$and' => $condiciones]
+                if (count($condiciones) > 0) {
+                    // Aplicamos filtro interno al arreglo
+                    $pipelineSub[] = [
+                        '$addFields' => [
+                            'filtrado' => [
+                                '$filter' => [
+                                    'input' => '$' . $nombreCampo,
+                                    'as' => 'campo',
+                                    'cond' => ['$and' => $condiciones]
+                                ]
+                            ]
                         ]
+                    ];
+
+                    // Cambiamos el campo a contar
+                    $nombreCampo = 'filtrado';
+                }
+
+                // Agregar conteo o suma según sea necesario
+                $operacionSub = match ($configuracion['subConfiguracion']['operacion']) {
+                    'contar' => ['$size' => '$' . $nombreCampo],
+                    'sumar' => [
+                        '$sum' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']
+                    ],
+                    'promedio' => ['$avg' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
+                    'maximo' => ['$max' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
+                    'minimo' => ['$min' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
+
+                    default => throw new Exception("Operación no soportada en subConfiguración: {$configuracion['subConfiguracion']['operacion']}")
+                };
+                // Añadimos la etapa de agregación para la subConfiguración
+                $pipelineSub[] = [
+                    '$addFields' => [
+                        'total' => $operacionSub
                     ]
-                ]
-            ];
-
-            // Cambiamos el campo a contar
-            $nombreCampo = 'filtrado';
-        }
-
-            // Agregar conteo o suma según sea necesario
-            $operacionSub = match ($configuracion['subConfiguracion']['operacion']) {
-                'contar' => ['$size' => '$' . $nombreCampo],
-                'sumar' => [
-                    '$sum' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']
-                ],
-                'promedio' => ['$avg' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
-                'maximo' => ['$max' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
-                'minimo' => ['$min' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
-
-                default => throw new Exception("Operación no soportada en subConfiguración: {$configuracion['subConfiguracion']['operacion']}")
-            };
-            // Añadimos la etapa de agregación para la subConfiguración
-            $pipelineSub[] = [
-                '$addFields' => [
-                    'total' => $operacionSub
-                ]
-            ];
-            // Añadimos las etapas generadas por subConfiguración al pipeline principal
-            foreach ($pipelineSub as $etapa) {
-                $pipeline[] = $etapa;
+                ];
+                // Añadimos las etapas generadas por subConfiguración al pipeline principal
+                foreach ($pipelineSub as $etapa) {
+                    $pipeline[] = $etapa;
+                }
+                // Cambiamos el campo a total para la siguiente etapa
+                $configuracion['campo'] = 'total'; // Cambiamos el campo a total para la siguiente etapa
             }
-            // Cambiamos el campo a total para la siguiente etapa
-            $configuracion['campo'] = 'total'; // Cambiamos el campo a total para la siguiente etapa
-        }
         }
 
         // Si la operación es distinta, agregamos un campo temporal para contar
-        if(  $configuracion['operacion'] === 'distinto') {
+        if ($configuracion['operacion'] === 'distinto') {
             $pipeline[] = [
                 '$group' => [
                     '_id' => null,
@@ -557,13 +577,13 @@ class IndicadoresController extends Controller
 
 
         // Agregamos la operación al pipeline
-        if($configuracion['operacion'] === 'distinto'){
+        if ($configuracion['operacion'] === 'distinto') {
             $pipeline[] = [
                 '$project' => [
                     'resultado' => $operacion
                 ]
             ];
-        }else{
+        } else {
             $pipeline[] = [
                 '$group' => [
                     '_id' => null,
@@ -672,7 +692,6 @@ class IndicadoresController extends Controller
                 'message' => 'Indicador creado exitosamente',
                 'indicador' => $indicador,
             ], Response::HTTP_CREATED);
-
         } catch (Exception $e) {
             // Manejo de errores
             // Logueamos el error
@@ -796,7 +815,8 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a borrar
      * @return JsonResponse La respuesta de la operación
      */
-    public function destroy($id) {
+    public function destroy($id)
+    {
         try {
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
@@ -811,15 +831,14 @@ class IndicadoresController extends Controller
             }
 
             // Eliminamos el indicador de la base de datos
-            $indicador -> delete();
+            $indicador->delete();
 
             // Retornamos la respuesta de éxito
-            return response() -> json([
+            return response()->json([
                 'success' => true,
                 'message' => 'Indicador borrado exitosamente',
                 'indicador_borrado' => $indicador
             ], Response::HTTP_OK);
-
         } catch (Exception $e) {
             // Retornamos el mensaje de error
             return response()->json([
@@ -836,10 +855,11 @@ class IndicadoresController extends Controller
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
      */
-    public function update($id, Request $request) {
+    public function update($id, Request $request)
+    {
         try {
             // Validar el formato de la id
-            if(!preg_match('/^[a-f0-9]{24}$/', $id)) {
+            if (!preg_match('/^[a-f0-9]{24}$/', $id)) {
                 throw new Exception('ID de indicador no válido', Response::HTTP_BAD_REQUEST);
             }
 
@@ -867,7 +887,7 @@ class IndicadoresController extends Controller
             ]);
 
             // Verificamos si la validación falla
-            if( $validator->fails()) {
+            if ($validator->fails()) {
                 throw new Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
@@ -895,7 +915,7 @@ class IndicadoresController extends Controller
             }
 
             // Actualizamos el indicador
-            $indicador ->update($datos);
+            $indicador->update($datos);
 
             // Verificamos si se actualizó el indicador
             if (!$indicador) {
@@ -904,11 +924,10 @@ class IndicadoresController extends Controller
 
 
             // Retornamos la respuesta de éxito
-            return response() -> json([
+            return response()->json([
                 'message' => 'Indicador actualizado exitosamente',
                 'indicador_actualizado' => $indicador
             ], Response::HTTP_OK);
-
         } catch (Exception $e) {
             // Manejamos el error
             // Logueamos el error
@@ -921,13 +940,14 @@ class IndicadoresController extends Controller
         }
     }
 
-     /**
+    /**
      * Agrega o actualiza la configuración de un indicador por su ID
      * @param Request $request Datos de configuración del indicador
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
      */
-    public function updateConfig(Request $request, $id) {
+    public function updateConfig(Request $request, $id)
+    {
         try {
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
@@ -935,7 +955,6 @@ class IndicadoresController extends Controller
             // Verificamos si existe el indicador
             if (!$indicador) {
                 throw new Exception("No se encontró el indicador con ID: $id", Response::HTTP_NOT_FOUND);
-
             }
 
             // Validamos que la operación sea una de las permitidas
@@ -967,16 +986,15 @@ class IndicadoresController extends Controller
             }
 
             // Guardamos o Actualizamos la configuración
-            if(!$indicador->update(['configuracion' => $request->input('configuracion')])){
+            if (!$indicador->update(['configuracion' => $request->input('configuracion')])) {
                 throw new Exception('Error al actualizar o guardar la configuración del indicador', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
             // Retornamos la respuesta de éxito
-            return response() -> json([
+            return response()->json([
                 'message' => 'Indicador actualizado exitosamente',
                 'indicador_actualizado' => $indicador
             ], Response::HTTP_OK);
-
         } catch (Exception $e) {
             // Retornamos el mensaje de error
             return response()->json([
@@ -986,13 +1004,14 @@ class IndicadoresController extends Controller
         }
     }
 
-     /**
+    /**
      * Obtener la configuración de un indicador por su ID
      * @param Request $request Datos de configuración del indicador
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
      */
-    public function getConfig($id) {
+    public function getConfig($id)
+    {
         try {
             // Buscamos el indicador por su ID
             $indicador = Indicadores::find($id);
@@ -1000,24 +1019,22 @@ class IndicadoresController extends Controller
             // Verificamos si existe el indicador
             if (!$indicador) {
                 throw new Exception("No se encontró el indicador con ID: $id", Response::HTTP_NOT_FOUND);
-
             }
 
             // Creamos la configuración
             $configuracion = [];
 
             // Verificamos si el indicador tiene configuración
-            if($indicador->configuracion && is_array($indicador->configuracion)) {
+            if ($indicador->configuracion && is_array($indicador->configuracion)) {
                 // Si tiene configuración, la asignamos
                 $configuracion = $indicador->configuracion;
             }
 
             // Retornamos la respuesta de éxito
-            return response() -> json([
+            return response()->json([
                 'message' => 'Configuración del indicador obtenida exitosamente',
                 'configuracion' => $configuracion
             ], Response::HTTP_OK);
-
         } catch (Exception $e) {
             // Retornamos el mensaje de error
             return response()->json([

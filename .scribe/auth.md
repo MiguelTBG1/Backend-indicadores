@@ -1,7 +1,7 @@
-# Authenticating requests
+# Autenticación de solicitudes
 
-To authenticate requests, include an **`Authorization`** header with the value **`"Bearer {YOUR_AUTH_KEY}"`**.
+Para autenticar las solicitudes, incluye un encabezado **`Authorization`** con el valor **`"Bearer {YOUR_AUTH_KEY}"`**.
 
-All authenticated endpoints are marked with a `requires authentication` badge in the documentation below.
+Todos los endpoints autenticados están marcados con una insignia `requiere autenticación` en la documentación a continuación.
 
 You can retrieve your token by visiting your dashboard and clicking <b>Generate API token</b>.

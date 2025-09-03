@@ -12,7 +12,7 @@ return [
     'title' => 'Documentación de la API del sistema de gestion de indicadores academicos',
 
     // A short description of your API. Will be included in the docs webpage, Postman collection and OpenAPI spec.
-    'description' => '',
+    'description' => 'Esta documentación provee la informacion de como trabajar con nuestra API',
 
     // The base URL displayed in the docs.
     // If you're using `laravel` type, you can set this to a dynamic string, like '{{ config("app.tenant_url") }}' to get a dynamic base URL.
@@ -48,7 +48,7 @@ return [
     'type' => 'static',
 
     // See https://scribe.knuckles.wtf/laravel/reference/config#theme for supported options
-    'theme' => 'default',
+    'theme' => 'elements',
 
     'static' => [
         // HTML documentation, assets and Postman collection will be generated to this folder.
@@ -80,7 +80,7 @@ return [
     'try_it_out' => [
         // Add a Try It Out button to your endpoints so consumers can test endpoints right from their browser.
         // Don't forget to enable CORS headers for your endpoints.
-        'enabled' => true,
+        'enabled' => false,
 
         // The base URL to use in the API tester. Leave as null to be the same as the displayed URL (`scribe.base_url`).
         'base_url' => null,
@@ -120,12 +120,7 @@ return [
     ],
 
     // Text to place in the "Introduction" section, right after the `description`. Markdown and HTML are supported.
-    'intro_text' => <<<INTRO
-        This documentation aims to provide all the information you need to work with our API.
-
-        <aside>As you scroll, you'll see code examples for working with the API in different programming languages in the dark area to the right (or as part of the content on mobile).
-        You can switch the language used with the tabs at the top right (or from the nav menu at the top left on mobile).</aside>
-    INTRO,
+    'intro_text' => '',
 
     // Example requests for each endpoint will be shown in each of these languages.
     // Supported options are: bash, javascript, php, python

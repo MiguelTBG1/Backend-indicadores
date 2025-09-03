@@ -9,12 +9,27 @@ use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+
+/**
+ * @group Authentification
+ */
 class AuthController extends Controller
 {
 
 
     /**
+     * Login
+     * 
      * Inicia sesion de un usuario y regresa un token
+     * 
+     * @unauthenticated
+     * 
+     * @bodyParam email string El correo del usuario
+     * @bodyParam password string La contraseña del usuario
+     * 
+     * @response scenario="Datos de inicio de sesion correctos" status=200 { "message": "Login exitoso", "user": {"nombre": "Miguel", "id": "68b8634ccf157bf9880c1e7"}, "token": "68b898af531f622cbf0ba1", "permisos": ["usuarios_leer", "Plantillas_leer",]}
+     * 
+     * @response scenario="Datos de inicio de sesion incorrectos" status=401 {"message": "Credenciales invalidas"}
      */
     public function login(Request $request)
     {
@@ -45,7 +60,7 @@ class AuthController extends Controller
             $token = $user->createToken($nombreToken, $permisos, $tiempoVida)->plainTextToken;
 
             // Eliminamos los campos innecesarios de la respuesta
-            $user->makeHidden(['apellido_materno', 'apellido_paterno', 'email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles','permisos']);
+            $user->makeHidden(['apellido_materno', 'apellido_paterno', 'email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles', 'permisos']);
 
             //$permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
             // Respuesta exitosa
@@ -65,7 +80,11 @@ class AuthController extends Controller
     }
 
     /**
+     * Logout
+     * 
      * Cierra la sesión del usuario y elimina todos sus tokens
+     * 
+     * @response scenario="Logout exitoso" status=200 {"message": "Logout exitoso"}
      */
     public function logout(Request $request)
     {

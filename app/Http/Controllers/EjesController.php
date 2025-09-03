@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
+/**
+ * @group Ejes
+ */
 class EjesController extends Controller
 {
     /**
@@ -15,8 +18,9 @@ class EjesController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function index(){
-        try{
+    public function index()
+    {
+        try {
             // Obtener todos los ejes
             $ejes = Ejes::all();
 
@@ -30,8 +34,7 @@ class EjesController extends Controller
                 'message' => 'Ejes encontrados',
                 'ejes' => $ejes
             ]);
-
-        }catch(Exception $e){
+        } catch (Exception $e) {
             // Manejo de excepciones
             // Registrar el error en el log
             Log::error('Error al obtener los ejes: ' . $e->getMessage());
@@ -49,7 +52,8 @@ class EjesController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function show($id){
+    public function show($id)
+    {
         try {
             // Buscar el eje por ID
             $eje = Ejes::find($id);
@@ -82,7 +86,8 @@ class EjesController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         try {
             // Crear el validador manualmente
             $validator = Validator::make($request->all(), [
@@ -111,7 +116,6 @@ class EjesController extends Controller
                 'message' => 'Eje creado exitosamente',
                 'eje' => $eje
             ]);
-
         } catch (\Exception $e) {
             // Manejo de excepciones
             // Registrar el error en el log
@@ -160,7 +164,6 @@ class EjesController extends Controller
                 'message' => 'Eje actualizado exitosamente',
                 'eje' => $eje
             ]);
-
         } catch (\Exception $e) {
             // Manejo de excepciones
             // Registrar el error en el log
@@ -173,8 +176,9 @@ class EjesController extends Controller
         }
     }
 
-    public function destroy($id){
-        try{
+    public function destroy($id)
+    {
+        try {
 
             // Buscar el eje por ID
             $eje = Ejes::find($id);
@@ -196,8 +200,7 @@ class EjesController extends Controller
             return response()->json([
                 'message' => 'Eje eliminado exitosamente'
             ]);
-
-        }catch(Exception $e){
+        } catch (Exception $e) {
             // Manejo de excepciones
             // Registrar el error en el log
             Log::error('Error al eliminar el eje: ' . $e->getMessage());
@@ -209,5 +212,3 @@ class EjesController extends Controller
         }
     }
 }
-
-

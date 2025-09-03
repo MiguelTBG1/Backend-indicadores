@@ -16,12 +16,20 @@ use DateTimeImmutable;
 
 
 
+/**
+ * @group Documentos
+ */
 class DocumentoController extends Controller
 {
-    // Función para obtener los nombres de las plantillas que tengan documentos
-    // Esta función se conecta a la base de datos MongoDB y obtiene los nombres de las colecciones que cumplen con el patrón 'template_*_data'
-    // Luego, limpia los nombres de las colecciones para que no tengan el prefijo 'template_' y el sufijo '_data'
-    // Finalmente, devuelve los nombres de las plantillas en formato JSON
+    /**
+     * Obtener nombre plantillas
+     *
+     * Función para obtener los nombres de las plantillas que tengan documentos
+     * Esta función se conecta a la base de datos MongoDB y obtiene los nombres de las colecciones que cumplen con el patrón 'template_*_data'
+     * Luego, limpia los nombres de las colecciones para que no tengan el prefijo 'template_' y el sufijo '_data'
+     * Finalmente, devuelve los nombres de las plantillas en formato JSON
+     * 
+     */
     public function templateNames()
     {
         try {
@@ -50,7 +58,6 @@ class DocumentoController extends Controller
             }
 
             return response()->json($coleccionesConDocumentos);
-
         } catch (\Exception $e) {
             Log::error("Error en templateNames: " . $e->getMessage());
             return response()->json(['error' => 'Error interno del servidor'], 500);
@@ -131,7 +138,6 @@ class DocumentoController extends Controller
 
                     // Si NO es JSON válido, se queda como string (ej: "juan", "2025-07-19")
                 }
-
             }
 
             Log::info('Datos2', $documentData);
@@ -139,43 +145,41 @@ class DocumentoController extends Controller
             // Buscar los campos que tengan un valor en formato de fecha
             foreach ($documentData as $key => $value) {
 
-                    // Verifica si es un arreglo
-                    if (is_array($documentData[$key])) {
+                // Verifica si es un arreglo
+                if (is_array($documentData[$key])) {
 
-                        // Si es un arreglo, recorremos sus elementos
-                        foreach ($value as $index => $data){
-                            foreach ($data as $subKey => $subValue) {
+                    // Si es un arreglo, recorremos sus elementos
+                    foreach ($value as $index => $data) {
+                        foreach ($data as $subKey => $subValue) {
 
-                                // Verificar si el valor es un string y se puede convertir a fecha
-                                if (is_string($documentData[$key][$index][$subKey]) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key][$index][$subKey])) {
-                                    // Convertir a UTCDateTime
-                                    $documentData[$key][$index][$subKey] = new UTCDateTime(new DateTimeImmutable($documentData[$key][$index][$subKey]));
-                                }
+                            // Verificar si el valor es un string y se puede convertir a fecha
+                            if (is_string($documentData[$key][$index][$subKey]) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key][$index][$subKey])) {
+                                // Convertir a UTCDateTime
+                                $documentData[$key][$index][$subKey] = new UTCDateTime(new DateTimeImmutable($documentData[$key][$index][$subKey]));
                             }
                         }
-
-                    // Verificamos si es una fecha y la convertimos a UTCDateTime
-                    }elseif(preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key])) {
-                        // Convertir la fecha a UTCDateTime
-                        $documentData[$key] = new UTCDateTime(new DateTimeImmutable($documentData[$key]));
                     }
 
+                    // Verificamos si es una fecha y la convertimos a UTCDateTime
+                } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key])) {
+                    // Convertir la fecha a UTCDateTime
+                    $documentData[$key] = new UTCDateTime(new DateTimeImmutable($documentData[$key]));
+                }
             }
 
             Log::info('Datos3', $documentData);
 
             // Obtener el nombre de la colección de la plantilla
-            $collectionName = $plantilla -> nombre_coleccion;
+            $collectionName = $plantilla->nombre_coleccion;
 
             $client = new MongoClient(config('database.connections.mongodb.url'));
             $db = $client->selectDatabase(config('database.connections.mongodb.database'));
 
             // Insertar el documento en la colección de MongoDB con sus respectivos nombres de campos
-            $db ->selectCollection($collectionName)->insertOne($documentData);
+            $db->selectCollection($collectionName)->insertOne($documentData);
 
 
             return response()->json(['message' => 'Documento guardado con éxito'], 201);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al guardar documento: " . $e->getMessage());
@@ -193,7 +197,7 @@ class DocumentoController extends Controller
      */
     public function index($id)
     {
-        try{
+        try {
 
             // Verifica si la id de la plantilla es válida
             if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
@@ -227,7 +231,7 @@ class DocumentoController extends Controller
                 }
             }
 
-            if(!$collectionExists){
+            if (!$collectionExists) {
                 throw new \Exception(('Colección no encontra'));
             }
 
@@ -240,17 +244,19 @@ class DocumentoController extends Controller
 
 
                 foreach ($document['secciones'] as $indexSecciones => $valueSecciones) {
-                    foreach ($valueSecciones['fields'] as $fieldKey => $fieldValue){
+                    foreach ($valueSecciones['fields'] as $fieldKey => $fieldValue) {
 
                         /*Log::info('Fecha '.$fieldKey.': ', [
                             'fields' => $documents[$index]['secciones'][$indexSecciones]['fields'] ?? null,
                         ]);*/
 
                         // Si es un campo de tipo fecha de MongoDB
-                        if (is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]) &&
+                        if (
+                            is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]) &&
                             isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']) &&
                             is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']) &&
-                            isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']['$numberLong'])) {
+                            isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']['$numberLong'])
+                        ) {
 
 
                             // Convertir el timestamp a DateTime
@@ -261,17 +267,19 @@ class DocumentoController extends Controller
                             $documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey] = $dt->format('Y-m-d');
 
                             // En caso contrario, Verificar si es un arreglo de un subformulario
-                        }elseif(is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey])){
+                        } elseif (is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey])) {
 
                             //Recorremos los elemmentos del subformulario
-                            foreach($fieldValue as $indexSubform => $valueSubform){
-                                foreach($valueSubform as $keySubform => $fieldSubform){
+                            foreach ($fieldValue as $indexSubform => $valueSubform) {
+                                foreach ($valueSubform as $keySubform => $fieldSubform) {
 
                                     // Si es un campo de tipo fecha de MongoDB
-                                    if (is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]) &&
+                                    if (
+                                        is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]) &&
                                         isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']) &&
                                         is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']) &&
-                                        isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']['$numberLong'])) {
+                                        isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']['$numberLong'])
+                                    ) {
 
                                         // Convertir el timestamp a DateTime
                                         $timestamp = (int)$documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']['$numberLong'] / 1000;
@@ -282,19 +290,15 @@ class DocumentoController extends Controller
                                     }
                                 }
                             }
-
                         }
-
                     }
-
                 }
             }
 
             // Devolver los documentos en formato JSON
 
             return response()->json($documents);
-
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al obtener los  documentos: " . $e->getMessage());
 
@@ -305,7 +309,7 @@ class DocumentoController extends Controller
 
     public function destroy($plantillaName, $documentId)
     {
-        try{
+        try {
             // Conexión a MongoDB
             $client = new MongoClient(config('database.connections.mongodb.url'));
             $db = $client->selectDatabase(config('database.connections.mongodb.database'));
@@ -347,8 +351,9 @@ class DocumentoController extends Controller
                 'message' => 'Documento y archivos asociados eliminados con éxito',
                 'result' => $result->getDeletedCount(),
                 'plantilla' => $plantillaName,
-                'documentId' => $documentId]);
-        }catch (\Exception $e) {
+                'documentId' => $documentId
+            ]);
+        } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al eliminar documento: " . $e->getMessage());
 
@@ -359,7 +364,7 @@ class DocumentoController extends Controller
 
     public function update(Request $request, $plantillaName, $documentId)
     {
-        try{
+        try {
             // Verifica si la id del documento es válida
             if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
                 return response()->json(['error' => 'ID del documento no válido'], 400);
@@ -467,7 +472,7 @@ class DocumentoController extends Controller
             unset($documento['Recurso_Digital']);
 
             // Guardar la lista final de archivos
-            if( empty($archivosActuales) ) {
+            if (empty($archivosActuales)) {
                 $updateData['Recurso Digital'] = $archivosActuales;
             }
 
@@ -478,7 +483,6 @@ class DocumentoController extends Controller
             );
 
             return response()->json(['message' => 'Documento actualizado con éxito']);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error en la actualización del documento: " . $e->getMessage());
