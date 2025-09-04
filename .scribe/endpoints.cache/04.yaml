@@ -12,8 +12,8 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: 'Obtiene todos los documentos de una plantilla específica.'
-      description: ''
+      title: 'Obtener documentos especificos'
+      description: 'Obtiene todos los documentos de una plantilla específica.'
       authenticated: true
       custom: []
     headers:
@@ -66,8 +66,8 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Obtener un documento de una plantilla'
+      description: "Obtiene un documento en especifico de una plantilla especifica mediante sus id's"
       authenticated: true
       custom: []
     headers:
@@ -77,7 +77,7 @@ endpoints:
     urlParameters:
       plantillaName:
         name: plantillaName
-        description: ''
+        description: 'El nombre de la plantilla.'
         required: true
         example: architecto
         type: string
@@ -87,17 +87,17 @@ endpoints:
         custom: []
       documentId:
         name: documentId
-        description: ''
+        description: 'El ID del documento que se quiere ver'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
       plantillaName: architecto
-      documentId: architecto
+      documentId: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -131,8 +131,8 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Crear un documento'
+      description: 'Recibe un conjunto de datos para crear un nuevo documento'
       authenticated: true
       custom: []
     headers:
@@ -142,20 +142,31 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the documento.'
+        description: 'Id de la plantilla a la que pertenece el documento'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      document_data:
+        name: document_data
+        description: 'La informacion del documento.'
+        required: true
+        example: null
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      document_data: null
     fileParameters: []
     responses: []
     responseFields: []
@@ -176,8 +187,8 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Actualizar documento'
+      description: 'Actualiza un documento en especifico.'
       authenticated: true
       custom: []
     headers:
@@ -187,7 +198,7 @@ endpoints:
     urlParameters:
       plantillaName:
         name: plantillaName
-        description: ''
+        description: 'El nombre de la plantilla a la que pertenece el documento'
         required: true
         example: architecto
         type: string
@@ -197,21 +208,32 @@ endpoints:
         custom: []
       documentId:
         name: documentId
-        description: ''
+        description: 'El ID del documento a actualizar'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
       plantillaName: architecto
-      documentId: architecto
+      documentId: 16
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      document_data:
+        name: document_data
+        description: 'La informacion nueva del documento'
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      document_data: []
     fileParameters: []
     responses: []
     responseFields: []
@@ -232,8 +254,8 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Borrar un documento'
+      description: 'Borra el documento especifico de una plantilla'
       authenticated: true
       custom: []
     headers:
@@ -243,7 +265,7 @@ endpoints:
     urlParameters:
       plantillaName:
         name: plantillaName
-        description: ''
+        description: 'El nombre de la plantilla al que pertenece el documento'
         required: true
         example: architecto
         type: string
@@ -253,17 +275,17 @@ endpoints:
         custom: []
       documentId:
         name: documentId
-        description: ''
+        description: 'El ID del documento a borrar'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
       plantillaName: architecto
-      documentId: architecto
+      documentId: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

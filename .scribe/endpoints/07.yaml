@@ -364,7 +364,7 @@ endpoints:
         name: 'permisos[].activo'
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -385,7 +385,7 @@ endpoints:
         -
           recurso: architecto
           acciones: []
-          activo: false
+          activo: true
     fileParameters: []
     responses: []
     responseFields: []

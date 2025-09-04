@@ -64,9 +64,15 @@ class DocumentoController extends Controller
         }
     }
 
-    // Funcion para crear un nuevo documento
-    // Esta función recibe una plantilla y un conjunto de datos para crear un nuevo documento
-    // Se valida la plantilla y los datos, se procesan los archivos subidos y se guarda el documento en MongoDB
+    /**
+     * Crear un documento
+     * 
+     * Recibe un conjunto de datos para crear un nuevo documento
+     * 
+     * @urlParam id integer required Id de la plantilla a la que pertenece el documento
+     * 
+     * @bodyParam document_data object required La informacion del documento. No-example
+     */
     public function store(Request $request, $id)
     {
         try {
@@ -190,7 +196,10 @@ class DocumentoController extends Controller
     }
 
     /**
+     * Obtener documentos especificos
+     * 
      * Obtiene todos los documentos de una plantilla específica.
+     * 
      * @param string $id ID de la plantilla.
      * @return \Illuminate\Http\JsonResponse Lista de documentos de la plantilla.
      * @throws \Exception Si la plantilla no existe o la colección no se encuentra.
@@ -307,6 +316,15 @@ class DocumentoController extends Controller
         }
     }
 
+
+    /** 
+     * Borrar un documento
+     * 
+     * Borra el documento especifico de una plantilla
+     * 
+     * @urlParam plantillaName string required El nombre de la plantilla al que pertenece el documento
+     * @urlParam documentId integer required El ID del documento a borrar
+     */
     public function destroy($plantillaName, $documentId)
     {
         try {
@@ -362,6 +380,16 @@ class DocumentoController extends Controller
         }
     }
 
+    /**
+     * Actualizar documento
+     * 
+     * Actualiza un documento en especifico.
+     * 
+     * @urlParam plantillaName string required El nombre de la plantilla a la que pertenece el documento
+     * @urlParam documentId integer required El ID del documento a actualizar
+     * 
+     * @bodyParam document_data object required La informacion nueva del documento
+     */
     public function update(Request $request, $plantillaName, $documentId)
     {
         try {
@@ -494,6 +522,14 @@ class DocumentoController extends Controller
 
 
 
+    /**
+     * Obtener un documento de una plantilla
+     * 
+     * Obtiene un documento en especifico de una plantilla especifica mediante sus id's
+     * 
+     * @urlPAram plantillaName string required El nombre de la plantilla.
+     * @urlParam documentId integer required El ID del documento que se quiere ver
+     */
     public function show($plantillaName, $documentId)
     {
         // Conexión a MongoDB

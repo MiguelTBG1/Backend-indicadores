@@ -116,9 +116,9 @@ paths:
         - Authentification
   '/api/documentos/{id}':
     get:
-      summary: 'Obtiene todos los documentos de una plantilla específica.'
-      operationId: obtieneTodosLosDocumentosDeUnaPlantillaEspecfica
-      description: ''
+      summary: 'Obtener documentos especificos'
+      operationId: obtenerDocumentosEspecificos
+      description: 'Obtiene todos los documentos de una plantilla específica.'
       parameters: []
       responses:
         401:
@@ -140,13 +140,28 @@ paths:
       tags:
         - Documentos
     post:
-      summary: ''
-      operationId: postApiDocumentosId
-      description: ''
+      summary: 'Crear un documento'
+      operationId: crearUnDocumento
+      description: 'Recibe un conjunto de datos para crear un nuevo documento'
       parameters: []
       responses: {  }
       tags:
         - Documentos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                document_data:
+                  type: object
+                  description: 'La informacion del documento.'
+                  example: null
+                  nullable: false
+                  properties: {  }
+              required:
+                - document_data
     parameters:
       -
         in: path
@@ -158,9 +173,9 @@ paths:
           type: string
   '/api/documentos/{plantillaName}/{documentId}':
     get:
-      summary: ''
-      operationId: getApiDocumentosPlantillaNameDocumentId
-      description: ''
+      summary: 'Obtener un documento de una plantilla'
+      operationId: obtenerUnDocumentoDeUnaPlantilla
+      description: "Obtiene un documento en especifico de una plantilla especifica mediante sus id's"
       parameters: []
       responses:
         401:
@@ -182,13 +197,28 @@ paths:
       tags:
         - Documentos
     post:
-      summary: ''
-      operationId: postApiDocumentosPlantillaNameDocumentId
-      description: ''
+      summary: 'Actualizar documento'
+      operationId: actualizarDocumento
+      description: 'Actualiza un documento en especifico.'
       parameters: []
       responses: {  }
       tags:
         - Documentos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                document_data:
+                  type: object
+                  description: 'La informacion nueva del documento'
+                  example: []
+                  nullable: false
+                  properties: {  }
+              required:
+                - document_data
     delete:
       summary: ''
       operationId: deleteApiDocumentosPlantillaNameDocumentId
@@ -201,7 +231,7 @@ paths:
       -
         in: path
         name: plantillaName
-        description: ''
+        description: 'El nombre de la plantilla.'
         example: architecto
         required: true
         schema:
@@ -209,11 +239,11 @@ paths:
       -
         in: path
         name: documentId
-        description: ''
-        example: architecto
+        description: 'El ID del documento que se quiere ver'
+        example: 16
         required: true
         schema:
-          type: string
+          type: integer
   /api/documentos/plantillas:
     get:
       summary: 'Obtener nombre plantillas'
@@ -679,7 +709,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: !!binary JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSID4+CmVuZG9iagoyIDAgb2JqCjw8IC9UeXBlIC9PdXRsaW5lcyAvQ291bnQgMCA+PgplbmRvYmoKMyAwIG9iago8PCAvVHlwZSAvUGFnZXMKL0tpZHMgWzYgMCBSCl0KL0NvdW50IDEKL1Jlc291cmNlcyA8PAovUHJvY1NldCA0IDAgUgovRm9udCA8PCAKL0YxIDggMCBSCi9GMiA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAuMDAwIDAuMDAwIDU5NS4yODAgODQxLjg5MF0KID4+CmVuZG9iago0IDAgb2JqClsvUERGIC9UZXh0IF0KZW5kb2JqCjUgMCBvYmoKPDwKL1Byb2R1Y2VyICj+/wBkAG8AbQBwAGQAZgAgADMALgAxAC4AMAAgACsAIABDAFAARABGKQovQ3JlYXRpb25EYXRlIChEOjIwMjUwOTAzMTk1NDIyKzAwJzAwJykKL01vZERhdGUgKEQ6MjAyNTA5MDMxOTU0MjIrMDAnMDAnKQovVGl0bGUgKP7/AEYAYQBjAHQAdQByAGEpCj4+CmVuZG9iago2IDAgb2JqCjw8IC9UeXBlIC9QYWdlCi9NZWRpYUJveCBbMC4wMDAgMC4wMDAgNTk1LjI4MCA4NDEuODkwXQovUGFyZW50IDMgMCBSCi9Db250ZW50cyA3IDAgUgo+PgplbmRvYmoKNyAwIG9iago8PCAvRmlsdGVyIC9GbGF0ZURlY29kZQovTGVuZ3RoIDc0NiA+PgpzdHJlYW0KeJyVlk1v00AQhu/9FSPRA0h0u99r90gFiApQBYZL1YOVmBIpTargCIl/zL9gHGdmx46N4BKlr2b3fbx+audMK601yM/dw9mrCkwsVSgKSLFQLhiolnD5xoL1SkP1DeDu+Zt60e53NTx79/HrhdU2XGhtXtxDdQOvq24L65OKOkJyXsWi7LcwYGzeoll8r69Au0tdXnZbyOW4ShtcrYPSLk2svl6vmk3bXMHNvt7A7e9d84vXa1XEBPLz01sMU4CfoOEG7gDu8cvy7NgSi6iSM/AIJmCDtZys4XM35EqDUVIGL+gRKAiFKoM/zCCxx4KIe+GRRRfoyATx7W673C/aLWOaYJRNVtTbGFVx6Mr13VT0SfRzMgQw+OeBfZbgut60q2W9ZIKuz3gjCLy3+K0cEHRT4XBMRMDJkAAvpsf/yxk0i9UWvmxWbb1b5aPw3qiyKAVIiHg40Q9AOjh3yAiEEwESIt7zw140xcnojvmiv9ZZ3Grb1muGJFtCqZwtpS3HRNqCUdJe2OKMCsGObcHrts5N+P2+fmq3T6eucDm7IsqzGdTOybCeXZntN6eScDVLIqqzElTNybCaJZmtPjcvre4eR6d6MALrIRCyDITAiUDIMtAUJ6NbRHr8BygpgjuVNklFjolUxCGctkIR7ZUJeqyIcapwZqL+w3b/ozk1hLvZENGdfaByTobtbMhsvT01hKvZEFGdfaBqTobVbMhs9bkNk3pwP+sh+rMM1M+J6M8y0BQno9tDesxThkk3cJtgg3TjmBzd6IZCwmeXdWKIEikQrivxnc0ChYTPSl+MBAr4BPV26g1cNYt1vZx4ITEiKyQQaSoz0pRklFr1kJSMKEm0ecyJRxEDsmgCkKYyIE1JQClfD0jJCJB0nAc8T9M6MiXrKChpKlPSlKSUivaUlEhKqWg/RclYiaO0/3wt3Rqn8VjwBlmHN2rqt9jhNQk1PNUP9e4K5OKgE3IUw8V29BB1g3/nP4moOz4KZW5kc3RyZWFtCmVuZG9iago4IDAgb2JqCjw8IC9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovTmFtZSAvRjEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKPj4KZW5kb2JqCjkgMCBvYmoKPDwgL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMgovQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkCi9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nCj4+CmVuZG9iagp4cmVmCjAgMTAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNzQgMDAwMDAgbiAKMDAwMDAwMDEyMCAwMDAwMCBuIAowMDAwMDAwMjg0IDAwMDAwIG4gCjAwMDAwMDAzMTMgMDAwMDAgbiAKMDAwMDAwMDQ4OCAwMDAwMCBuIAowMDAwMDAwNTkxIDAwMDAwIG4gCjAwMDAwMDE0MDkgMDAwMDAgbiAKMDAwMDAwMTUxNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDEwCi9Sb290IDEgMCBSCi9JbmZvIDUgMCBSCi9JRFs8Y2JiNGYwZDgzMmEyMjUxZTE0N2RmOWM4ZmI2M2M0MzQ+PGNiYjRmMGQ4MzJhMjI1MWUxNDdkZjljOGZiNjNjNDM0Pl0KPj4Kc3RhcnR4cmVmCjE2MjgKJSVFT0YK
+                example: !!binary JVBERi0xLjcKMSAwIG9iago8PCAvVHlwZSAvQ2F0YWxvZwovT3V0bGluZXMgMiAwIFIKL1BhZ2VzIDMgMCBSID4+CmVuZG9iagoyIDAgb2JqCjw8IC9UeXBlIC9PdXRsaW5lcyAvQ291bnQgMCA+PgplbmRvYmoKMyAwIG9iago8PCAvVHlwZSAvUGFnZXMKL0tpZHMgWzYgMCBSCl0KL0NvdW50IDEKL1Jlc291cmNlcyA8PAovUHJvY1NldCA0IDAgUgovRm9udCA8PCAKL0YxIDggMCBSCi9GMiA5IDAgUgo+Pgo+PgovTWVkaWFCb3ggWzAuMDAwIDAuMDAwIDU5NS4yODAgODQxLjg5MF0KID4+CmVuZG9iago0IDAgb2JqClsvUERGIC9UZXh0IF0KZW5kb2JqCjUgMCBvYmoKPDwKL1Byb2R1Y2VyICj+/wBkAG8AbQBwAGQAZgAgADMALgAxAC4AMAAgACsAIABDAFAARABGKQovQ3JlYXRpb25EYXRlIChEOjIwMjUwOTAzMjAzMjA3KzAwJzAwJykKL01vZERhdGUgKEQ6MjAyNTA5MDMyMDMyMDcrMDAnMDAnKQovVGl0bGUgKP7/AEYAYQBjAHQAdQByAGEpCj4+CmVuZG9iago2IDAgb2JqCjw8IC9UeXBlIC9QYWdlCi9NZWRpYUJveCBbMC4wMDAgMC4wMDAgNTk1LjI4MCA4NDEuODkwXQovUGFyZW50IDMgMCBSCi9Db250ZW50cyA3IDAgUgo+PgplbmRvYmoKNyAwIG9iago8PCAvRmlsdGVyIC9GbGF0ZURlY29kZQovTGVuZ3RoIDc0NiA+PgpzdHJlYW0KeJyVlk1v00AQhu/9FSPRA0h0u99r90gFiApQBYZL1YOVmBIpTargCIl/zL9gHGdmx46N4BKlr2b3fbx+audMK601yM/dw9mrCkwsVSgKSLFQLhiolnD5xoL1SkP1DeDu+Zt60e53NTx79/HrhdU2XGhtXtxDdQOvq24L65OKOkJyXsWi7LcwYGzeoll8r69Au0tdXnZbyOW4ShtcrYPSLk2svl6vmk3bXMHNvt7A7e9d84vXa1XEBPLz01sMU4CfoOEG7gDu8cvy7NgSi6iSM/AIJmCDtZys4XM35EqDUVIGL+gRKAiFKoM/zCCxx4KIe+GRRRfoyATx7W673C/aLWOaYJRNVtTbGFVx6Mr13VT0SfRzMgQw+OeBfZbgut60q2W9ZIKuz3gjCLy3+K0cEHRT4XBMRMDJkAAvpsf/yxk0i9UWvmxWbb1b5aPw3qiyKAVIiHg40Q9AOjh3yAiEEwESIt7zw140xcnojvmiv9ZZ3Grb1muGJFtCqZwtpS3HRNqCUdJe2OKMCsGObcHrts5N+P2+fmq3T6eucDm7IsqzGdTOybCeXZntN6eScDVLIqqzElTNybCaJZmtPjcvre4eR6d6MALrIRCyDITAiUDIMtAUJ6NbRHr8BygpgjuVNklFjolUxCGctkIR7ZUJeqyIcapwZqL+w3b/ozk1hLvZENGdfaByTobtbMhsvT01hKvZEFGdfaBqTobVbMhs9bkNk3pwP+sh+rMM1M+J6M8y0BQno9tDesxThkk3cJtgg3TjmBzd6IZCwmeXdWKIEikQrivxnc0ChYTPSl+MBAr4BPV26g1cNYt1vZx4ITEiKyQQaSoz0pRklFr1kJSMKEm0ecyJRxEDsmgCkKYyIE1JQClfD0jJCJB0nAc8T9M6MiXrKChpKlPSlKSUivaUlEhKqWg/RclYiaO0/3wt3Rqn8VjwBlmHN2rqt9jhNQk1PNUP9e4K5OKgE3IUw8V29BB1g3/nP4moOz4KZW5kc3RyZWFtCmVuZG9iago4IDAgb2JqCjw8IC9UeXBlIC9Gb250Ci9TdWJ0eXBlIC9UeXBlMQovTmFtZSAvRjEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKPj4KZW5kb2JqCjkgMCBvYmoKPDwgL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9OYW1lIC9GMgovQmFzZUZvbnQgL0hlbHZldGljYS1Cb2xkCi9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nCj4+CmVuZG9iagp4cmVmCjAgMTAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwNzQgMDAwMDAgbiAKMDAwMDAwMDEyMCAwMDAwMCBuIAowMDAwMDAwMjg0IDAwMDAwIG4gCjAwMDAwMDAzMTMgMDAwMDAgbiAKMDAwMDAwMDQ4OCAwMDAwMCBuIAowMDAwMDAwNTkxIDAwMDAwIG4gCjAwMDAwMDE0MDkgMDAwMDAgbiAKMDAwMDAwMTUxNiAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDEwCi9Sb290IDEgMCBSCi9JbmZvIDUgMCBSCi9JRFs8Y2M4MDgwMzE3MzA4ZDg2MzRmOTZjMDQwY2Y2ZThkY2U+PGNjODA4MDMxNzMwOGQ4NjM0Zjk2YzA0MGNmNmU4ZGNlPl0KPj4Kc3RhcnR4cmVmCjE2MjgKJSVFT0YK
       tags:
         - Reporte
   /api/roles:

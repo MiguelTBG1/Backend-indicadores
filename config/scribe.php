@@ -127,7 +127,6 @@ return [
     // To add a language of your own, see https://scribe.knuckles.wtf/laravel/advanced/example-requests
     // Note: does not work for `external` docs types
     'example_languages' => [
-        'bash',
         'javascript',
     ],
 
@@ -136,7 +135,7 @@ return [
     // For 'laravel' docs, it will be generated to storage/app/scribe/collection.json.
     // Setting `laravel.add_routes` to true (above) will also add a route for the collection.
     'postman' => [
-        'enabled' => true,
+        'enabled' => false,
 
         'overrides' => [
             // 'info.version' => '2.0.0',
@@ -148,7 +147,7 @@ return [
     // For 'laravel' docs, it will be generated to storage/app/scribe/openapi.yaml.
     // Setting `laravel.add_routes` to true (above) will also add a route for the spec.
     'openapi' => [
-        'enabled' => true,
+        'enabled' => false,
 
         'overrides' => [
             // 'info.version' => '2.0.0',
@@ -185,7 +184,7 @@ return [
     // The format you pass to `date` will be passed to PHP's `date()` function.
     // The format you pass to `git` can be either "short" or "long".
     // Note: does not work for `external` docs types
-    'last_updated' => 'Last updated: {date:F j, Y}',
+    'last_updated' => 'Last updated: {date:F j, Y} \n Last commit: {git:long}',
 
     'examples' => [
         // Set this to any number to generate the same example values for parameters on each run,
