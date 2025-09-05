@@ -110,14 +110,6 @@ class PlantillaController extends Controller
             // Actualizamos el modelo dinámico
             DynamicModelService::generate($modelName, $relations);
 
-            // Registramos la coleccion del documento a crear
-            /*Recurso::create([
-                'clave' => $collectionName,
-                'nombre' => $plantillaName,
-                'tipo' => 'dinamico',
-                'grupo' => 'documentos',
-                'descripcion' => "Documentos de la plantilla {$plantillaName}"
-            ]);*/
 
             return response()->json([
                 'message' => 'Plantilla creada exitosamente',

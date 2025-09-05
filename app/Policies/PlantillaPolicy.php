@@ -4,6 +4,8 @@ namespace App\Policies;
 
 use App\Models\Plantillas;
 use App\Models\User;
+use App\Models\Recurso;
+
 use Illuminate\Auth\Access\Response;
 
 class PlantillaPolicy
@@ -21,7 +23,26 @@ class PlantillaPolicy
      */
     public function view(User $user, Plantillas $plantillas): bool
     {
-        return false;
+        // buscar el recurso dinámico asociado a esta plantilla
+        $recurso = Recurso::where('modulo', 'Plantillas')
+            ->where('referencia_id', $plantillas->_id)
+            ->first();
+
+        if (!$recurso) {
+            return false;
+        }
+
+        // validar si el usuario tiene permitido "leer" este recurso
+        return collect($user->permisos['allowed'] ?? [])
+            ->contains(function ($permiso) use ($recurso) {
+                return $permiso['recurso'] === (string) $recurso->_id
+                    && in_array('leer', $permiso['acciones']);
+            })
+            && ! collect($user->permisos['denied'] ?? [])
+                ->contains(function ($permiso) use ($recurso) {
+                    return $permiso['recurso'] === (string) $recurso->_id
+                        && in_array('leer', $permiso['acciones']);
+                });
     }
 
     /**
