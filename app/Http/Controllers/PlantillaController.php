@@ -447,7 +447,7 @@ class PlantillaController extends Controller
 
                     // Returnar el registro mapeado con solo los campos _id y $dataSource['campoMostrar']
                     return [
-                        'id' => $item->_id,
+                        'campoGuardar' => $item->_id,
                         'campoMostrar' => $valorCampoMostrar,
                     ];
                 });
