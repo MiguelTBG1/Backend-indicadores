@@ -95,15 +95,6 @@ class PlantillaController extends Controller
             // Formar el nombre de la colección eliminando espacios
             $collectionName = str_replace(' ', '', $plantillaName) . "_data";
 
-            // Registramos la coleccion del documento a crear
-            Recurso::create([
-                'clave' => $collectionName,
-                'nombre' => $plantillaName,
-                'tipo' => 'dinamico',
-                'grupo' => 'documentos',
-                'descripcion' => "Documentos de la plantilla {$plantillaName}"
-            ]);
-
             // Filtrar datos no serializables en `campos`
             $secciones = $request->input('secciones');
 
@@ -113,6 +104,18 @@ class PlantillaController extends Controller
                 'nombre_coleccion' => $collectionName,
                 'secciones' => $secciones,
             ]);
+            
+            // Registramos la coleccion del documento a crear
+            Recurso::create([
+                'clave' => $collectionName,
+                'nombre' => $plantillaName,
+                'tipo' => 'dinamico',
+                'grupo' => 'plantillas',
+                'idPlantilla' => $plantilla->_id,
+                'descripcion' => "Plantilla {$plantillaName}"
+            ]);
+
+            Log::debug($plantilla->_id);
 
             // Verificar si la plantilla se creó correctamente
             if (!$plantilla) {

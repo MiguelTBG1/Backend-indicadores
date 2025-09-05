@@ -258,6 +258,7 @@ class PlantillasCollectionSeeder extends Seeder
 
         // Plantilla de alumnos
         Plantillas::create([
+            '_id' => new ObjectId('68bb162223bbc9264e05fca0'),
             'nombre_plantilla' => 'Alumnos',
             'nombre_coleccion' => 'Alumnos_data',
             'secciones' => [

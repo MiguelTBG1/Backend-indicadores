@@ -18,6 +18,7 @@ class Recurso extends Model
         'tipo',
         'grupo',
         'descripcion',
+        'idPlantilla',
         'patron_regex'
     ];
 }
