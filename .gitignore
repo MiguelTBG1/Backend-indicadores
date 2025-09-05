@@ -22,3 +22,18 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+/app/Models/*
+
+# Excepto este archivo específico
+!app/Models/Accion.php
+!app/Models/Comentarios.php
+!app/Models/Ejes.php
+!app/Models/Indicadores.php
+!app/Models/PersonalAccessToken.php
+!app/Models/Plantillas.php
+!app/Models/Recursos.php
+!app/Models/Rol.php
+!app/Models/User.php
+
+
