@@ -119,7 +119,6 @@ class User extends Model
         }
 
         $allowedStr = array_unique(array_merge(...$allowedStr));
-        Log::debug($deniedStr);
         $deniedStr = array_unique(array_merge(...$deniedStr));
         $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
         // Aplanar el array si es necesario
@@ -196,6 +195,4 @@ class User extends Model
 
         return array_values(array_unique($resolved));
     }
-
-    
 }
