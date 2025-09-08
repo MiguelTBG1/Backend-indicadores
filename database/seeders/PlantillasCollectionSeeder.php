@@ -19,6 +19,7 @@ class PlantillasCollectionSeeder extends Seeder
         Plantillas::create([
             '_id' => new ObjectId('68b0938423ed6ec87508548c'),
             'nombre_plantilla' => 'Periodos',
+            'nombre_modelo' => 'Periodos',
             'nombre_coleccion' => 'Periodos_data',
             'secciones' => [
                 [
@@ -38,6 +39,7 @@ class PlantillasCollectionSeeder extends Seeder
         Plantillas::create([
             '_id' => new ObjectId('68b1df5f34dafa1c910aa02c'),
             'nombre_plantilla' => 'Programa Educativo',
+            'nombre_modelo' => 'ProgramaEducativo',
             'nombre_coleccion' => 'ProgramaEducativo_data',
             'secciones' => [
                 [
@@ -57,6 +59,7 @@ class PlantillasCollectionSeeder extends Seeder
         Plantillas::create([
             '_id' => new ObjectId('68b0a68006688a676a0e6a5d'),
             'nombre_plantilla' => 'Profesores',
+            'nombre_modelo' => 'Profesores',
             'nombre_coleccion' => 'Profesores_data',
             'secciones' => [
                 [
@@ -259,6 +262,7 @@ class PlantillasCollectionSeeder extends Seeder
         // Plantilla de alumnos
         Plantillas::create([
             'nombre_plantilla' => 'Alumnos',
+            'nombre_modelo' => 'Alumnos',
             'nombre_coleccion' => 'Alumnos_data',
             'secciones' => [
                 [

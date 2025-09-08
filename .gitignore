@@ -35,5 +35,9 @@ Thumbs.db
 !app/Models/Recursos.php
 !app/Models/Rol.php
 !app/Models/User.php
+!app/Models/Alumnos.php
+!app/Models/Periodos.php
+!app/Models/Profesores.php
+!app/Models/ProgramaEducativos.php
 
 
