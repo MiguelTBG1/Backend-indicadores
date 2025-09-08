@@ -321,6 +321,26 @@ class PlantillasCollectionSeeder extends Seeder
                                         'seccion' => 'Información Personal',
                                         'campoMostrar' => 'Nombres',
                                     ]
+                                ],
+                                [
+                                    'name' => "Obtuvo algún premio o reconocimiento",
+                                    'type' => "subform",
+                                    'required' => false,
+                                    'filterable' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => "Nombre del premio",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Lugar obtenido",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
@@ -365,6 +385,26 @@ class PlantillasCollectionSeeder extends Seeder
                                     'name' => 'Lugar',
                                     'type' => 'string',
                                     'required' => false
+                                ],
+                                [
+                                    'name' => "Obtuvo algún premio o reconocimiento",
+                                    'type' => "subform",
+                                    'required' => false,
+                                    'filterable' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => "Nombre del premio",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Lugar obtenido",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
@@ -401,6 +441,32 @@ class PlantillasCollectionSeeder extends Seeder
                                         'plantillaId' => '68b0938423ed6ec87508548c',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
+                                    ]
+                                ],
+                                [
+                                    'name' => "Productos obtenidos",
+                                    'type' => "subform",
+                                    'required' => false,
+                                    'filterable' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => "Publicacion",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Tesis",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Residencia Profesional",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
                                     ]
                                 ]
                             ]
