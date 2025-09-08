@@ -38,6 +38,6 @@ Thumbs.db
 !app/Models/Alumnos.php
 !app/Models/Periodos.php
 !app/Models/Profesores.php
-!app/Models/ProgramaEducativos.php
+!app/Models/ProgramaEducativo.php
 
 
