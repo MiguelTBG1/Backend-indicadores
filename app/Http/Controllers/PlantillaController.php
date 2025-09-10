@@ -30,7 +30,6 @@ class PlantillaController extends Controller
 
             // Devolver la respuesta JSON
             return response()->json($plantillas, 200);
-
         } catch (Exception $e) {
 
             // Registrar el error en el log
@@ -85,10 +84,10 @@ class PlantillaController extends Controller
             }
 
             // Formar el nombre de la colección eliminando espacios
-            $collectionName = str_replace(' ','', $plantillaName) . "_data";
+            $collectionName = str_replace(' ', '', $plantillaName) . "_data";
 
             // Formar el nombre del modelo eliminiando espacios
-            $modelName = str_replace(' ','', $plantillaName);
+            $modelName = str_replace(' ', '', $plantillaName);
 
             // Filtrar datos no serializables en `campos`
             $secciones = $request->input('secciones');
@@ -109,9 +108,9 @@ class PlantillaController extends Controller
             // Recorremos secciones para buscar las relaciones
             $relations = [];
 
-            foreach($secciones as $index => $seccion){
-                foreach($seccion['fields'] as $indexfield => $field){
-                    if($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])){
+            foreach ($secciones as $index => $seccion) {
+                foreach ($seccion['fields'] as $indexfield => $field) {
+                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
                         // Guardamos dataSource
                         $optionsSource = $field['dataSource'];
 
@@ -119,7 +118,7 @@ class PlantillaController extends Controller
                         $relatedModel = Plantillas::find($optionsSource['plantillaId'])->nombre_modelo ?? null;
 
                         // Validamos si se encontro el modelo
-                        if(!$relatedModel){
+                        if (!$relatedModel) {
                             throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
                         }
 
@@ -134,8 +133,8 @@ class PlantillaController extends Controller
             }
 
             // Generamos el modelo dinámico
-            $generator = new \App\Services\DynamicModelGenerator();
-            $generator->generate($modelName, $relations);
+            //$generator = new \App\Services\DynamicModelGenerator();
+            //$generator->generate($modelName, $relations);
 
             // Registramos la coleccion del documento a crear
             /*Recurso::create([
@@ -149,9 +148,7 @@ class PlantillaController extends Controller
             return response()->json([
                 'message' => 'Plantilla creada exitosamente',
             ], 201);
-
-        } catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en store: ' . $e->getMessage());
 
@@ -195,11 +192,10 @@ class PlantillaController extends Controller
             }
 
             // Buscamos los campos que sean select dinamico
-            foreach($secciones as $index => $seccion){
+            foreach ($secciones as $index => $seccion) {
 
                 // Recorremos los campos de las secciones con recursividad
                 $secciones[$index]['fields'] = $this->traverseFields($seccion['fields']);
-
             }
 
             Log::info('Secciones obtenidas para la plantilla', [
@@ -213,7 +209,6 @@ class PlantillaController extends Controller
                 'nombre_plantilla' => $nombrePlantilla,
                 'secciones' => $secciones,
             ], 200);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en getFields: ' . $e->getMessage());
@@ -260,7 +255,7 @@ class PlantillaController extends Controller
                 'secciones' => $request->input('secciones')
             ]);
 
-             // Validar la solicitud
+            // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'secciones' => 'required|array|min:1',
             ]);
@@ -283,9 +278,9 @@ class PlantillaController extends Controller
             // Recorremos secciones para buscar las relaciones
             $relations = [];
 
-            foreach($secciones as $index => $seccion){
-                foreach($seccion['fields'] as $indexfield => $field){
-                    if($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])){
+            foreach ($secciones as $index => $seccion) {
+                foreach ($seccion['fields'] as $indexfield => $field) {
+                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
                         // Guardamos dataSource
                         $optionsSource = $field['dataSource'];
 
@@ -293,12 +288,13 @@ class PlantillaController extends Controller
                         $relatedModel = Plantillas::find($optionsSource['plantillaId'])->nombre_modelo ?? null;
 
                         // Validamos si se encontro el modelo
-                        if(!$relatedModel){
+                        if (!$relatedModel) {
                             throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
                         }
 
+                        $functionNAme = $this->formatRelationName($field['name']);
                         // Agregamos la relación al array de relaciones
-                        $relations[$field['name']] = [
+                        $relations[$functionNAme] = [
                             'type' => 'belongsTo',
                             'model' => $relatedModel,
                             'foreign' => $field['name'] . '_id'
@@ -311,14 +307,13 @@ class PlantillaController extends Controller
             $modelName = $plantilla->nombre_modelo;
 
             // Actualizamos el modelo dinámico
-            $generator = new \App\Services\DynamicModelGenerator();
-            $generator->generate($modelName, $relations);
+            //$generator = new \App\Services\DynamicModelGenerator();
+            //$generator->generate($modelName, $relations);
 
             // Retornar la respuesta JSON
             return response()->json([
                 'message' => 'Plantilla actualizada exitosamente',
             ], 200);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en update: ' . $e->getMessage());
@@ -355,7 +350,7 @@ class PlantillaController extends Controller
             }
 
             // Obtener el nombre del modelo de la plantilla
-            $modelName = $plantilla -> nombre_modelo;
+            $modelName = $plantilla->nombre_modelo;
             // creamos el documento
             $modelClass = "App\\Models\\$modelName";
 
@@ -389,7 +384,6 @@ class PlantillaController extends Controller
             return response()->json([
                 'message' => 'Plantilla eliminada exitosamente'
             ], 200);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error('Error en delete: ' . $e->getMessage());
@@ -454,7 +448,6 @@ class PlantillaController extends Controller
 
                 // Asignar los registros mapeados a las opciones del campo select
                 $fields[$index]['options'] = $mappedRecords->toArray();
-
             }
 
             // Si el campo es un subform, recorremos sus subcampos recursivamente
@@ -466,4 +459,11 @@ class PlantillaController extends Controller
         return $fields;
     }
 
+    function formatRelationName($name) {
+    // Quita espacios, acentos y caracteres especiales, y convierte a snake_case
+    $name = preg_replace('/[áéíóúÁÉÍÓÚñÑ]/u', '', $name); // Opcional: quitar acentos
+    $name = str_replace([' ', '-'], '_', $name); // Reemplaza espacios y guiones por _
+    $name = preg_replace('/[^A-Za-z0-9_]/', '', $name); // Quita cualquier otro caracter especial
+    return strtolower($name);
+}
 }

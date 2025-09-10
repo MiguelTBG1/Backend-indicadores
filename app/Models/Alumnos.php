@@ -20,7 +20,8 @@ class Alumnos extends Model
         'secciones',
     ];
 
-   public function getTable()
-   {
-       return $this->collection;
-   }}
+    public function getTable()
+    {
+        return $this->collection;
+    }
+}
