@@ -79,9 +79,13 @@ class DocumentoController extends Controller
         }
     }
 
-    // Funcion para crear un nuevo documento
-    // Esta función recibe una plantilla y un conjunto de datos para crear un nuevo documento
-    // Se valida la plantilla y los datos, se procesan los archivos subidos y se guarda el documento en MongoDB
+    /**
+     * Función para guardar un documento en una plantilla específica.
+     * @param \Illuminate\Http\Request $request
+     * @param string $id ID de la plantilla.
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
     public function store(Request $request, $id)
     {
         try {
@@ -138,53 +142,28 @@ class DocumentoController extends Controller
                 $documentData['Recurso Digital'] = $uploadedFiles;
             }
 
-            Log::info('Datos', $documentData);
-
-            // Formateamos los datos recibido a un array valido
-            foreach ($documentData as $key => $value) {
-                // Solo procesamos valores que sean string
-                if (is_string($value)) {
-                    $decoded = json_decode($value, true);
-
-                    // Verificamos si es JSON válido
-                    if (json_last_error() === JSON_ERROR_NONE) {
-                        $documentData[$key] = $decoded;
-                    }
-
-                    // Si NO es JSON válido, se queda como string (ej: "juan", "2025-07-19")
-                }
-
-            }
-
-            Log::info('Datos2', $documentData);
+            // Obtenemos las secciones y lo formateamos a un json valido
+            $documentData = json_decode($documentData['secciones'], true);
 
             // Buscar los campos que tengan un valor en formato de fecha
             foreach ($documentData as $key => $value) {
+                foreach ($value['fields'] as $index => $data){
 
-                    // Verifica si es un arreglo
-                    if (is_array($documentData[$key])) {
-
-                        // Si es un arreglo, recorremos sus elementos
-                        foreach ($value as $index => $data){
-                            foreach ($data as $subKey => $subValue) {
-
-                                // Verificar si el valor es un string y se puede convertir a fecha
-                                if (is_string($documentData[$key][$index][$subKey]) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key][$index][$subKey])) {
-                                    // Convertir a UTCDateTime
-                                    $documentData[$key][$index][$subKey] = new UTCDateTime(new DateTimeImmutable($documentData[$key][$index][$subKey]));
-                                }
-                            }
+                    // Verificar que sea string y se pueda convertir a fecha
+                    if (is_string($data) && strtotime($data)) {
+                        $timestamp = strtotime($data);
+                        if ($timestamp !== false) {
+                            $documentData[$key]['fields'][$index] =  new UTCDateTime($timestamp * 1000);
                         }
-
-                    // Verificamos si es una fecha y la convertimos a UTCDateTime
-                    }elseif(preg_match('/^\d{4}-\d{2}-\d{2}$/', $documentData[$key])) {
-                        // Convertir la fecha a UTCDateTime
-                        $documentData[$key] = new UTCDateTime(new DateTimeImmutable($documentData[$key]));
+                    }else if(is_array($data)){
+                        // Llamamos la función recursiva
+                        $documentData[$key]['fields'][$index] = $this->recusiveSubForm($data);
                     }
 
-            }
+                }
 
-            Log::info('Datos3', $documentData);
+
+            }
 
             // Obtener el nombre del modelo de la plantilla
             $modelName = $plantilla -> nombre_modelo;
@@ -200,7 +179,7 @@ class DocumentoController extends Controller
             }
 
             $modelClass::create([
-                'secciones' => $documentData['secciones'],
+                'secciones' => $documentData,
             ]);
 
 
@@ -238,7 +217,7 @@ class DocumentoController extends Controller
                 throw new \Exception('No se encontró la plantilla con la id: ' . $id, 404);
             }
 
-            // creamos el documento
+            // creamos la clase del modelo
             $modelClass = "App\\Models\\$modelName";
 
             //Validar que la clase exista
@@ -257,69 +236,12 @@ class DocumentoController extends Controller
             foreach ($documents as $indexDocument => $document) {
 
 
-                /*$documents[$indexDocument] = [
-                    '_id' => ['$oid' => $documents[$indexDocument]['id']],
-                    'secciones' => $documents[$indexDocument]['secciones'],
-                ];*/
-
-
-                /*foreach ($document['secciones'] as $indexSecciones => $valueSecciones) {
-                    foreach ($valueSecciones['fields'] as $fieldKey => $fieldValue){
-
-                        Log::info('Fecha '.$fieldKey.': ', [
-                            'fields' => $documents[$index]['secciones'][$indexSecciones]['fields'] ?? null,
-                        ]);
-
-                        // Si es un campo de tipo fecha de MongoDB
-                        if (is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]) &&
-                            isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']) &&
-                            is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']) &&
-                            isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']['$numberLong'])) {
-
-
-                            // Convertir el timestamp a DateTime
-                            $timestamp = (int)$documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey]['$date']['$numberLong'] / 1000;
-                            $dt = new DateTime("@$timestamp");
-                            $dt->setTimezone(new DateTimeZone('UTC')); // Puedes cambiar a tu zona horar
-                            // Reemplazar por fecha formateada
-                            $documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey] = $dt->format('Y-m-d');
-
-                            // En caso contrario, Verificar si es un arreglo de un subformulario
-                        }elseif(is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey])){
-
-                            //Recorremos los elemmentos del subformulario
-                            foreach($fieldValue as $indexSubform => $valueSubform){
-                                foreach($valueSubform as $keySubform => $fieldSubform){
-
-                                    // Si es un campo de tipo fecha de MongoDB
-                                    if (is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]) &&
-                                        isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']) &&
-                                        is_array($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']) &&
-                                        isset($documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']['$numberLong'])) {
-
-                                        // Convertir el timestamp a DateTime
-                                        $timestamp = (int)$documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform]['$date']['$numberLong'] / 1000;
-                                        $dt = new DateTime("@$timestamp");
-                                        $dt->setTimezone(new DateTimeZone('UTC')); // Puedes cambiar a tu zona horar
-                                        // Reemplazar por fecha formateada
-                                        $documents[$index]['secciones'][$indexSecciones]['fields'][$fieldKey][$indexSubform][$keySubform] = $dt->format('Y-m-d');
-                                    }
-                                }
-                            }
-
-                        }
-
-                    }
-
-                }*/
+                /*Log::info('Documento ', [
+                            $indexDocument => $document ?? null,
+                        ]);*/
             }
 
             // Devolver los documentos en formato JSON
-
-             Log::info('Fecha: ', [
-                            'fields' => $documents ?? null,
-                        ]);
-
             return response()->json($documents);
 
         }catch(\Exception $e){
@@ -334,16 +256,30 @@ class DocumentoController extends Controller
     public function destroy($plantillaName, $documentId)
     {
         try{
-            // Conexión a MongoDB
-            $client = new MongoClient(config('database.connections.mongodb.url'));
-            $db = $client->selectDatabase(config('database.connections.mongodb.database'));
 
-            // Obtener el documento de la colección MongoDB
-            $documento = $db->selectCollection($plantillaName)->findOne(['_id' => new ObjectId($documentId)]);
+            // Buscar plantilla por nombre
+            $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
+
+            // Nombre del model
+            $nameModel = $plantilla->nombre_modelo;
+
+            // Creamos la clase del modelo
+            $modelClass = "App\\Models\\$nameModel";
+
+            //Validar que la clase exista
+            if (!class_exists($modelClass)) {
+                Log::error("Clase de modelo no encontrada: $modelClass");
+                return response()->json([
+                    'error' => 'Modelo inválido o no encontrado.',
+                ], 400);
+            }
+
+            // Obtenemos el documento
+            $document = $modelClass::find($documentId)->toArray();
 
             // Verificar si el documento tiene un archivo asociado y eliminarlo
-            if (isset($documento['Recurso Digital']) && is_array($documento['Recurso Digital'])) {
-                foreach ($documento['Recurso Digital'] as $filePath) {
+            if (isset($document['Recurso Digital']) && is_array($document['Recurso Digital'])) {
+                foreach ($document['Recurso Digital'] as $filePath) {
                     // Asegurarse de que el archivo no tiene el prefijo "uploads/"
                     if (strpos($filePath, 'uploads/') === 0) {
                         $filePath = substr($filePath, strlen('uploads/'));
@@ -367,15 +303,14 @@ class DocumentoController extends Controller
                 }
             }
 
-            // Eliminar el documento de la colección MongoDB
-            $result = $db->selectCollection($plantillaName)->deleteOne(['_id' => new ObjectId($documentId)]);
+            // Eliminamos el documento con su ID
+            $modelClass::delete($documentId);
 
 
             return response()->json([
                 'message' => 'Documento y archivos asociados eliminados con éxito',
-                'result' => $result->getDeletedCount(),
-                'plantilla' => $plantillaName,
-                'documentId' => $documentId]);
+            ]);
+
         }catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al eliminar documento: " . $e->getMessage());
@@ -388,42 +323,38 @@ class DocumentoController extends Controller
     public function update(Request $request, $plantillaName, $documentId)
     {
         try{
-            // Verifica si la id del documento es válida
-            if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
-                return response()->json(['error' => 'ID del documento no válido'], 400);
-            }
-
-            $client = new MongoClient(config('database.connections.mongodb.url'));
-            $db = $client->selectDatabase(config('database.connections.mongodb.database'));
-
-            // Verifica si la colección existe
-            $collections = $db->listCollections();
-            $collectionExists = false;
-            foreach ($collections as $collection) {
-                if ($collection->getName() === $plantillaName) {
-                    $collectionExists = true;
-                    break;
-                }
-            }
-
-            if (!$collectionExists) {
-                throw new \Exception('La colección no existe');
-            }
 
             // Verifica si la id del documento es válida
             if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
                 throw new \Exception('ID de documento no válido');
             }
 
-            // Obtener el documento de la colección usando el cliente nativo
-            $documento = $db->selectCollection($plantillaName)->findOne(['_id' => new ObjectId($documentId)]);
+            Log::info($plantillaName);
 
-            // Verifica si el documento existe
-            if (!$documento) {
-                throw new \Exception('Documento no encontrado');
+            // Buscar plantilla por nombre
+            $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
+
+            // Nombre del model
+            $nameModel = $plantilla->nombre_modelo;
+
+            // Creamos la clase del modelo
+            $modelClass = "App\\Models\\$nameModel";
+
+            //Validar que la clase exista
+            if (!class_exists($modelClass)) {
+                Log::error("Clase de modelo no encontrada: $modelClass");
+                return response()->json([
+                    'error' => 'Modelo inválido o no encontrado.',
+                ], 400);
             }
 
-            Log::info("Datos: ", $request->all());
+            // Obtenemos el documento
+            $document = $modelClass::find($documentId)->toArray();
+
+            // Verifica si el documento existe
+            if (!$document) {
+                throw new \Exception('Documento no encontrado');
+            }
 
             // Validar los datos de entrada
             $validatos = Validator::make($request->all(), [
@@ -436,13 +367,13 @@ class DocumentoController extends Controller
             }
 
             // Convertir el array recibido a un formato JSON válido
-            $updateData = json_decode(json_encode($request->input('document_data')), true);
+            $updateData = $request->input('document_data');
 
             // Obtener archivos actuales desde `existing_files` si se envían
             $archivosActuales = $request->input('existing_files', []);
 
             // Manejo de eliminación de archivos
-            if ($request->has('delete_files') && isset($documento['Recurso Digital'])) {
+            if ($request->has('delete_files') && isset($document['Recurso Digital'])) {
                 foreach ($request->input('delete_files') as $filePath) {
                     if (Storage::disk('public')->exists($filePath)) {
                         Storage::disk('public')->delete($filePath);
@@ -466,44 +397,37 @@ class DocumentoController extends Controller
                 }
             }
 
-            Log::info("documento: ", $updateData);
+            $updateData = $updateData['secciones'];
 
-            foreach ($updateData as $key => $value) {
-                // 1. Si el valor es un array, revisamos campos internos (ej: listas de objetos)
-                if (is_array($value)) {
-                    foreach ($value as $index => $data) {
-                        if (is_array($data)) {
-                            foreach ($data as $subKey => $subValue) {
-                                // Verificar que sea string y se pueda convertir a fecha
-                                if (is_string($subValue) && strtotime($subValue)) {
-                                    // Convertir a UTCDateTime
-                                    $updateData[$key][$index][$subKey] = new UTCDateTime(strtotime($subValue) * 1000);
-                                }
-                            }
+            Log::info("docuemento",[
+                ' ' => $updateData
+            ]);
+
+            // Buscar los campos que tengan un valor en formato de fecha
+            foreach ($updateData as $index => $seccion) {
+                foreach ($seccion['fields'] as $key => $field){
+
+                    // Verificar que sea string y se pueda convertir a fecha
+                    if (is_string($field) && strtotime($field)) {
+                        $timestamp = strtotime($field);
+                        if ($timestamp !== false) {
+                            $updateData[$index]['fields'][$key] =  new UTCDateTime($timestamp * 1000);
                         }
+                    }else if(is_array($field)){
+                        // Llamamos la función recursiva
+                        $updateData[$index]['fields'][$key] = $this->recusiveSubForm($field);
                     }
+
                 }
 
-                // 2. Si el campo directo es un string y parece una fecha
-                if (is_string($value) && strtotime($value)) {
-                    // Convertir a UTCDateTime
-                    $updateData[$key] = new UTCDateTime(strtotime($value) * 1000);
-                }
-            }
 
-            // Asegurar que solo exista 'Recurso Digital' y no 'Recurso_Digital'
-            unset($documento['Recurso_Digital']);
-
-            // Guardar la lista final de archivos
-            if( empty($archivosActuales) ) {
-                $updateData['Recurso Digital'] = $archivosActuales;
             }
 
             // Actualizar el documento en la colección de MongoDB
-            $result = $db->selectCollection($plantillaName)->updateOne(
-                ['_id' => new ObjectId($documentId)],
-                ['$set' => $updateData]
-            );
+            $modelClass::where('_id', $documentId)->update([
+                'secciones' => $updateData,
+                'Recursos Digitales' => $archivosActuales
+            ]);
 
             return response()->json(['message' => 'Documento actualizado con éxito']);
 
@@ -512,7 +436,7 @@ class DocumentoController extends Controller
             Log::error("Error en la actualización del documento: " . $e->getMessage());
 
             // Registrar el error completo
-            return response()->json(['message' => 'Error al crear documento', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Error en la actualización del documento', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -520,17 +444,71 @@ class DocumentoController extends Controller
 
     public function show($plantillaName, $documentId)
     {
-        // Conexión a MongoDB
-        $client = new MongoClient(config('database.connections.mongodb.url'));
-        $db = $client->selectDatabase(config('database.connections.mongodb.database'));
+        try{
 
-        // Obtener el documento de la colección MongoDB
-        $document = $db->selectCollection($plantillaName)->findOne(['_id' => new ObjectId($documentId)]);
+            // Verifica si la id del documento es válida
+            if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
+                throw new \Exception('ID de documento no válido');
+            }
 
-        if ($document) {
+            Log::info($plantillaName);
+
+            // Buscar plantilla por nombre
+            $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
+
+            // Nombre del model
+            $nameModel = $plantilla->nombre_modelo;
+
+            // Creamos la clase del modelo
+            $modelClass = "App\\Models\\$nameModel";
+
+            //Validar que la clase exista
+            if (!class_exists($modelClass)) {
+                Log::error("Clase de modelo no encontrada: $modelClass");
+                return response()->json([
+                    'error' => 'Modelo inválido o no encontrado.',
+                ], 400);
+            }
+
+            // Obtenemos el documento
+            $document = $modelClass::find($documentId)->toArray();
+
+            // Retornamos el documento
             return response()->json($document);
-        } else {
-            return response()->json(['error' => "Documento no encontrado"], 404);
+
+        }catch(\Exception $e){
+            // Registrar el error en el log
+            Log::error("Error al obtener el documento: " . $e->getMessage());
+
+            // Registrar el error completo
+            return response()->json(['message' => 'Error al obtener el documento', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Función recursiva para recorrer los subFormularios
+     * @param array $data
+     * @return array
+     */
+    public function recusiveSubForm(array $data){
+        // Recorremos el arraglo
+        foreach ($data as $index => $value) {
+            foreach ($value as $key => $field) {
+                // Verificar si es un string y se puede convertir a fecha
+                if (is_string($field) && strtotime($field)) {
+                    // Convertir a UTCDateTime
+                    $timestamp = strtotime($field);
+                    if ($timestamp !== false) {
+                        $data[$index][$key] =  new UTCDateTime($timestamp * 1000);
+                    }
+                }else if (is_array($field)) {
+                    // Llamamos la función recursiva
+                    $data[$index][$key] = $this->recusiveSubForm($field);
+                }
+            }
+        }
+
+        // Retornamos $data
+        return $data;
     }
 }
