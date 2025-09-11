@@ -133,8 +133,8 @@ class PlantillaController extends Controller
             }
 
             // Generamos el modelo dinámico
-            //$generator = new \App\Services\DynamicModelGenerator();
-            //$generator->generate($modelName, $relations);
+            $generator = new \App\Services\DynamicModelGenerator();
+            $generator->generate($modelName, $relations);
 
             // Registramos la coleccion del documento a crear
             /*Recurso::create([
