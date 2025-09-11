@@ -277,30 +277,43 @@ class IndicadoresController extends Controller
 
         log::info('4');
 
-        $pipeline[] = [
+        $pipeline = [
             [ '$unwind' => '$secciones' ],
-            [ '$match' => [ "secciones.titulo" => $configuracion['secciones'] ] ],
-            [ '$project' => [ 'campo' => [ '$ifNull' => $this->recursiveCampo($configuracion) ] ]],
+            [ '$match' => [ "secciones.nombre" => $configuracion['secciones'] ] ],
+            [ '$project' => [ 'campo' => [ '$ifNull' => ['$secciones.fields.' . $this->recursiveCampo($configuracion), [] ] ] ]],
             [ '$group' => [ '_id' => null, 'resultado' => $this -> recursiveOperation($configuracion) ]]
         ];
 
+        try {
 
-        Log::info("pipeline",[
-            ' ' => $pipeline
-        ]);
-        return 0;
-        // Ejecutamos el pipeline
-        /*$cursor = $documents->aggregate($pipeline);
+            $db = $this->connectToMongoDB();
 
+            // Seleccionamos la colección
+            $collection = $db->selectCollection($configuracion['coleccion']);
 
+            // Ejecutamos el pipeline
+            $cursor = $collection->aggregate($pipeline);
 
-        // Retornamos el resultado
-        $resultados = iterator_to_array($cursor);
-        Log::info('Cursor obtenido de la agregación', $resultados);
-        if (empty($resultados)) {
-            return 0; // Si no hay resultados, retornamos 0
+            // Procesamos resultado de forma más segura
+            $resultados = [];
+            foreach ($cursor as $document) {
+                $resultados[] = $document;
+            }
+
+            Log::info('Cursor obtenido de la agregación', $resultados);
+
+            if (empty($resultados)) {
+                return 0;
+            }
+
+            return $resultados[0]['resultado'] ?? 0;
+
+        } catch (\Exception $e) {
+            Log::error('Error específico: ' . $e->getMessage());
+        Log::error('Línea del error: ' . $e->getLine());
+        Log::error('Archivo del error: ' . $e->getFile());
+            return 0;
         }
-        return $resultados[0]['resultado'] ?? 0; // Retornamos el resultado del numerador*/
     }
 
     public function recursiveOperation($configuracion){
@@ -313,7 +326,7 @@ class IndicadoresController extends Controller
         Log::info("5");
 
         $operacion = match ($configuracion['operacion']) {
-            'contar' => ['$sum' => 1],
+            'contar' => ['$size' => '$campo'],
             'sumar' => ['$sum' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
             'promedio' => ['$avg' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
             'maximo' => ['$max' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
@@ -327,25 +340,39 @@ class IndicadoresController extends Controller
     }
 
     public function recursiveCampo($configuracion) {
-        // Si no hay subConfiguracion, devolvemos el campo
+        // Tomamos el campo actual
         $campo = $configuracion['campo'] ?? null;
 
-        Log::info('7');
-
         if (!$campo) {
-            return null; // Puede ser null si la operación no necesita campo
+            return null; // si no hay campo, detenemos
         }
 
-        // Si hay subConfiguracion, concatenamos el campo anidado (solo string)
-        if (!empty($configuracion['subConfiguracion']) && !empty($configuracion['subConfiguracion']['campo'])) {
-            return $campo . '.' . $this->recursiveCampo($configuracion['subConfiguracion']);
+        // Si hay subConfiguracion, procesarla
+        if (!empty($configuracion['subConfiguracion'])) {
+            $campoRecursivo = $this->recursiveCampo($configuracion['subConfiguracion']);
+
+            // Solo concatenamos si el recursivo trae algo
+            if ($campoRecursivo != null) {
+                return $campo . '.' . $campoRecursivo;
+            }
         }
 
-        Log::info('8');
-
+        Log::info($campo);
         return $campo;
     }
 
+    /**
+     * Conexión a la base de datos MongoDB
+     * @return MongoDB\Database La conexión a la base de datos
+     */
+    private function connectToMongoDB()
+    {
+        // Conexión a MongoDB
+        $client = new MongoClient(config('database.connections.mongodb.url'));
+        $db = $client->selectDatabase(config('database.connections.mongodb.database'));
+
+        return $db;
+    }
 
     /*public function recursiveOperation($configuracion, $campo){
 
