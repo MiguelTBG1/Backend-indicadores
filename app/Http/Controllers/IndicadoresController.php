@@ -278,13 +278,22 @@ class IndicadoresController extends Controller
         log::info('4');
 
         $pipeline = [
-            [ '$unwind' => '$secciones' ],
-            [ '$match' => [ "secciones.nombre" => $configuracion['secciones'] ] ],
-            [ '$project' => [ 'campo' => [ '$ifNull' => ['$secciones.fields.' . $this->recursiveCampo($configuracion), [] ] ] ]],
-            [ '$group' => [ '_id' => null, 'resultado' => $this -> recursiveOperation($configuracion) ]]
+            ['$unwind' => '$secciones'],
+            ['$match' => [
+                '$and' => array_merge(
+                    [['secciones.nombre' => $configuracion['secciones']]],
+                    $this->recursiveCondicion($configuracion) // debe devolver un array de condiciones
+                )]
+            ],
+            ['$project' => ['campo' => ['$ifNull' => ['$secciones.fields.' . $this->recursiveCampo($configuracion), []]]]],
+            ['$group' => ['_id' => null, 'resultado' => $this->recursiveOperation($configuracion)]]
         ];
 
+
+
         try {
+
+            Log::info('pipeline', $pipeline);
 
             $db = $this->connectToMongoDB();
 
@@ -307,16 +316,16 @@ class IndicadoresController extends Controller
             }
 
             return $resultados[0]['resultado'] ?? 0;
-
         } catch (\Exception $e) {
             Log::error('Error específico: ' . $e->getMessage());
-        Log::error('Línea del error: ' . $e->getLine());
-        Log::error('Archivo del error: ' . $e->getFile());
+            Log::error('Línea del error: ' . $e->getLine());
+            Log::error('Archivo del error: ' . $e->getFile());
             return 0;
         }
     }
 
-    public function recursiveOperation($configuracion){
+    public function recursiveOperation($configuracion)
+    {
 
         // Validamos que la configuración sea válida
         if (!is_array($configuracion) || !isset($configuracion['operacion'])) {
@@ -339,7 +348,8 @@ class IndicadoresController extends Controller
         return $operacion;
     }
 
-    public function recursiveCampo($configuracion) {
+    public function recursiveCampo($configuracion)
+    {
         // Tomamos el campo actual
         $campo = $configuracion['campo'] ?? null;
 
@@ -359,6 +369,57 @@ class IndicadoresController extends Controller
 
         Log::info($campo);
         return $campo;
+    }
+
+    /**
+     * Función recuriva para formatear las condiciones de la configuración
+     * @param array
+     * @return array
+     */
+    public function recursiveCondicion($configuracion)
+    {
+
+        // Validamos que la configuración sea válida
+        if (!is_array($configuracion) || !isset($configuracion['condicion']) || !is_array($configuracion['condicion'])) {
+            throw new Exception('Configuración inválida', Response::HTTP_BAD_REQUEST);
+        }
+
+        // Creamos el array de condiciones
+        $condiciones = [];
+
+        // Recorremos las condiciones
+        foreach ($configuracion['condicion'] as $condicion) {
+            $operador = match ($condicion['operador']) {
+                'mayor' => '$gt',
+                'menor' => '$lt',
+                'igual' => '$eq',
+                'diferente' => '$ne',
+                'mayor_igual' => '$gte',
+                'menor_igual' => '$lte',
+                default => throw new Exception('Operador no válido: ' . $condicion['operador'])
+            };
+
+            $condiciones[] = [
+                'secciones.fields.' . $condicion['campo'] => [ $operador => $condicion['valor'] ]
+            ];
+        }
+
+        // Si hay subConfiguracion, procesarla
+        if (!empty($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && !empty($configuracion['subConfiguracion']['condicion'])) {
+            // Concatenamos el nombre del campo con el nombre del subcampo
+            if( $configuracion['subConfiguracion']['campo'] != null || $configuracion['subConfiguracion']['campo'] != 'null' ){
+                $configuracion['subConfiguracion']['campo'] = $configuracion['campo'] . '.' . $configuracion['subConfiguracion']['campo'];
+            }
+
+            // Llamamos recursivamente a la función para procesar la subconfiguracion
+            $condicionesRecursivo = $this->recursiveCondicion($configuracion['subConfiguracion']);
+
+            // Agregamos las condiciones recursivas al array de condiciones
+            $condiciones[] = $condicionesRecursivo;
+        }
+
+        // Retornamos las condiciones
+        return $condiciones;
     }
 
     /**
