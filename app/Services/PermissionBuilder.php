@@ -1,4 +1,5 @@
 <?php
+namespace App\Services;
 
 use App\Models\User;
 use App\Models\Rol;
@@ -92,7 +93,6 @@ class PermissionBuilder
 
         foreach ($allow as $perm) {
             [$recurso, $accion] = explode('_', $perm);
-            Log::debug("Recurso: {$recurso}     Accion: {$accion}");
             // Caso 1: comodín total
             if ($recurso === '*' && $accion === '*') {
                 foreach ($allRecursos as $r) {
