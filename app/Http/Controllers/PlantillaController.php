@@ -7,16 +7,10 @@ use App\Models\Recurso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use MongoDB\Client as MongoClient;
-use MongoDB\BSON\UTCDateTime;
-use MongoDB\BSON\ObjectId;
 use Exception;
 
 use function PHPUnit\Framework\isArray;
 
-/**
- * @group Plantillas
- */
 class PlantillaController extends Controller
 {
     /**
@@ -67,17 +61,15 @@ class PlantillaController extends Controller
 
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
-                /*'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'secciones' => 'required|array|min:1',
-                'secciones.*.nombre' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
+                /*'secciones.*.nombre' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'secciones.*.fields' => 'required|array|min:1',
                 'secciones.*.fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
                 'secciones.*.fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
                 'secciones.*.fields.*.required' => 'required|boolean',
-                'secciones.*.fields.*.subcampos' => 'required_if:secciones.*.fields.*.type,subform|array|min:1',
-                'secciones.*.fields.*.subcampos.*.name' => 'required_if:secciones.*.fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'secciones.*.fields.*.subcampos.*.type' => 'required_if:secciones.*.fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
-                'secciones.*.fields.*.subcampos.*.required' => 'required_if:secciones.*.fields.*.type,subform|boolean'*/
+                'secciione.*.fields.*.filterable' => 'required|boolean',
+                'secciones.*.fields.*.subcampos' => 'required_if:secciones.*.fields.*.type,subform|array|min:1',*/
             ]);
 
 
@@ -95,12 +87,16 @@ class PlantillaController extends Controller
             // Formar el nombre de la colección eliminando espacios
             $collectionName = str_replace(' ', '', $plantillaName) . "_data";
 
+            // Formar el nombre del modelo eliminiando espacios
+            $modelName = str_replace(' ', '', $plantillaName);
+
             // Filtrar datos no serializables en `campos`
             $secciones = $request->input('secciones');
 
             // Agregar la plantilla a la colección de Plantillas
             $plantilla = Plantillas::create([
                 'nombre_plantilla' => $plantillaName,
+                'nombre_modelo' => $modelName,
                 'nombre_coleccion' => $collectionName,
                 'secciones' => $secciones,
             ]);
@@ -121,6 +117,48 @@ class PlantillaController extends Controller
             if (!$plantilla) {
                 throw new \Exception('Error al crear la plantilla', 500);
             }
+
+            // Recorremos secciones para buscar las relaciones
+            $relations = [];
+
+            foreach ($secciones as $index => $seccion) {
+                foreach ($seccion['fields'] as $indexfield => $field) {
+                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
+                        // Guardamos dataSource
+                        $optionsSource = $field['dataSource'];
+
+                        //Buscamos el nombre del modelo
+                        $relatedModel = Plantillas::find($optionsSource['plantillaId'])->nombre_modelo ?? null;
+
+                        // Validamos si se encontro el modelo
+                        if (!$relatedModel) {
+                            throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
+                        }
+
+                        $functionNAme = $this->formatRelationName($field['name']);
+
+                        // Agregamos la relación al array de relaciones
+                        $relations[$functionNAme] = [
+                            'type' => 'belongsTo',
+                            'model' => $relatedModel,
+                            'foreign' => $field['name'] . '_id'
+                        ];
+                    }
+                }
+            }
+
+            // Generamos el modelo dinámico
+            $generator = new \App\Services\DynamicModelGenerator();
+            $generator->generate($modelName, $relations);
+
+            // Registramos la coleccion del documento a crear
+            /*Recurso::create([
+                'clave' => $collectionName,
+                'nombre' => $plantillaName,
+                'tipo' => 'dinamico',
+                'grupo' => 'documentos',
+                'descripcion' => "Documentos de la plantilla {$plantillaName}"
+            ]);*/
 
             return response()->json([
                 'message' => 'Plantilla creada exitosamente',
@@ -168,129 +206,11 @@ class PlantillaController extends Controller
                 throw new \Exception('No hay secciones disponibles para esta plantilla', 404);
             }
 
-            // Conexión a MongoDB
-            $client = new MongoClient(config('database.connections.mongodb.url'));
-            $db = $client->selectDatabase(config('database.connections.mongodb.database'));
-
-            // Verifica si la colección existe
-            $collections = $db->listCollections();
-
             // Buscamos los campos que sean select dinamico
-            foreach ($plantilla->secciones as $index => $seccion) {
-                foreach ($seccion['fields'] as $indexfield => $field) {
+            foreach ($secciones as $index => $seccion) {
 
-                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
-                        // Guardamos dataSource
-                        $optionsSource = $field['dataSource'];
-
-                        //Buscamos el nombre de la colección
-                        $nombreColeccion = Plantillas::find($optionsSource['plantillaId'])->nombre_coleccion ?? null;
-
-                        // Validamos si se encontro la coleccion
-                        if (!$nombreColeccion) {
-                            throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
-                        }
-
-                        // Verificamos si la colección de origen existe
-                        $sourceCollectionExists = false;
-                        foreach ($collections as $collection) {
-                            if ($collection->getName() === $nombreColeccion) {
-                                $sourceCollectionExists = true;
-                                break;
-                            }
-                        }
-
-                        if ($sourceCollectionExists) {
-                            // Obtenemos los documentos de la colección de origen
-                            $Documents = json_decode(json_encode($db->selectCollection($nombreColeccion)->find()->toArray()), true);
-
-
-
-                            $options = [];
-                            foreach ($Documents as $indexDoc => $doc) {
-
-                                foreach ($doc['secciones'] as $indexSeccion => $seccion) {
-                                    foreach ($seccion['fields'] as $keyField => $fields) {
-
-                                        /*Log::info('Fecha '.$keyField.': ', [
-                                            'fields' => $fields ?? null,
-                                        ]);*/
-
-                                        if ($optionsSource['campoMostrar'] == $keyField) {
-                                            $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
-                                        }
-                                    }
-                                }
-                                $options[] = [
-                                    'campoMostrar' => $campoMostrar,
-                                    'campoGuardar' => $doc['_id']['$oid']
-                                ];
-                            }
-
-                            // Actualizamos las opciones del campo en la plantilla
-                            $secciones[$index]['fields'][$indexfield]['options'] = $options;
-                        } else {
-                            Log::warning("Colección de origen no encontrada: " . $optionsSource);
-                        }
-                    }
-
-                    if ($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])) {
-                        // Recorremos los subcampos
-                        foreach ($field['subcampos'] as $indexSubcampo => $subcampo) {
-
-                            if ($subcampo['type'] === 'select' && isset($subcampo['dataSource']) && isArray($subcampo['dataSource'])) {
-                                // Guardamos dataSource
-                                $optionsSource = $subcampo['dataSource'];
-
-                                //Buscamos el nombre de la colección
-                                $nombreColeccion = Plantillas::find($optionsSource['plantillaId'])->nombre_coleccion ?? null;
-
-                                // Validamos si se encontro la coleccion
-                                if (!$nombreColeccion) {
-                                    throw new \Exception('No se encontró la plantilla para el campo select: ' . $subcampo['name'], 404);
-                                }
-
-                                // Verificamos si la colección de origen existe
-                                $sourceCollectionExists = false;
-                                foreach ($collections as $collection) {
-                                    if ($collection->getName() === $nombreColeccion) {
-                                        $sourceCollectionExists = true;
-                                        break;
-                                    }
-                                }
-
-                                if ($sourceCollectionExists) {
-                                    // Obtenemos los documentos de la colección de origen
-                                    $Documents = json_decode(json_encode($db->selectCollection($nombreColeccion)->find()->toArray()), true);
-
-                                    $options = [];
-                                    foreach ($Documents as $indexDoc => $doc) {
-
-                                        foreach ($doc['secciones'] as $indexSeccion => $seccion) {
-                                            foreach ($seccion['fields'] as $keyField => $fields) {
-
-                                                /*Log::info('Fecha '.$keyField.': ', [
-                                                    'fields' => $fields ?? null,
-                                                ]);*/
-
-                                                if ($optionsSource['campoMostrar'] == $keyField) {
-                                                    $campoMostrar = $doc['secciones'][$indexSeccion]['fields'][$keyField] ?? null;
-                                                }
-                                            }
-                                        }
-                                        $options[] = [
-                                            'campoMostrar' => $campoMostrar,
-                                            'campoGuardar' => $doc['_id']['$oid']
-                                        ];
-                                    }
-
-                                    // Actualizamos las opciones del subcampo en la plantilla
-                                    $secciones[$index]['fields'][$indexfield]['subcampos'][$indexSubcampo]['options'] = $options;
-                                }
-                            }
-                        }
-                    }
-                }
+                // Recorremos los campos de las secciones con recursividad
+                $secciones[$index]['fields'] = $this->traverseFields($seccion['fields']);
             }
 
             Log::info('Secciones obtenidas para la plantilla', [
@@ -353,29 +273,57 @@ class PlantillaController extends Controller
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'secciones' => 'required|array|min:1',
-                'secciones.*.nombre' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'secciones.*.fields' => 'required|array|min:1',
-                'secciones.*.fields.*.name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'secciones.*.fields.*.type' => 'required|string|in:' . implode(',', $tiposCamposPermitidos),
-                'secciones.*.fields.*.required' => 'required|boolean',
-                'secciones.*.fields.*.subcampos' => 'required_if:secciones.*.fields.*.type,subform|array|min:1',
-                'secciones.*.fields.*.subcampos.*.name' => 'required_if:secciones.*.fields.*.type,subform|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
-                'secciones.*.fields.*.subcampos.*.type' => 'required_if:secciones.*.fields.*.type,subform|string|in:' . implode(',', $tiposCamposPermitidosSubform),
-                'secciones.*.fields.*.subcampos.*.required' => 'required_if:secciones.*.fields.*.type,subform|boolean'
             ]);
 
             if ($validator->fails()) {
                 throw new \Exception(json_encode($validator->errors()), 422);
             }
 
+            $secciones = $request->input('secciones');
+
             $plantilla->update([
-                'secciones' => $request->input('secciones'),
+                'secciones' => $secciones,
             ]);
 
             // Verificar si la plantilla se actualizó correctamente
             if (!$plantilla) {
                 throw new \Exception('Error al actualizar la plantilla', 500);
             }
+
+            // Recorremos secciones para buscar las relaciones
+            $relations = [];
+
+            foreach ($secciones as $index => $seccion) {
+                foreach ($seccion['fields'] as $indexfield => $field) {
+                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
+                        // Guardamos dataSource
+                        $optionsSource = $field['dataSource'];
+
+                        //Buscamos el nombre del modelo
+                        $relatedModel = Plantillas::find($optionsSource['plantillaId'])->nombre_modelo ?? null;
+
+                        // Validamos si se encontro el modelo
+                        if (!$relatedModel) {
+                            throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
+                        }
+
+                        $functionNAme = $this->formatRelationName($field['name']);
+                        // Agregamos la relación al array de relaciones
+                        $relations[$functionNAme] = [
+                            'type' => 'belongsTo',
+                            'model' => $relatedModel,
+                            'foreign' => $field['name'] . '_id'
+                        ];
+                    }
+                }
+            }
+
+            // Nombre del modelo
+            $modelName = $plantilla->nombre_modelo;
+
+            // Actualizamos el modelo dinámico
+            $generator = new \App\Services\DynamicModelGenerator();
+            $generator->generate($modelName, $relations);
 
             // Retornar la respuesta JSON
             return response()->json([
@@ -402,9 +350,6 @@ class PlantillaController extends Controller
     public function destroy($id)
     {
         try {
-            // Conexión a MongoDB
-            $client = new MongoClient(config('database.connections.mongodb.url'));
-            $db = $client->selectDatabase(config('database.connections.mongodb.database'));
 
             // Validar el ID
             if (!preg_match('/^[a-f\d]{24}$/i', $id)) {
@@ -419,10 +364,20 @@ class PlantillaController extends Controller
                 throw new \Exception('Plantilla no encontrada', 404);
             }
 
-            // Verificar si la plantilla tiene datos asociados
-            $collectionName = $plantilla->nombre_coleccion;
-            $collection = $db->selectCollection($collectionName);
-            $count = $collection->countDocuments();
+            // Obtener el nombre del modelo de la plantilla
+            $modelName = $plantilla->nombre_modelo;
+            // creamos el documento
+            $modelClass = "App\\Models\\$modelName";
+
+            //Validar que la clase exista
+            if (!class_exists($modelClass)) {
+                Log::error("Clase de modelo no encontrada: $modelClass");
+                return response()->json([
+                    'error' => 'Modelo inválido o no encontrado.',
+                ], 400);
+            }
+
+            $count = $modelClass::count();
 
             // Si la colección tiene datos, no se puede eliminar
             if ($count > 0) {
@@ -434,19 +389,12 @@ class PlantillaController extends Controller
                 throw new \Exception('Error al eliminar la plantilla', 500);
             }
 
-            // Verificar si la colección existe en MongoDB
-            $collectionExists = false;
-            foreach ($db->listCollections(['filter' => ['name' => $collectionName]]) as $collection) {
-                if ($collection->getName() === $collectionName) {
-                    $collectionExists = true;
-                    break;
-                }
-            }
+            // Eliminar la colección asociada a la plantilla
+            //$modelClass::getCollection()->drop();
 
-            if ($collectionExists) {
-                // Eliminar la colección asociada en MongoDB
-                $db->dropCollection($collectionName);
-            }
+            // Eliminar el modelo dinamico
+            $remover = new \App\Services\DynamicModelRemover();
+            $remover::remove($modelName);
 
             return response()->json([
                 'message' => 'Plantilla eliminada exitosamente'
@@ -461,5 +409,77 @@ class PlantillaController extends Controller
                 'code' => $e->getCode()
             ], $e->getCode() ?: 500);
         }
+    }
+
+    /**
+     * Funnción de recursividad para recorres los campos de las secciones
+     * @param array $fields
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
+    function traverseFields(array $fields)
+    {
+        foreach ($fields as $index => $field) {
+            if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
+                // Guardamos dataSource
+                $dataSource = $field['dataSource'];
+
+                //Buscamos el nombre del modelo
+                $modelName = Plantillas::find($dataSource['plantillaId'])->nombre_modelo ?? null;
+
+                // Validamos si se encontro el modelo
+                if (!$modelName) {
+                    throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
+                }
+
+                // creamos el documento
+                $modelClass = "App\\Models\\$modelName";
+
+                //Validar que la clase exista
+                if (!class_exists($modelClass)) {
+                    Log::error("Clase de modelo no encontrada: $modelClass");
+                    return response()->json([
+                        'error' => 'Modelo inválido o no encontrado.',
+                    ], 400);
+                }
+
+                // Obtener todos los registros del modelo relacionado
+                $relatedModels = $modelClass::all();
+
+                // Mapear los registros para obtener solo los campos _id y $dataSource['campoMostrar']
+                $mappedRecords = $relatedModels->map(function ($item) use ($dataSource) {
+                    // Buscar la sección por nombre, por ejemplo 'Informacion basica'
+                    $seccionBuscada = collect($item->secciones)->firstWhere('nombre', $dataSource['seccion']);
+
+                    // Extraer el campo que quieres mostrar, por ejemplo 'fecha'
+                    $valorCampoMostrar = $seccionBuscada['fields'][$dataSource['campoMostrar']] ?? null;
+
+                    // Returnar el registro mapeado con solo los campos _id y $dataSource['campoMostrar']
+                    return [
+                        'campoGuardar' => $item->_id,
+                        'campoMostrar' => $valorCampoMostrar,
+                    ];
+                });
+
+                // Asignar los registros mapeados a las opciones del campo select
+                $fields[$index]['options'] = $mappedRecords->toArray();
+            }
+
+            // Si el campo es un subform, recorremos sus subcampos recursivamente
+            if ($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])) {
+                $fields[$index]['subcampos'] = $this->traverseFields($field['subcampos']);
+            }
+        }
+
+        return $fields;
+    }
+
+    function formatRelationName($name)
+    {
+        // Quita espacios, acentos y caracteres especiales, y convierte a snake_case
+        $name = preg_replace('/[áéíóúÁÉÍÓÚñÑ]/u', '', $name); // Opcional: quitar acentos
+        $name = str_replace([' ', '-'], '_', $name); // Reemplaza espacios y guiones por _
+        $name = preg_replace('/[^A-Za-z0-9_]/', '', $name); // Quita cualquier otro caracter especial
+        return strtolower($name);
     }
 }

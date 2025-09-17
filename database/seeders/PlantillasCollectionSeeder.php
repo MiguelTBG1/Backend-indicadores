@@ -19,6 +19,7 @@ class PlantillasCollectionSeeder extends Seeder
         Plantillas::create([
             '_id' => new ObjectId('68b0938423ed6ec87508548c'),
             'nombre_plantilla' => 'Periodos',
+            'nombre_modelo' => 'Periodos',
             'nombre_coleccion' => 'Periodos_data',
             'secciones' => [
                 [
@@ -38,6 +39,7 @@ class PlantillasCollectionSeeder extends Seeder
         Plantillas::create([
             '_id' => new ObjectId('68b1df5f34dafa1c910aa02c'),
             'nombre_plantilla' => 'Programa Educativo',
+            'nombre_modelo' => 'ProgramaEducativo',
             'nombre_coleccion' => 'ProgramaEducativo_data',
             'secciones' => [
                 [
@@ -57,6 +59,7 @@ class PlantillasCollectionSeeder extends Seeder
         Plantillas::create([
             '_id' => new ObjectId('68b0a68006688a676a0e6a5d'),
             'nombre_plantilla' => 'Profesores',
+            'nombre_modelo' => 'Profesores',
             'nombre_coleccion' => 'Profesores_data',
             'secciones' => [
                 [
@@ -260,6 +263,7 @@ class PlantillasCollectionSeeder extends Seeder
         Plantillas::create([
             '_id' => new ObjectId('68bb162223bbc9264e05fca0'),
             'nombre_plantilla' => 'Alumnos',
+            'nombre_modelo' => 'Alumnos',
             'nombre_coleccion' => 'Alumnos_data',
             'secciones' => [
                 [
@@ -318,6 +322,26 @@ class PlantillasCollectionSeeder extends Seeder
                                         'seccion' => 'Información Personal',
                                         'campoMostrar' => 'Nombres',
                                     ]
+                                ],
+                                [
+                                    'name' => "Obtuvo algún premio o reconocimiento",
+                                    'type' => "subform",
+                                    'required' => false,
+                                    'filterable' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => "Nombre del premio",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Lugar obtenido",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
@@ -362,6 +386,26 @@ class PlantillasCollectionSeeder extends Seeder
                                     'name' => 'Lugar',
                                     'type' => 'string',
                                     'required' => false
+                                ],
+                                [
+                                    'name' => "Obtuvo algún premio o reconocimiento",
+                                    'type' => "subform",
+                                    'required' => false,
+                                    'filterable' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => "Nombre del premio",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Lugar obtenido",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
@@ -398,6 +442,32 @@ class PlantillasCollectionSeeder extends Seeder
                                         'plantillaId' => '68b0938423ed6ec87508548c',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
+                                    ]
+                                ],
+                                [
+                                    'name' => "Productos obtenidos",
+                                    'type' => "subform",
+                                    'required' => false,
+                                    'filterable' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => "Publicacion",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Tesis",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
+                                        [
+                                            'name' => "Residencia Profesional",
+                                            'type' => "string",
+                                            'required' => false,
+                                            'filterable' => false
+                                        ],
                                     ]
                                 ]
                             ]

@@ -16,6 +16,7 @@ class Plantillas extends Model
     protected $fillable = [
         '_id',
         'nombre_plantilla',
+        'nombre_modelo',
         'nombre_coleccion',
         'secciones',
         'created_at',

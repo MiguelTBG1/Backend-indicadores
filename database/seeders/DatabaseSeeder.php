@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Alumnos;
 use App\Models\Plantillas;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
             ProfesoresSeeder::class,
             ProgramaEducativoSeeder::class,
             DocumentosSeeder::class,
+            AlumnosSeeder::class
         ]);
     }
 }
