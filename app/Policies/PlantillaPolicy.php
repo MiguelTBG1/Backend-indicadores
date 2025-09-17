@@ -15,34 +15,24 @@ class PlantillaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Plantillas $plantillas): bool
+    public function view(User $user, Plantillas $plantilla): bool
     {
-        // buscar el recurso dinámico asociado a esta plantilla
-        $recurso = Recurso::where('modulo', 'Plantillas')
-            ->where('referencia_id', $plantillas->_id)
-            ->first();
 
-        if (!$recurso) {
-            return false;
+        
+        // Caso 2: creador puede ver lo suyo
+        if ($plantilla->creado_por === $user->id) {
+            return true;
         }
 
-        // validar si el usuario tiene permitido "leer" este recurso
-        return collect($user->permisos['allowed'] ?? [])
-            ->contains(function ($permiso) use ($recurso) {
-                return $permiso['recurso'] === (string) $recurso->_id
-                    && in_array('leer', $permiso['acciones']);
-            })
-            && ! collect($user->permisos['denied'] ?? [])
-                ->contains(function ($permiso) use ($recurso) {
-                    return $permiso['recurso'] === (string) $recurso->_id
-                        && in_array('leer', $permiso['acciones']);
-                });
+        // Caso 3: Usuarios particulares
+        
+        return false;
     }
 
     /**

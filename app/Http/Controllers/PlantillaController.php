@@ -18,11 +18,17 @@ class PlantillaController extends Controller
      * @return \Illuminate\Http\JsonResponse
      *
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
+            $user = $request->user();
+
+            Log::debug($user);
+            
             // Obtener todas las plantillas
-            $plantillas = Plantillas::all();
+            $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
+            return $user->can('view', $plantilla);
+        });
 
             // Verificar si hay plantillas
             if ($plantillas->isEmpty()) {

@@ -11,9 +11,15 @@ use App\Models\Accion;
 use App\Models\Recurso;
 use Illuminate\Support\Facades\Log;
 
-class User extends Model
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Notifications\Notifiable;
+
+
+use MongoDB\Laravel\Auth\User as Authenticatable;
+
+class User extends Authenticatable 
 {
-    use HasApiTokens;
+    use HasApiTokens, Notifiable;
 
     protected $connection = 'mongodb';
 
