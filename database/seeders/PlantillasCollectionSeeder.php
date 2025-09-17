@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Plantillas;
+use App\Models\User;
 use MongoDB\BSON\ObjectId;
 
 class PlantillasCollectionSeeder extends Seeder
@@ -15,12 +16,16 @@ class PlantillasCollectionSeeder extends Seeder
 
     public function run(): void
     {
+        // Usuario administrador
+        $admin_user = User::where('nombre', 'Rodrigo Alexander')->first();
+
         // Plantilla de periodos
         Plantillas::create([
             '_id' => new ObjectId('68b0938423ed6ec87508548c'),
             'nombre_plantilla' => 'Periodos',
             'nombre_modelo' => 'Periodos',
             'nombre_coleccion' => 'Periodos_data',
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Información General',
@@ -41,6 +46,7 @@ class PlantillasCollectionSeeder extends Seeder
             'nombre_plantilla' => 'Programa Educativo',
             'nombre_modelo' => 'ProgramaEducativo',
             'nombre_coleccion' => 'ProgramaEducativo_data',
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Información General',
@@ -61,6 +67,7 @@ class PlantillasCollectionSeeder extends Seeder
             'nombre_plantilla' => 'Profesores',
             'nombre_modelo' => 'Profesores',
             'nombre_coleccion' => 'Profesores_data',
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Información Personal',
@@ -265,6 +272,7 @@ class PlantillasCollectionSeeder extends Seeder
             'nombre_plantilla' => 'Alumnos',
             'nombre_modelo' => 'Alumnos',
             'nombre_coleccion' => 'Alumnos_data',
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Información General',
