@@ -8,6 +8,7 @@ class DynamicModelGenerator
         $path = app_path("Models/{$name}.php");
 
         $content = "<?php\n\nnamespace App\Models;\n\nuse MongoDB\Laravel\Eloquent\Model;\n\n";
+        $content .= "use Illuminate\Database\Eloquent\Factories\HasFactory;\n\n";
 
         $imports = [];
         foreach ($relations as $rel) {
@@ -18,6 +19,7 @@ class DynamicModelGenerator
         $content .= implode("\n", $imports) . "\n\n";
 
         $content .= "class {$name} extends Model\n{\n";
+        $content .= "    use hasFactory;\n";
         $content .= "    protected \$connection = 'mongodb';\n\n";
         $content .= "    protected \$collection = '{$name}_data';\n\n";
         $content .= "    protected \$primaryKey = '_id';\n\n";

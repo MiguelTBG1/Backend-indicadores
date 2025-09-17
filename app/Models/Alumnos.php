@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\ProgramaEducativo;
 
 class Alumnos extends Model
 {
-    use HasFactory;
-
+    use hasFactory;
     protected $connection = 'mongodb';
 
     protected $collection = 'Alumnos_data';
@@ -20,8 +21,12 @@ class Alumnos extends Model
         'secciones',
     ];
 
-    public function getTable()
+    public function programa_educativo()
     {
-        return $this->collection;
+        return $this->belongsTo(ProgramaEducativo::class, 'Programa educativo_id');
     }
-}
+
+   public function getTable()
+   {
+       return $this->collection;
+   }}

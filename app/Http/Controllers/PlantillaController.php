@@ -122,8 +122,10 @@ class PlantillaController extends Controller
                             throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
                         }
 
+                        $functionNAme = $this->formatRelationName($field['name']);
+
                         // Agregamos la relación al array de relaciones
-                        $relations[$field['name']] = [
+                        $relations[$functionNAme] = [
                             'type' => 'belongsTo',
                             'model' => $relatedModel,
                             'foreign' => $field['name'] . '_id'
@@ -133,8 +135,8 @@ class PlantillaController extends Controller
             }
 
             // Generamos el modelo dinámico
-            //$generator = new \App\Services\DynamicModelGenerator();
-            //$generator->generate($modelName, $relations);
+            $generator = new \App\Services\DynamicModelGenerator();
+            $generator->generate($modelName, $relations);
 
             // Registramos la coleccion del documento a crear
             /*Recurso::create([
@@ -307,8 +309,8 @@ class PlantillaController extends Controller
             $modelName = $plantilla->nombre_modelo;
 
             // Actualizamos el modelo dinámico
-            //$generator = new \App\Services\DynamicModelGenerator();
-            //$generator->generate($modelName, $relations);
+            $generator = new \App\Services\DynamicModelGenerator();
+            $generator->generate($modelName, $relations);
 
             // Retornar la respuesta JSON
             return response()->json([
@@ -459,11 +461,12 @@ class PlantillaController extends Controller
         return $fields;
     }
 
-    function formatRelationName($name) {
-    // Quita espacios, acentos y caracteres especiales, y convierte a snake_case
-    $name = preg_replace('/[áéíóúÁÉÍÓÚñÑ]/u', '', $name); // Opcional: quitar acentos
-    $name = str_replace([' ', '-'], '_', $name); // Reemplaza espacios y guiones por _
-    $name = preg_replace('/[^A-Za-z0-9_]/', '', $name); // Quita cualquier otro caracter especial
-    return strtolower($name);
-}
+    function formatRelationName($name)
+    {
+        // Quita espacios, acentos y caracteres especiales, y convierte a snake_case
+        $name = preg_replace('/[áéíóúÁÉÍÓÚñÑ]/u', '', $name); // Opcional: quitar acentos
+        $name = str_replace([' ', '-'], '_', $name); // Reemplaza espacios y guiones por _
+        $name = preg_replace('/[^A-Za-z0-9_]/', '', $name); // Quita cualquier otro caracter especial
+        return strtolower($name);
+    }
 }
