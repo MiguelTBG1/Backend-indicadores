@@ -17,23 +17,23 @@ use DateTime;
 
 /**
  * @group Indicadores
- * 
+ *
  * APIs para administrar los indicadores
  */
 class IndicadoresController extends Controller
 {
     /**
      * Obtener indicadores
-     * 
+     *
      * Retorna una lista de indicadores disponibles en el sistema.
-     * 
+     *
      * @return JsonResponse La respuesta con los indicadores
      * @response 201 {
      * "success": true,
      * "message": "Indicadores encontrados",
      * "indicadires": ["Hola"]
      * }
-     * 
+     *
      * @response status=200 scenario= "No hay indicadores en la base de datos" {"success": true,
      * "message": "No se encontraron indicadores",
      * "indicadires": [] }
@@ -86,9 +86,9 @@ class IndicadoresController extends Controller
 
     /**
      * Obtener entre fechas
-     * 
+     *
      * Obtiene todos los indicadores filtrado por rango de fechas
-     * 
+     *
      * @bodyParam inicio string La fecha de inicio
      * @bodyParam fin string La fecha de fin
      * @bodyParam after_or_equa; string HOla
@@ -98,7 +98,7 @@ class IndicadoresController extends Controller
     public function filterByDateRange(Request $request)
     {
         try {
-            // Validación (se mantiene igual)
+            // Validación
             $validator = Validator::make($request->all(), [
                 'inicio' => 'required|date',
                 'fin' => 'required|date|after_or_equal:inicio',
@@ -188,7 +188,7 @@ class IndicadoresController extends Controller
      */
     private function calculateNumerador($configuracion)
     {
-        Log::info('Calculando numerador con configuración', $configuracion);
+        log::info('0');
 
         // Validamos que la operación sea una de las permitidas
         $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
@@ -209,12 +209,6 @@ class IndicadoresController extends Controller
             'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
             'condicion.*.valor' => 'required_with:condicion|string',
             'subConfiguracion' => 'sometimes|array',
-            'subConfiguracion.operacion' => 'nullable|string|required_if:operacion,!=,distinto|in:' . implode(',', $operacionesPermitidas),
-            'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
-            'subConfiguracion.condicion' => 'sometimes|array',
-            'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
-            'subConfiguracion.condicion.*.operador' => 'required_with:subConfiguracion.condicion|string|in:' . implode(',', $operadoresValidos),
-            'subConfiguracion.condicion.*.valor' => 'required_with:subConfiguracion.condicion|string',
         ]);
 
         if ($validator->fails()) {
@@ -222,398 +216,210 @@ class IndicadoresController extends Controller
             return 0;
         }
 
-        // Obtenemos la conexión a la base de datos MongoDB
-        $db = $this->connectToMongoDB();
+        log::info('1');
 
-        // Seleccionamos la colección
-        $collection = $db->selectCollection($configuracion['coleccion']);
+        //Buscamos la plantilla
+        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first() ?? null;
 
-        // Validamos que la colección exista
-        if (!$collection) {
-            Log::error('Colección no encontrada: ' . $configuracion['coleccion']);
-            return 0;
+        log::info('1.1');
+
+        // Validamos si se encontro el nombre del modelo
+        if (!$plantilla) {
+            throw new \Exception('No se encontró la plantilla ', 404);
         }
 
-        // Buscamos la plantilla en la colección Templates
-        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first();
+        log::info('1.2');
 
-        // Si no existe la plantilla, retornamos 0
-        if (!$plantilla) {
+        // Obtenemos el nombre del modelo
+        $modelName = $plantilla->nombre_modelo ?? null;
+
+        log::info('1.5');
+
+        // creamos la clase del modelo
+        $modelClass = "App\\Models\\$modelName";
+
+        //Validar que la clase exista
+        if (!class_exists($modelClass)) {
+            Log::error("Clase de modelo no encontrada: $modelClass");
+            return response()->json([
+                'error' => 'Modelo inválido o no encontrado.',
+            ], 400);
+        }
+
+        log::info('2');
+
+        // Obtener todos los registros del modelo
+        $documents = $modelClass::all();
+
+        // Validamos que existan registros
+        if (!$documents) {
+            Log::error('No se encontraron registros en: ' . $configuracion['coleccion']);
             return 0;
         }
 
         // Creamos el pipeline de agregación
         $pipeline = [];
 
-        // Procesamos los datos para formatear la estructura y eliminar las secciones
-        // Etapa 1: Aplanar los fields de todas las secciones
-        $pipeline[] = [
-            '$project' => [
-                'datosAplanados' => [
-                    '$reduce' => [
-                        'input' => '$secciones',
-                        'initialValue' => (object)[], // 👈 Cambiado a objeto vacío
-                        'in' => [
-                            '$mergeObjects' => ['$$value', '$$this.fields']
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        // Etapa 2: Reemplazar el root con los datos aplanados
-        $pipeline[] = [
-            '$replaceRoot' => [
-                'newRoot' => [
-                    '$mergeObjects' => ['$$ROOT', '$datosAplanados']
-                ]
-            ]
-        ];
-
-        // Etapa 3: Eliminar campos auxiliares
-        $pipeline[] = [
-            '$project' => [
-                'datosAplanados' => 0,
-                'secciones' => 0
-            ]
-        ];
-
-        // Validamos que la plantilla tenga el campo de configuración para obtener el tipo de campo
+        // Obtenemos las secciones de la plantilla
         $secciones = $plantilla->secciones ?? [];
 
-        // Validamos si hay condiciones
-        if (isset($configuracion['condicion']) && is_array($configuracion['condicion']) && count($configuracion['condicion']) > 0) {
-            // Verificar si un campo en la condicion es subform
-            foreach ($configuracion['condicion'] as $index => $condicion) {
-                $tipocampo = '';
+        // Obtenemos los campos de las secciones con su tipo
+        $campos = [];
 
-                foreach ($secciones as $seccion) {
-                    foreach ($seccion['fields'] as $campo) {
-                        if (isset($campo['name']) && $campo['name'] === $condicion['campo']) {
-                            Log::info('Campo encontrado en la sección', [
-                                'campo' => $campo['name'],
-                                'tipo' => $campo['type'] ?? 'desconocido'
-                            ]);
-                            $tipocampo = $campo['type'] ?? '';
-                            break 2;
-                        }
-                    }
-                }
+        log::info('3');
 
-                Log::info("tipocampo: $tipocampo");
-
-                if ($tipocampo === 'subform') {
-                    // Agregar etapa al pipeline
-                    $pipeline[] = [
-                        '$addFields' => [
-                            'total' . $condicion['campo'] => [
-                                '$size' => '$' . $condicion['campo']
-                            ]
-                        ]
-                    ];
-
-                    // Actualizar el campo en la condición original
-                    $configuracion['condicion'][$index]['campo'] = 'total' . $condicion['campo'];
-                }
-            }
-
-            foreach ($configuracion['condicion'] as $condicion) {
-
-                $operador = match ($condicion['operador']) {
-                    'mayor' => '$gt',
-                    'menor' => '$lt',
-                    'igual' => '$eq',
-                    'diferente' => '$ne',
-                    'mayor_igual' => '$gte',
-                    'menor_igual' => '$lte',
-                    default => throw new Exception('Operador no válido: ' . $condicion['operador'], Response::HTTP_BAD_REQUEST)
-                };
-
-                $valor = $condicion['valor'];
-                if (is_numeric($valor)) {
-                    $valor = (float)$valor; // Puedes usar (int) si prefieres
-                    if ((int)$valor === $valor) $valor = (int)$valor;
-                }
-                // Agregamos la condición al pipeline
-                $pipeline[] = [
-                    '$match' => [
-                        $condicion['campo'] => [
-                            $operador => $valor
-                        ]
-                    ]
-                ];
+        foreach ($secciones as $seccion) {
+            foreach ($seccion['fields'] as $campo) {
+                $nombreCompleto = $seccion['nombre'] . '_' . $campo['name'];
+                $campos[$nombreCompleto] = $campo['type'];
             }
         }
 
-        if ($configuracion['operacion'] === 'distinto') {
-            $pipeline[] = [
-                '$unwind' => '$' . $configuracion['campo']
-            ];
-        }
+        log::info('4');
 
-        // Validamos si hay subConfiguración
-        if (isset($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && count($configuracion['subConfiguracion']) > 0) {
-            $nombreCampo = $configuracion['campo'];
-
-            if ($configuracion['operacion'] === 'distinto') {
-                $subNombreCampo = $configuracion['subConfiguracion']['campo'];
-
-                // Verificamos si hay condiciones en subConfiguración
-                if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
-
-                    foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
-                        $operador = match ($subCondicion['operador']) {
-                            'mayor' => '$gt',
-                            'menor' => '$lt',
-                            'igual' => '$eq',
-                            'diferente' => '$ne',
-                            'mayor_igual' => '$gte',
-                            'menor_igual' => '$lte',
-                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
-                        };
-
-                        $valor = $subCondicion['valor'];
-                        if (is_numeric($valor)) {
-                            $valor = (float)$valor;
-                            if ((int)$valor === $valor) $valor = (int)$valor;
-                        }
-
-                        $pipeline[] = [
-                            '$match' => [
-                                $nombreCampo . "." . $subCondicion['campo'] => [
-                                    $operador => $valor
-                                ]
-                            ]
-                        ];
-                    }
-                }
-
-                if (isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])) {
-                    // Buscar campo de fecha que se aplicará el filtro
-                    $campoFecha = '';
-
-                    foreach ($secciones as $seccion) {
-
-                        foreach ($seccion['fields'] as $campo) {
-
-                            /*
-                            foreach($campo as $key => $value){
-                                if($key === 'name' && $value === $configuracion['campo']){
-                                    $nombreCampo = $seccion['name'];
-                                    break 2;
-                                }
-                            }*/
-
-                            Log::info('campo', $campo);
-
-                            // Verificamos si el campo es un subform y tiene subcampos
-                            if ($campo['name'] === $configuracion['campo'] && $campo['type'] === 'subform' && isset($campo['subcampos'])) {
-                                foreach ($campo['subcampos'] as $subcampo) {
-                                    if ($subcampo['filterable'] === true && $subcampo['type'] === 'date') {
-                                        $campoFecha = $subcampo['name'];
-                                        break 3;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // Filtrar fecha  de registro
-                    $pipeline[] = [
-                        '$match' => [
-                            $nombreCampo . '.' . $campoFecha => [
-                                '$gte' => $configuracion['fecha_inicio'],
-                                '$lte' => $configuracion['fecha_fin']
-                            ]
-                        ]
-                    ];
-                }
-
-                $configuracion['campo'] = $configuracion['campo'] . "." . $subNombreCampo;
-            } else {
+        $pipeline = [
+            ['$unwind' => '$secciones'],
+            ['$match' => [
+                '$and' => array_merge(
+                    [['secciones.nombre' => $configuracion['secciones']]],
+                    $this->recursiveCondicion($configuracion) // debe devolver un array de condiciones
+                )]
+            ],
+            ['$project' => ['campo' => ['$ifNull' => ['$secciones.fields.' . $this->recursiveCampo($configuracion), []]]]],
+            ['$group' => ['_id' => null, 'resultado' => $this->recursiveOperation($configuracion)]]
+        ];
 
 
-                $pipelineSub = [];
 
-                $condiciones = [];
+        try {
 
-                // Verificamos si hay condiciones en subConfiguración
-                if (isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && count($configuracion['subConfiguracion']['condicion']) > 0) {
+            Log::info('pipeline', $pipeline);
 
+            $db = $this->connectToMongoDB();
 
-                    foreach ($configuracion['subConfiguracion']['condicion'] as $subCondicion) {
-                        $operador = match ($subCondicion['operador']) {
-                            'mayor' => '$gt',
-                            'menor' => '$lt',
-                            'igual' => '$eq',
-                            'diferente' => '$ne',
-                            'mayor_igual' => '$gte',
-                            'menor_igual' => '$lte',
-                            default => throw new Exception('Operador no válido: ' . $subCondicion['operador'])
-                        };
+            // Seleccionamos la colección
+            $collection = $db->selectCollection($configuracion['coleccion']);
 
-                        $valor = $subCondicion['valor'];
-                        if (is_numeric($valor)) {
-                            $valor = (float)$valor;
-                            if ((int)$valor === $valor) $valor = (int)$valor;
-                        }
+            // Ejecutamos el pipeline
+            $cursor = $collection->aggregate($pipeline);
 
-                        $condiciones[] = [
-                            "$operador" => ["\$\$campo" . "." . $subCondicion['campo'], $valor]
-                        ];
-                    }
-                }
-
-                // Filtramos por fecha si es necesario
-                if (isset($configuracion['fecha_inicio']) && isset($configuracion['fecha_fin'])) {
-
-                    Log::info('Filtrando por rango de fechas', [
-                        'fecha_inicio' => $configuracion['fecha_inicio'],
-                        'fecha_fin' => $configuracion['fecha_fin']
-                    ]);
-
-                    // Buscar campo de fecha que se aplicará el filtro
-                    $campoFecha = '';
-
-                    foreach ($secciones as $seccion) {
-                        foreach ($seccion['fields'] as $campo) {
-                            if (
-                                $campo['name'] === $configuracion['campo'] &&
-                                $campo['type'] === 'subform' &&
-                                isset($campo['subcampos'])
-                            ) {
-
-                                foreach ($campo['subcampos'] as $subcampo) {
-                                    if (isset($subcampo['filterable']) && $subcampo['filterable'] === true && $subcampo['type'] === 'date') {
-                                        $campoFecha = $subcampo['name'];
-                                        break 3;
-                                    }
-                                }
-                            }
-                        }
-                        /**/
-                    }
-
-                    Log::info('Campo de fecha encontrado', ['campoFecha' => $campoFecha]);
-
-                    if (!empty($campoFecha)) {
-                        // Filtrar por rango de fechas
-                        $condiciones[] = [
-                            '$gte' => ['$$campo.Fecha de obtención', $configuracion['fecha_inicio']]
-                        ];
-                        $condiciones[] = [
-                            '$lte' => ['$$campo.Fecha de obtención', $configuracion['fecha_fin']]
-                        ];
-                    }
-                }
-
-                if (count($condiciones) > 0) {
-                    // Aplicamos filtro interno al arreglo
-                    $pipelineSub[] = [
-                        '$addFields' => [
-                            'filtrado' => [
-                                '$filter' => [
-                                    'input' => '$' . $nombreCampo,
-                                    'as' => 'campo',
-                                    'cond' => ['$and' => $condiciones]
-                                ]
-                            ]
-                        ]
-                    ];
-
-                    // Cambiamos el campo a contar
-                    $nombreCampo = 'filtrado';
-                }
-
-                // Agregar conteo o suma según sea necesario
-                $operacionSub = match ($configuracion['subConfiguracion']['operacion']) {
-                    'contar' => ['$size' => '$' . $nombreCampo],
-                    'sumar' => [
-                        '$sum' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']
-                    ],
-                    'promedio' => ['$avg' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
-                    'maximo' => ['$max' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
-                    'minimo' => ['$min' => '$' . $nombreCampo . '.' . $configuracion['subConfiguracion']['campo']],
-
-                    default => throw new Exception("Operación no soportada en subConfiguración: {$configuracion['subConfiguracion']['operacion']}")
-                };
-                // Añadimos la etapa de agregación para la subConfiguración
-                $pipelineSub[] = [
-                    '$addFields' => [
-                        'total' => $operacionSub
-                    ]
-                ];
-                // Añadimos las etapas generadas por subConfiguración al pipeline principal
-                foreach ($pipelineSub as $etapa) {
-                    $pipeline[] = $etapa;
-                }
-                // Cambiamos el campo a total para la siguiente etapa
-                $configuracion['campo'] = 'total'; // Cambiamos el campo a total para la siguiente etapa
+            // Procesamos resultado de forma más segura
+            $resultados = [];
+            foreach ($cursor as $document) {
+                $resultados[] = $document;
             }
+
+            Log::info('Cursor obtenido de la agregación', $resultados);
+
+            if (empty($resultados)) {
+                return 0;
+            }
+
+            return $resultados[0]['resultado'] ?? 0;
+        } catch (\Exception $e) {
+            Log::error('Error específico: ' . $e->getMessage());
+            Log::error('Línea del error: ' . $e->getLine());
+            Log::error('Archivo del error: ' . $e->getFile());
+            return 0;
+        }
+    }
+
+    public function recursiveOperation($configuracion)
+    {
+
+        // Validamos que la configuración sea válida
+        if (!is_array($configuracion) || !isset($configuracion['operacion'])) {
+            throw new Exception('Configuración inválida', Response::HTTP_BAD_REQUEST);
         }
 
-        // Si la operación es distinta, agregamos un campo temporal para contar
-        if ($configuracion['operacion'] === 'distinto') {
-            $pipeline[] = [
-                '$group' => [
-                    '_id' => null,
-                    'total' => ['$addToSet' => '$' . $configuracion['campo']]
-                ]
-            ];
+        Log::info("5");
 
-            $configuracion['campo'] = 'total';
-        }
-
-        // Validamos qué operación está configurada
         $operacion = match ($configuracion['operacion']) {
-            'contar' => ['$sum' => 1],
-            'sumar' => ['$sum' => '$' . $configuracion['campo']],
-            'promedio' => ['$avg' => '$' . $configuracion['campo']],
-            'maximo' => ['$max' => '$' . $configuracion['campo']],
-            'minimo' => ['$min' => '$' . $configuracion['campo']],
-            'distinto' => ['$size' => '$total'],
-            default => throw new Exception('Operación no válida: ' . $configuracion['operacion'], Response::HTTP_BAD_REQUEST)
+            'contar' => ['$size' => '$campo'],
+            'sumar' => ['$sum' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
+            'promedio' => ['$avg' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
+            'maximo' => ['$max' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
+            'minimo' => ['$min' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
+            default => throw new Exception('Operación no válida: ' . $configuracion['operacion'], Response::HTTP_BAD_REQUEST),
         };
 
+        Log::info('6');
 
-        // Agregamos la operación al pipeline
-        if ($configuracion['operacion'] === 'distinto') {
-            $pipeline[] = [
-                '$project' => [
-                    'resultado' => $operacion
-                ]
-            ];
-        } else {
-            $pipeline[] = [
-                '$group' => [
-                    '_id' => null,
-                    'resultadoOperacion' => $operacion,
-                ]
-            ];
+        return $operacion;
+    }
 
-            $pipeline[] = [
-                '$project' => [
-                    'resultado' => '$resultadoOperacion',
-                ]
+    public function recursiveCampo($configuracion)
+    {
+        // Tomamos el campo actual
+        $campo = $configuracion['campo'] ?? null;
+
+        if (!$campo) {
+            return null; // si no hay campo, detenemos
+        }
+
+        // Si hay subConfiguracion, procesarla
+        if (!empty($configuracion['subConfiguracion'])) {
+            $campoRecursivo = $this->recursiveCampo($configuracion['subConfiguracion']);
+
+            // Solo concatenamos si el recursivo trae algo
+            if ($campoRecursivo != null) {
+                return $campo . '.' . $campoRecursivo;
+            }
+        }
+
+        Log::info($campo);
+        return $campo;
+    }
+
+    /**
+     * Función recuriva para formatear las condiciones de la configuración
+     * @param array
+     * @return array
+     */
+    public function recursiveCondicion($configuracion)
+    {
+
+        // Validamos que la configuración sea válida
+        if (!is_array($configuracion) || !isset($configuracion['condicion']) || !is_array($configuracion['condicion'])) {
+            throw new Exception('Configuración inválida', Response::HTTP_BAD_REQUEST);
+        }
+
+        // Creamos el array de condiciones
+        $condiciones = [];
+
+        // Recorremos las condiciones
+        foreach ($configuracion['condicion'] as $condicion) {
+            $operador = match ($condicion['operador']) {
+                'mayor' => '$gt',
+                'menor' => '$lt',
+                'igual' => '$eq',
+                'diferente' => '$ne',
+                'mayor_igual' => '$gte',
+                'menor_igual' => '$lte',
+                default => throw new Exception('Operador no válido: ' . $condicion['operador'])
+            };
+
+            $condiciones[] = [
+                'secciones.fields.' . $condicion['campo'] => [ $operador => $condicion['valor'] ]
             ];
         }
 
+        // Si hay subConfiguracion, procesarla
+        if (!empty($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && !empty($configuracion['subConfiguracion']['condicion'])) {
+            // Concatenamos el nombre del campo con el nombre del subcampo
+            if( $configuracion['subConfiguracion']['campo'] != null || $configuracion['subConfiguracion']['campo'] != 'null' ){
+                $configuracion['subConfiguracion']['campo'] = $configuracion['campo'] . '.' . $configuracion['subConfiguracion']['campo'];
+            }
 
-        // Log para depuración
-        Log::info('Pipeline de agregación: ', $pipeline);
+            // Llamamos recursivamente a la función para procesar la subconfiguracion
+            $condicionesRecursivo = $this->recursiveCondicion($configuracion['subConfiguracion']);
 
-        // Ejecutamos el pipeline
-        $cursor = $collection->aggregate($pipeline);
-
-
-
-        // Retornamos el resultado
-        $resultados = iterator_to_array($cursor);
-        Log::info('Cursor obtenido de la agregación', $resultados);
-        if (empty($resultados)) {
-            return 0; // Si no hay resultados, retornamos 0
+            // Agregamos las condiciones recursivas al array de condiciones
+            $condiciones[] = $condicionesRecursivo;
         }
-        return $resultados[0]['resultado'] ?? 0; // Retornamos el resultado del numerador
+
+        // Retornamos las condiciones
+        return $condiciones;
     }
 
     /**
@@ -628,6 +434,32 @@ class IndicadoresController extends Controller
 
         return $db;
     }
+
+    /*public function recursiveOperation($configuracion, $campo){
+
+        // Validamos que la configuración sea válida
+        if (!is_array($configuracion) || !isset($configuracion['operacion'])) {
+            throw new Exception('Configuración inválida', Response::HTTP_BAD_REQUEST);
+        }
+
+        $campo = $campo ? $campo . '.' . ($configuracion['campo'] ?? '') : ($configuracion['campo'] ?? '');
+
+        $operacion = match ($configuracion['operacion']) {
+            'contar' => ['$sum' => 1],
+            'sumar' => ['$sum' => '$secciones.fields.' . $campo],
+            'promedio' => ['$avg' => '$secciones.fields.' . $campo],
+            'maximo' => ['$max' => '$secciones.fields.' . $campo],
+            'minimo' => ['$min' => '$secciones.fields.' . $campo],
+            default => throw new Exception('Operación no válida: ' . $configuracion['operacion'], Response::HTTP_BAD_REQUEST),
+        };
+
+        $subPipeline = !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion'], $campo) : [];
+
+        return array_merge([
+            ['$unwind' => '$secciones.fields.' . $campo],
+            ['$group' => ['_id' => null, 'resultado' => $operacion]],
+        ], $subPipeline);
+    }*/
 
     /**
      * Inserta un nuevo indicador en la base de datos

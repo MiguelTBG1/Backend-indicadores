@@ -20,6 +20,15 @@ class IndicadoresCollectionSeeder extends Seeder
                 'nombreIndicador' => 'Evaluación institucional con los criterios SEAES',
                 'denominador' => 1,
                 'numerador' => 0,
+                'configuracion' => [
+                    'coleccion' => 'Alumnos_data',
+                    'operacion' => 'sumar',
+                    'campo' => 'Participa en movilidad',
+                    'secciones' => 'Movilidad',
+                    'condicion' => [],
+                    'subConfiguracion' => [ 'operacion' => 'contar', 'campo' => 'null', 'condicion' => [] ]
+
+                ],
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
@@ -81,12 +90,6 @@ class IndicadoresCollectionSeeder extends Seeder
                 'denominador' => 3,
                 'numerador' => 0,
                 'porcentaje' => 0,
-                'configuracion' => [
-                    'coleccion' => 'Profesores_data',
-                    'operacion' => 'contar',
-                    'campo' => null,
-                    'condicion' => [ [ 'campo' => 'Especialidades Académicas', 'operador' => 'mayor', 'valor' => '0' ] ]
-                ],
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -137,12 +140,6 @@ class IndicadoresCollectionSeeder extends Seeder
                 'denominador' => 5,
                 'numerador' => 0,
                 'porcentaje' => 0,
-                'configuracion' => [
-                    'coleccion' => 'Profesores_data',
-                    'operacion' => 'contar',
-                    'campo' => null,
-                    'condicion' => [ [ 'campo' => 'Idiomas', 'operador' => 'mayor', 'valor' => '0' ] ]
-                ],
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
@@ -173,12 +170,6 @@ class IndicadoresCollectionSeeder extends Seeder
                 'denominador' => 750,
                 'numerador' => 0,
                 'porcentaje' => 0,
-                'configuracion' => [
-                    'coleccion' => 'Alumnos_data',
-                    'operacion' => 'contar',
-                    'campo' => null,
-                    'condicion' => [ [ 'campo' => 'Cursos', 'operador' => 'mayor', 'valor' => '0' ] ]
-                ],
                 'fecha_inicio' => new \DateTime('2025-01-01'),
                 'fecha_fin' => new \DateTime('2025-12-31')
             ],
