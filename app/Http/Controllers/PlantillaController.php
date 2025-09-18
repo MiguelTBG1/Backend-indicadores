@@ -23,7 +23,7 @@ class PlantillaController extends Controller
             $user = $request->user();
 
             Log::debug($user);
-            
+
             // Obtener todas las plantillas
             $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
             return $user->can('view', $plantilla);
@@ -57,6 +57,9 @@ class PlantillaController extends Controller
     public function store(Request $request)
     {
         try {
+            
+            $user = $request->user();
+
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
@@ -97,7 +100,11 @@ class PlantillaController extends Controller
                 'nombre_modelo' => $modelName,
                 'nombre_coleccion' => $collectionName,
                 'secciones' => $secciones,
+                'creado_por' => $user->_id
             ]);
+            
+
+            Log::debug($plantilla->_id);
 
             // Verificar si la plantilla se creó correctamente
             if (!$plantilla) {
