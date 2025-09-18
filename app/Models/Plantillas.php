@@ -18,6 +18,7 @@ class Plantillas extends Model
         'nombre_plantilla',
         'nombre_modelo',
         'nombre_coleccion',
+        'creado_por',
         'secciones',
         'created_at',
         'updated_at'

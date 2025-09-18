@@ -24,7 +24,7 @@ class PlantillaController extends Controller
             $user = $request->user();
 
             Log::debug($user);
-            
+
             // Obtener todas las plantillas
             $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
             return $user->can('view', $plantilla);
@@ -58,6 +58,9 @@ class PlantillaController extends Controller
     public function store(Request $request)
     {
         try {
+            
+            $user = $request->user();
+
             // Tipos de campos permitidos
             $tiposCamposPermitidos = ['string', 'number', 'file', 'date', 'subform', 'boolean', 'select', 'checkbox'];
 
@@ -105,6 +108,7 @@ class PlantillaController extends Controller
                 'nombre_modelo' => $modelName,
                 'nombre_coleccion' => $collectionName,
                 'secciones' => $secciones,
+                'creado_por' => $user->_id
             ]);
             
             // Registramos la coleccion del documento a crear
