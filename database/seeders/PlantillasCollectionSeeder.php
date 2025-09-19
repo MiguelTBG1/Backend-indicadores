@@ -35,6 +35,26 @@ class PlantillasCollectionSeeder extends Seeder
             ]
         ]);
 
+        // Plantilla de Area
+        Plantillas::create([
+            '_id' => new ObjectId('68cc40d088161ce06d09312c'),
+            'nombre_plantilla' => 'Areas',
+            'nombre_modelo' => 'Areas',
+            'nombre_coleccion' => 'Areas_data',
+            'secciones' => [
+                [
+                    'nombre' => 'Información General',
+                    'fields' => [
+                        [
+                            'name' => 'Nombre del area',
+                            'type' => 'string',
+                            'required' => true
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
         // Plantilla de Programas Educativos
         Plantillas::create([
             '_id' => new ObjectId('68b1df5f34dafa1c910aa02c'),
@@ -67,15 +87,47 @@ class PlantillasCollectionSeeder extends Seeder
                     'fields' => [
                         ['name' => 'Nombres', 'type' => 'string', 'required' => true],
                         ['name' => 'Apellidos', 'type' => 'string', 'required' => true],
-                        ['name' => 'Correo electrónico', 'type' => 'string', 'required' => true],
+                        ['name' => 'Correo electrónico', 'type' => 'string', 'required' => false],
                         ['name' => 'Teléfono', 'type' => 'string', 'required' => false],
-                        ['name' => 'Especialidad', 'type' => 'string', 'required' => true],
-                        ['name' => 'Fecha de contratación', 'type' => 'date', 'required' => true],
-                        ['name' => 'Idiomas', 'type' => 'subform', 'required' => false, 'subcampos' => [
-                            ['name' => 'Idioma', 'type' => 'string', 'required' => true],
-                            ['name' => 'Nivel', 'type' => 'select', 'required' => true, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
-                            ['name' => 'Certificación', 'type' => 'file', 'required' => false]
-                        ]]
+                        [
+                            'name' => 'Área',
+                            'type' => 'select',
+                            'required' => false,
+                            'dataSource' => [
+                                'plantillaId' => '68cc40d088161ce06d09312c',
+                                'seccion' => 'Información General',
+                                'campoMostrar' => 'Nombre del area'
+                            ]
+                        ],
+                        ['name' => 'Género', 'type' => 'select', 'required' => false, 'options' => ['Masculino', 'Femenino']],
+                        ['name' => 'RFC', 'type' => 'string', 'required' => false],
+                        ['name' => 'Horas', 'type' => 'number', 'required' => false],
+                        ['name' => 'Fecha de contratación', 'type' => 'date', 'required' => false],
+                        [
+                            'name' => 'Idiomas',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Idioma', 'type' => 'string', 'required' => false],
+                                ['name' => 'Nivel', 'type' => 'select', 'required' => false, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
+                                ['name' => 'Certificación', 'type' => 'file', 'required' => false]
+                            ]
+                        ],
+                        [
+                            'name' => 'Vigencia en el SNI',
+                            'type' => 'date',
+                            'required' => false
+                        ],
+                        [
+                            'name' => 'Cuerpo académico al que pertenece',
+                            'type' => 'string',
+                            'required' => false
+                        ],
+                        [
+                            'name' => 'Vigencia del cuerpo académico al que pertenece',
+                            'type' => 'date',
+                            'required' => false
+                        ]
                     ]
                 ],
                 [
@@ -84,39 +136,64 @@ class PlantillasCollectionSeeder extends Seeder
                         [
                             'name' => 'Estado',
                             'type' => 'select',
-                            'required' => true,
+                            'required' => false,
                             'options' => ['Activo', 'Inactivo']
                         ],
                         [
-                            'name' => 'Niveles de estudio',
+                            'name' => 'Programa educativo',
+                            'type' => 'select',
+                            'required' => false,
+                            'dataSource' => [
+                                'plantillaId' => '68b1df5f34dafa1c910aa02c',
+                                'seccion' => 'Información General',
+                                'campoMostrar' => 'Nombre del programa'
+                            ]
+                        ],
+                        [
+                            'name' => 'Licenciatura',
                             'type' => 'subform',
-                            'required' => true,
+                            'required' => false,
                             'subcampos' => [
                                 [
-                                    'name' => "Nivel",
+                                    'name' => "Nombre de la licenciatura",
                                     "type" => "string",
-                                    "required" => true
-                                ],
+                                    "required" => false
+                                ]
+                            ],
+                        ],
+                        [
+                            'name' => 'Maestría',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
                                 [
-                                    "name" => "Año",
-                                    "type" => "number",
-                                    "required" => true
-                                ],
-                                [
-                                    "name" => "Institución",
+                                    'name' => "Nombre de maestría",
                                     "type" => "string",
-                                    "required" => true
-                                ],
-                                [
-                                    "name" => "Evidencia",
-                                    "type" => "file",
                                     "required" => false
                                 ],
                                 [
-                                    "name" => "Fecha de obtención",
-                                    "type" => "date",
-                                    "required" => true,
-                                    "filterable" => true
+                                    'name' => "Estado",
+                                    "type" => "select",
+                                    "required" => false,
+                                    "options" => ["Cursado sin acreditar", "Cursando", "Acreditado"]
+                                ]
+                            ]
+                        ],
+                        [
+                            'name' => 'Doctorado',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                [
+                                    'name' => "Nombre del Doctorado",
+                                    "type" => "string",
+                                    "required" => false
+                                ],
+                                [
+                                    'name' => "Estado",
+                                    "type" => "select",
+                                    "required" => false,
+                                    "options" => ["Cursado sin acreditar", "Cursando", "Acreditado"]
                                 ]
                             ]
                         ],
@@ -138,12 +215,12 @@ class PlantillasCollectionSeeder extends Seeder
                                 [
                                     "name" => "Fecha de inicio",
                                     "type" => "date",
-                                    "required" => true
+                                    "required" => false
                                 ],
                                 [
                                     "name" => "Fecha de término",
                                     "type" => "date",
-                                    "required" => true,
+                                    "required" => false,
                                     "filterable" => true
                                 ]
                             ]

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this -> call([
             RecursosSeeder::class,
             AccionesSeeder::class,
+            AreasSeeder::class,
             RolesSeeder::class,
             UserCollectionSeeder::class,
             EjesCollectionSeeder::class,
