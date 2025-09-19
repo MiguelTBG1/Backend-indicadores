@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Rol;
 use App\Models\Accion;
 use App\Models\Recurso;
-
+use App\Models\Rol;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RolesSeeder extends Seeder
 {
@@ -39,11 +37,11 @@ class RolesSeeder extends Seeder
                         [
                             'recurso' => $todosRecursos->_id,
                             'acciones' => [
-                                $todosAcciones->_id
-                            ]
-                        ]
-                    ]
-                ]
+                                $todosAcciones->_id,
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'nombre' => 'Coordinador académico',
@@ -52,14 +50,14 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $indicadores->_id,
-                            'acciones' => [$todosAcciones->_id]
+                            'acciones' => [$todosAcciones->_id],
                         ],
                         [
                             'recurso' => $documentos->_id,
-                            'acciones' => [$todosAcciones->_id]
-                        ]
-                    ]
-                ]
+                            'acciones' => [$todosAcciones->_id],
+                        ],
+                    ],
+                ],
             ],
             [
                 'nombre' => 'Editor de plantillas',
@@ -68,10 +66,10 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $plantillas->_id,
-                            'acciones' => [$todosAcciones->_id]
-                        ]
-                    ]
-                ]
+                            'acciones' => [$todosAcciones->_id],
+                        ],
+                    ],
+                ],
             ],
             [
                 'nombre' => 'Lector general',
@@ -80,10 +78,10 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $todosRecursos->_id,
-                            'acciones' => [$leer->_id]
-                        ]
-                    ]
-                ]
+                            'acciones' => [$leer->_id],
+                        ],
+                    ],
+                ],
             ],
             [
                 'nombre' => 'Analista de indicadores',
@@ -92,10 +90,10 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $indicadores->_id,
-                            'acciones' => [$leer->_id]
-                        ]
-                    ]
-                ]
+                            'acciones' => [$leer->_id],
+                        ],
+                    ],
+                ],
             ],
             [
                 'nombre' => 'Creador de documentos',
@@ -106,12 +104,12 @@ class RolesSeeder extends Seeder
                             'recurso' => $documentos->_id,
                             'acciones' => [
                                 $crear->_id,
-                                $actualizar->_id
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                $actualizar->_id,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         foreach ($roles as $rol) {

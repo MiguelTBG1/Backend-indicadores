@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Recurso;
+use Illuminate\Database\Seeder;
+
 class RecursosSeeder extends Seeder
 {
     /**
@@ -14,36 +14,36 @@ class RecursosSeeder extends Seeder
     {
         $recursos = [
             [
-                "clave" => "*",
-                "nombre" => "*",
-                "descripcion" => "Permisos en todas las tablas",
-                "tipo" => "estatico"
+                'clave' => '*',
+                'nombre' => '*',
+                'descripcion' => 'Permisos en todas las tablas',
+                'tipo' => 'estatico',
             ],
             [
-                "clave" => "usuarios",
-                "nombre" => "Usuarios",
-                "tipo" => 'estatico',
-                "descripcion" => "Gestión de usuarios del sistema"
+                'clave' => 'usuarios',
+                'nombre' => 'Usuarios',
+                'tipo' => 'estatico',
+                'descripcion' => 'Gestión de usuarios del sistema',
             ],
             [
-                "claves" => "indicadores",
-                "nombre" => "Indicadores",
-                "descripcion" => "Colección de indicadores del sistema",
-                "tipo" => 'estatico'
+                'claves' => 'indicadores',
+                'nombre' => 'Indicadores',
+                'descripcion' => 'Colección de indicadores del sistema',
+                'tipo' => 'estatico',
             ],
             [
-                "clave" => "Plantillas",
-                "nombre" => "Plantillas",
-                "descripcion" => "Todas las plantillas para la creación de documentos",
-                "tipo" => 'estatico'
+                'clave' => 'Plantillas',
+                'nombre' => 'Plantillas',
+                'descripcion' => 'Todas las plantillas para la creación de documentos',
+                'tipo' => 'estatico',
             ],
             [
-                "clave" => "clave_prueba",
-                "nombre" => "Documentos",
-                "descripcion" => "Todos los documentos del sistema",
-                "tipo" => 'patron',
-                "patron_regex" => '^documentos_.*$'
-            ]
+                'clave' => 'clave_prueba',
+                'nombre' => 'Documentos',
+                'descripcion' => 'Todos los documentos del sistema',
+                'tipo' => 'patron',
+                'patron_regex' => '^documentos_.*$',
+            ],
         ];
 
         foreach ($recursos as $recurso) {

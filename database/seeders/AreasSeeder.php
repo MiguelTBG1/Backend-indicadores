@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use MongoDB\Client as MongoClient;
 
@@ -23,46 +22,46 @@ class AreasSeeder extends Seeder
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del area' => 'Ciencias Económico Administrativas'
-                        ]
-                    ]
-                ]
+                            'Nombre del area' => 'Ciencias Económico Administrativas',
+                        ],
+                    ],
+                ],
             ],
             [
                 'secciones' => [
                     [
-                    'nombre' => 'Información General',
-                    'fields' => [
-                        'Nombre del area' => 'Ingeniería Química y Bioquímica'
-                    ]
-                    ]
-                ]
+                        'nombre' => 'Información General',
+                        'fields' => [
+                            'Nombre del area' => 'Ingeniería Química y Bioquímica',
+                        ],
+                    ],
+                ],
             ],
             [
                 'secciones' => [
                     [
-                    'nombre' => 'Información General',
-                    'fields' => [
-                        'Nombre del area' => 'Ciencias Básicas'
-                    ]]
-                ]
+                        'nombre' => 'Información General',
+                        'fields' => [
+                            'Nombre del area' => 'Ciencias Básicas',
+                        ]],
+                ],
             ],
             [
                 'secciones' => [
                     [
-                    'nombre' => 'Información General',
-                    'fields' => [
-                        'Nombre del area' => 'Departamento de ingeniería eléctrica y electrónica'
-                    ]]
-                ]
-            ]
+                        'nombre' => 'Información General',
+                        'fields' => [
+                            'Nombre del area' => 'Departamento de ingeniería eléctrica y electrónica',
+                        ]],
+                ],
+            ],
         ];
 
         // Verificar si la colección 'Profesores_data' ya existe
         $collectionNameAreas = 'Areas_data';
 
         $collectionsAreas = $db->listCollections([
-            'filter' => ['name' => $collectionNameAreas]
+            'filter' => ['name' => $collectionNameAreas],
         ]);
 
         $existsProfesores = false;
@@ -74,7 +73,7 @@ class AreasSeeder extends Seeder
         }
 
         // Si la colección no existe, crearla
-        if (!$existsProfesores) {
+        if (! $existsProfesores) {
             $db->createCollection($collectionNameAreas);
         }
 

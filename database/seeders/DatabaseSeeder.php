@@ -2,12 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Alumnos;
-use App\Models\Plantillas;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use PhpParser\Comment\Doc;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,7 +14,7 @@ class DatabaseSeeder extends Seeder
     {
 
         // Llamamos a los seeders
-        $this -> call([
+        $this->call([
             RecursosSeeder::class,
             AccionesSeeder::class,
             AreasSeeder::class,
@@ -31,7 +27,7 @@ class DatabaseSeeder extends Seeder
             ProfesoresSeeder::class,
             ProgramaEducativoSeeder::class,
             DocumentosSeeder::class,
-            AlumnosSeeder::class
+            AlumnosSeeder::class,
         ]);
     }
 }

@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Ejes;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
 
 class EjesCollectionSeeder extends Seeder
 {
@@ -15,21 +14,21 @@ class EjesCollectionSeeder extends Seeder
     {
         $ejes = [
             [
-            'descripcion' => 'Calidad educativa, cobertura y formacion integral',
-            'clave_oficial' => '1'
+                'descripcion' => 'Calidad educativa, cobertura y formacion integral',
+                'clave_oficial' => '1',
             ],
             [
-            'descripcion' => 'Efectividad organizacional',
-            'clave_oficial' => '3'
+                'descripcion' => 'Efectividad organizacional',
+                'clave_oficial' => '3',
             ],
             [
-            'descripcion' => 'Evolución con inclusión, igualdad y desarrollo sostenible',
-            'clave_oficial' => 'ET'
+                'descripcion' => 'Evolución con inclusión, igualdad y desarrollo sostenible',
+                'clave_oficial' => 'ET',
             ],
             [
-            'descripcion' => 'Frotalecimiento de la investigación, el desarrollo tecnológico, la vinculación y el emprendimiento',
-            'clave_oficial' => '2'
-            ]
+                'descripcion' => 'Frotalecimiento de la investigación, el desarrollo tecnológico, la vinculación y el emprendimiento',
+                'clave_oficial' => '2',
+            ],
         ];
 
         foreach ($ejes as $eje) {

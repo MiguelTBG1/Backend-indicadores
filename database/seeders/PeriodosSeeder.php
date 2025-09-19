@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use MongoDB\Client as MongoClient;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Client as MongoClient;
 
 class PeriodosSeeder extends Seeder
 {
@@ -21,147 +20,147 @@ class PeriodosSeeder extends Seeder
 
         $periodos = [
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee1'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee1'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'AGO-DIC/2025'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'AGO-DIC/2025',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee2'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee2'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'VERANO/2025'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'VERANO/2025',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee3'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee3'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'ENE-JUN/2025'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'ENE-JUN/2025',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee4'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee4'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'AGO-DIC/2024'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'AGO-DIC/2024',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee5'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee5'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'VERANO/2024'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'VERANO/2024',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee6'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee6'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'ENE-JUN/2024'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'ENE-JUN/2024',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee7'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee7'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'AGO-DIC/2023'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'AGO-DIC/2023',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee8'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee8'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'VERANO/2023'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'VERANO/2023',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000ee9'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000ee9'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'ENE-JUN/2023'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'ENE-JUN/2023',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f10500ee10'),
+                '_id' => new ObjectId('68b5ec5fa75013f10500ee10'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'AGO-DIC/2022'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'AGO-DIC/2022',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000e11'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000e11'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'VERANO/2022'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'VERANO/2022',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5e5fa75013f105000ee12'),
+                '_id' => new ObjectId('68b5e5fa75013f105000ee12'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'FEB-JUN/2022'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'FEB-JUN/2022',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa5013f105000ee13'),
+                '_id' => new ObjectId('68b5ec5fa5013f105000ee13'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre periodo' => 'AGO/21-ENE/22'
-                        ]
-                    ]
-                ]
+                            'Nombre periodo' => 'AGO/21-ENE/22',
+                        ],
+                    ],
+                ],
             ],
         ];
 
@@ -169,7 +168,7 @@ class PeriodosSeeder extends Seeder
         $collectionNamePeriodos = 'Periodos_data';
 
         $collectionPeriodos = $db->listCollections([
-            'filter' => ['name' => $collectionNamePeriodos]
+            'filter' => ['name' => $collectionNamePeriodos],
         ]);
 
         $existsPeriodos = false;
@@ -181,7 +180,7 @@ class PeriodosSeeder extends Seeder
         }
 
         // Si la coleccion no existe, crearla
-        if (!$existsPeriodos) {
+        if (! $existsPeriodos) {
             $db->createCollection($collectionNamePeriodos);
         }
 

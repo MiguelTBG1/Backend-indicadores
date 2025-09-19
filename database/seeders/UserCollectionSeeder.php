@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Rol;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class UserCollectionSeeder extends Seeder
@@ -37,7 +36,7 @@ class UserCollectionSeeder extends Seeder
                 'estado' => 'Activo',
                 'ocupacion' => 'Administrador',
                 'escolaridad' => 'Universidad',
-                'roles' => [$super_usuario->_id]
+                'roles' => [$super_usuario->_id],
             ]
         );
 
@@ -54,7 +53,7 @@ class UserCollectionSeeder extends Seeder
                 'estado' => 'Activo',
                 'ocupacion' => 'Administrador',
                 'escolaridad' => 'Universidad',
-                'roles' => [$coordinador->_id]
+                'roles' => [$coordinador->_id],
             ]
         );
 
@@ -71,7 +70,7 @@ class UserCollectionSeeder extends Seeder
                 'estado' => 'Activo',
                 'ocupacion' => 'Desarrollador',
                 'escolaridad' => 'Universidad',
-                'roles' => [$editorPlantillas->_id]
+                'roles' => [$editorPlantillas->_id],
             ]
         );
 
@@ -88,7 +87,7 @@ class UserCollectionSeeder extends Seeder
                 'estado' => 'Activo',
                 'ocupacion' => 'Desarrollador',
                 'escolaridad' => 'Universidad',
-                'roles' => [$lector->_id]
+                'roles' => [$lector->_id],
             ]
         );
 
@@ -104,7 +103,7 @@ class UserCollectionSeeder extends Seeder
             'estado' => 'Activo',
             'ocupacion' => 'Analista',
             'escolaridad' => 'Maestría',
-            'roles' => [$analistaIndicador->_id]
+            'roles' => [$analistaIndicador->_id],
         ]);
 
         // Usuario Creador de Documentos
@@ -119,7 +118,7 @@ class UserCollectionSeeder extends Seeder
             'estado' => 'Activo',
             'ocupacion' => 'Documentalista',
             'escolaridad' => 'Licenciatura',
-            'roles' => [$creadorDocumentos->_id]
+            'roles' => [$creadorDocumentos->_id],
         ]);
     }
 }

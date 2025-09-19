@@ -4,12 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Areas;
 use App\Models\ProgramaEducativo;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use MongoDB\BSON\ObjectId;
-use MongoDB\BSON\UTCDateTime;
 use MongoDB\Client as MongoClient;
-use MongoDB\Laravel\Eloquent\Casts\ObjectId as CastsObjectId;
 
 class ProfesoresSeeder extends Seeder
 {
@@ -20,7 +16,6 @@ class ProfesoresSeeder extends Seeder
     {
         $client = new MongoClient(config('database.connections.mongodb.url'));
         $db = $client->selectDatabase(config('database.connections.mongodb.database'));
-
 
         $AreaElectronica = Areas::where('secciones.fields.Nombre del area', 'Departamento de ingeniería eléctrica y electrónica')->first();
         $progSistemas = '68b5ec5fa75013f105000dd1';
@@ -41,25 +36,25 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Acevedo Huerta',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 19
-                        ]
+                            'Horas' => 19,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => '68b5ec5fa75013f105000dd8',
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Licenciatura en Electronica']
+                                ['Nombre de la licenciatura' => 'Licenciatura en Electronica'],
                             ],
                             'Maestría' => [
                                 [
                                     'Nombre de maestría' => 'Electrónica con opción en automatización',
-                                    'Estado' => 'Acreditado'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'Estado' => 'Acreditado',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'secciones' => [
@@ -70,31 +65,31 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Avila Lopez',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 17
-                        ]
+                            'Horas' => 17,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => '68b5ec5fa75013f105000dd8',
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Electrico']
+                                ['Nombre de la licenciatura' => 'Ingeniero Electrico'],
                             ],
                             'Maestría' => [
                                 [
                                     'Nombre de maestría' => 'Ingeniería en Mecatrónica',
-                                    'Estado' => 'Acreditado'
-                                ]
+                                    'Estado' => 'Acreditado',
+                                ],
                             ],
                             'Doctorado' => [
                                 [
                                     'Nombre del Doctorado' => 'Ciencias Ambientales',
-                                    'Estado' => 'Cursado sin acreditar'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'Estado' => 'Cursado sin acreditar',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'secciones' => [
@@ -105,25 +100,25 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Cante Gongora',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 40
-                        ]
+                            'Horas' => 40,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => '68b5ec5fa75013f105000dd8',
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ing. Industrial Eléctrica']
+                                ['Nombre de la licenciatura' => 'Ing. Industrial Eléctrica'],
                             ],
                             'Doctorado' => [
                                 [
                                     'Nombre de Nombre del Doctorado' => 'En Educación',
-                                    'Estado' => 'Cursado sin acreditar'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'Estado' => 'Cursado sin acreditar',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'secciones' => [
@@ -134,31 +129,31 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Carrillo Interian',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 20
-                        ]
+                            'Horas' => 20,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => '68b5ec5fa75013f105000dd8',
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Industrial En Eléctrica']
+                                ['Nombre de la licenciatura' => 'Ingeniero Industrial En Eléctrica'],
                             ],
                             'Maestría' => [
                                 [
                                     'Nombre de maestría' => 'Ingeniería Investigación de Operaciones',
-                                    'Estado' => 'Acreditado'
-                                ]
+                                    'Estado' => 'Acreditado',
+                                ],
                             ],
                             'Doctorado' => [
                                 [
                                     'Nombre del Doctorado' => 'Ingeniería en planeación estratégica',
-                                    'Estado' => 'Acreditado'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'Estado' => 'Acreditado',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'secciones' => [
@@ -169,22 +164,22 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Cruz Arguello',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 40
-                        ]
+                            'Horas' => 40,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero en Sistemas de Energía']
+                                ['Nombre de la licenciatura' => 'Ingeniero en Sistemas de Energía'],
                             ],
                             'Maestría' => [
-                                ['Nombre de maestría' => 'Electroquímica']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['Nombre de maestría' => 'Electroquímica'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 2) DIAZ CARVAJAL, MANUEL CIPRIANO
@@ -197,25 +192,25 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Diaz Carvajal',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 40
-                        ]
+                            'Horas' => 40,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Mecánico Electricista']
+                                ['Nombre de la licenciatura' => 'Ingeniero Mecánico Electricista'],
                             ],
                             'Maestría' => [
                                 [
                                     'Nombre de maestría' => 'Sistemas eléctricos de potencia',
-                                    'Estado' => 'Cursado sin acreditar'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'Estado' => 'Cursado sin acreditar',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 3) PALACIOS RAMIREZ, MARIA NORMA
@@ -228,33 +223,33 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Palacios Ramirez',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Femenino',
-                            'Horas' => 17
-                        ]
+                            'Horas' => 17,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progLicenciaSindical,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Licenciatura en Física']
+                                ['Nombre de la licenciatura' => 'Licenciatura en Física'],
                             ],
                             'Maestría' => [
                                 ['Nombre de maestría' => 'Óptica',
-                                'Estado' => 'Acreditado']
+                                    'Estado' => 'Acreditado'],
                             ],
                             'Doctorado' => [
                                 [
                                     'Nombre del Doctorado' => 'Ciencias de la Educación',
-                                    'Estado' => 'Acreditado'
+                                    'Estado' => 'Acreditado',
                                 ],
                                 [
                                     'Nombre del Doctorado' => 'Astrofísica',
-                                    'Estado' => 'Cursando'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                    'Estado' => 'Cursando',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 4) RIVAS RUIZ, WILLIAM
@@ -267,22 +262,22 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Rivas Ruiz',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 40
-                        ]
+                            'Horas' => 40,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniería Industrial en Química']
+                                ['Nombre de la licenciatura' => 'Ingeniería Industrial en Química'],
                             ],
                             'Maestría' => [
-                                ['Nombre de maestría' => 'Planeación Industrial']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['Nombre de maestría' => 'Planeación Industrial'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 5) RODRIGUEZ MAY, GERMAN ALBERTO
@@ -295,22 +290,22 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Rodriguez May',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 40
-                        ]
+                            'Horas' => 40,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Industrial en Eléctrica']
+                                ['Nombre de la licenciatura' => 'Ingeniero Industrial en Eléctrica'],
                             ],
                             'Doctorado' => [
-                                ['Nombre del Doctorado' => 'En Educación']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['Nombre del Doctorado' => 'En Educación'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 6) SANTILLAN SANVICENTE, DAVID DE JESUS
@@ -323,22 +318,22 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Santillan Sanvicente',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 40
-                        ]
+                            'Horas' => 40,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Eléctrico']
+                                ['Nombre de la licenciatura' => 'Ingeniero Eléctrico'],
                             ],
                             'Maestría' => [
-                                ['Nombre de maestría' => 'Tecnología Educativa']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['Nombre de maestría' => 'Tecnología Educativa'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 7) SONDA MARTINEZ, JUAN RAMON
@@ -351,19 +346,19 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Sonda Martinez',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 20
-                        ]
+                            'Horas' => 20,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ing. en Transmisiones Militares']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['Nombre de la licenciatura' => 'Ing. en Transmisiones Militares'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 8) VELASCO TEH, LIMBER LEONARDO
@@ -376,22 +371,22 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Velasco Teh',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 30
-                        ]
+                            'Horas' => 30,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progSistemas,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Eléctrico']
+                                ['Nombre de la licenciatura' => 'Ingeniero Eléctrico'],
                             ],
                             'Doctorado' => [
-                                ['Nombre del Doctorado' => 'En Educación']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['Nombre del Doctorado' => 'En Educación'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 9) ZAVALA PIMENTEL, JUAN MANUEL
@@ -404,22 +399,22 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Zavala Pimentel',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 40
-                        ]
+                            'Horas' => 40,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Electricista']
+                                ['Nombre de la licenciatura' => 'Ingeniero Electricista'],
                             ],
                             'Maestría' => [
-                                ['Nombre de maestría' => 'Tecnología Educativa']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['Nombre de maestría' => 'Tecnología Educativa'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
 
             // 10) TE AZARCOYA, JULIO HUMBERTO
@@ -432,33 +427,32 @@ class ProfesoresSeeder extends Seeder
                             'Apellidos' => 'Te Azarcoya',
                             'Área' => $AreaElectronica->_id,
                             'Género' => 'Masculino',
-                            'Horas' => 18
-                        ]
+                            'Horas' => 18,
+                        ],
                     ],
                     [
                         'nombre' => 'Información Académica',
                         'fields' => [
                             'Programa educativo' => $progIngenieria,
                             'Licenciatura' => [
-                                ['Nombre de la licenciatura' => 'Ingeniero Eléctrico']
+                                ['Nombre de la licenciatura' => 'Ingeniero Eléctrico'],
                             ],
                             'Maestría' => [
                                 [
-                                    'Nombre de maestría' => 'Sistemas eléctricos de potencia'
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                    'Nombre de maestría' => 'Sistemas eléctricos de potencia',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
-
 
         // Verificar si la colección 'Profesores_data' ya existe
         $collectionNameProfesores = 'Profesores_data';
 
         $collectionsProfesores = $db->listCollections([
-            'filter' => ['name' => $collectionNameProfesores]
+            'filter' => ['name' => $collectionNameProfesores],
         ]);
 
         $existsProfesores = false;
@@ -470,7 +464,7 @@ class ProfesoresSeeder extends Seeder
         }
 
         // Si la colección no existe, crearla
-        if (!$existsProfesores) {
+        if (! $existsProfesores) {
             $db->createCollection($collectionNameProfesores);
         }
 
