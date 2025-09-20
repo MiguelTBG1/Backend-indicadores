@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use MongoDB\Client as MongoClient;
 use MongoDB\BSON\ObjectId;
+use MongoDB\Client as MongoClient;
 
 class ProgramaEducativoSeeder extends Seeder
 {
@@ -20,144 +19,144 @@ class ProgramaEducativoSeeder extends Seeder
 
         $programas_educativos = [
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd1'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd1'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Arquitectura'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Arquitectura',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd2'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd2'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Contador Público'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Contador Público',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd3'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd3'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Gastronomía'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Gastronomía',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd4'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd4'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería Ambiental'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería Ambiental',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd5'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd5'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería Biomédica'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería Biomédica',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd6'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd6'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería Bioquímica'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería Bioquímica',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd7'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd7'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería Civil'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería Civil',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd8'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd8'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería Eléctrica'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería Eléctrica',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000dd9'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000dd9'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería Electromecánica'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería Electromecánica',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa7013f105000dd10'),
+                '_id' => new ObjectId('68b5ec5fa7013f105000dd10'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería Electrónica'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería Electrónica',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5a75013f105000dd11'),
+                '_id' => new ObjectId('68b5ec5a75013f105000dd11'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería en Sistemas Computacionales'
-                        ]
-                    ]
-                ]
+                            'Nombre del programa' => 'Ingeniería en Sistemas Computacionales',
+                        ],
+                    ],
+                ],
             ],
             [
-                '_id'=> new ObjectId('68b5ec5fa7501f105000dd12'),
+                '_id' => new ObjectId('68b5ec5fa7501f105000dd12'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
-                            'Nombre del programa' => 'Ingeniería en Tecnologías de la Información y Comunicaciones'
-                        ]
-                    ]
-                ]
-            ]
+                            'Nombre del programa' => 'Ingeniería en Tecnologías de la Información y Comunicaciones',
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         // Verificar si la colección 'Programa_educativo_data' ya existe
         $collectionName = 'ProgramaEducativo_data';
 
         $collectionPrograma = $db->listCollections([
-            'filter' => ['name' => $collectionName]
+            'filter' => ['name' => $collectionName],
         ]);
 
         $exists = false;
@@ -169,7 +168,7 @@ class ProgramaEducativoSeeder extends Seeder
         }
 
         // Si la coleccion no existe, crearla
-        if (!$exists) {
+        if (! $exists) {
             $db->createCollection($collectionName);
         }
 

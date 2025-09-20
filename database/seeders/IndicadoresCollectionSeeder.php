@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Indicadores;
+use Illuminate\Database\Seeder;
 
 class IndicadoresCollectionSeeder extends Seeder
 {
@@ -16,7 +16,7 @@ class IndicadoresCollectionSeeder extends Seeder
         $indicadores = [
             [
                 '_idProyecto' => '1.1.2',
-                'numero'=> 2,
+                'numero' => 2,
                 'nombreIndicador' => 'Evaluación institucional con los criterios SEAES',
                 'denominador' => 1,
                 'numerador' => 0,
@@ -26,42 +26,42 @@ class IndicadoresCollectionSeeder extends Seeder
                     'campo' => 'Participa en movilidad',
                     'secciones' => 'Movilidad',
                     'condicion' => [],
-                    'subConfiguracion' => [ 'operacion' => 'contar', 'campo' => 'null', 'condicion' => [] ]
+                    'subConfiguracion' => ['operacion' => 'contar', 'campo' => 'null', 'condicion' => []],
 
                 ],
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.1.3',
-                'numero'=> 4,
+                'numero' => 4,
                 'nombreIndicador' => 'Programas de licenciatura acreditados',
                 'denominador' => 9,
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.1.3',
-                'numero'=> 5,
+                'numero' => 5,
                 'nombreIndicador' => 'Matrícula en programas de licenciatura acreditados',
                 'denominador' => 9,
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.1.4',
-                'numero' =>  6,
+                'numero' => 6,
                 'nombreIndicador' => 'Porcentaje de programas de posgrado registrados en el SNP',
                 'denominador' => 6,
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.1.5',
@@ -71,7 +71,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.2.2',
@@ -81,7 +81,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.2.3',
@@ -91,7 +91,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.2.4',
@@ -101,7 +101,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.2.5',
@@ -111,7 +111,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.3.1',
@@ -121,7 +121,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.3.2',
@@ -131,7 +131,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.4.3',
@@ -141,7 +141,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '1.4.4',
@@ -151,7 +151,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => 'ET.1.2',
@@ -161,7 +161,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '2.2.1',
@@ -171,7 +171,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '2.2.2',
@@ -181,7 +181,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '2.2.3',
@@ -191,7 +191,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '2.2.4',
@@ -201,7 +201,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '2.2.6',
@@ -211,7 +211,7 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
+                'fecha_fin' => new \DateTime('2025-12-31'),
             ],
             [
                 '_idProyecto' => '2.3.1',
@@ -221,12 +221,12 @@ class IndicadoresCollectionSeeder extends Seeder
                 'numerador' => 0,
                 'porcentaje' => 0,
                 'fecha_inicio' => new \DateTime('2025-01-01'),
-                'fecha_fin' => new \DateTime('2025-12-31')
-            ]
+                'fecha_fin' => new \DateTime('2025-12-31'),
+            ],
         ];
 
         // Recorremos el objeto y lo creamos en la base de datos
-        foreach($indicadores as $indicador) {
+        foreach ($indicadores as $indicador) {
             Indicadores::create($indicador);
         }
     }

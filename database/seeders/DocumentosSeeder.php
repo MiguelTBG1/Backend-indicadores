@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use MongoDB\Client as MongoClient;
 use MongoDB\BSON\ObjectId;
-use MongoDB\BSON\UTCDateTime;
+use MongoDB\Client as MongoClient;
 
 class DocumentosSeeder extends Seeder
 {
@@ -13,60 +12,59 @@ class DocumentosSeeder extends Seeder
     {
         $alumnos = [
             [
-                '_id'=> new ObjectId('68b5ec5fa75013f105000aa2'),
+                '_id' => new ObjectId('68b5ec5fa75013f105000aa2'),
                 'secciones' => [
                     [
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre Completo' => 'Daris Gael Martinez Galicia',
-                            'Género'=> 'Masculino',
-                            'Programa educativo'=> '68b5ec5a75013f105000dd11',
-                            'Número de control'=> '21394563'
-                        ]
+                            'Género' => 'Masculino',
+                            'Programa educativo' => '68b5ec5a75013f105000dd11',
+                            'Número de control' => '21394563',
+                        ],
 
-                    ],[
+                    ], [
                         'nombre' => 'Movilidad',
                         'fields' => [
                             'Participa en movilidad' => [
                                 [
                                     'Período de la movilidad' => '68b5ec5fa75013f105000ee1',
-                                    'Lugar al que asistió'=> 'ITChetumal',
-                                    'Proyecto que realizó'=> 'Indicadores',
-                                    'Asesor' => '686d545c64c3ad79300fd1c0'
-                                ]
+                                    'Lugar al que asistió' => 'ITChetumal',
+                                    'Proyecto que realizó' => 'Indicadores',
+                                    'Asesor' => '686d545c64c3ad79300fd1c0',
+                                ],
 
+                            ],
+                        ],
 
-                            ]
-                        ]
-
-                    ],[
+                    ], [
                         'nombre' => 'Eventos',
                         'fields' => [
                             'Participa en evento' => [
                                 [
-                                'Tipo de evento'=> 'Concurso',
-                                    'Nombre del evento'=> 'Indicadores Académicos',
-                                    'Período'=> '68b5ec5fa75013f105000ee1',
-                                    'Institución'=> 'ITChetumal',
-                                    'Lugar' => 'Centro de Innovacion'
+                                    'Tipo de evento' => 'Concurso',
+                                    'Nombre del evento' => 'Indicadores Académicos',
+                                    'Período' => '68b5ec5fa75013f105000ee1',
+                                    'Institución' => 'ITChetumal',
+                                    'Lugar' => 'Centro de Innovacion',
                                 ],
 
-                            ]
+                            ],
                         ],
-                    ],[
+                    ], [
                         'nombre' => 'Proyecto de investigación',
                         'fields' => [
                             'Participa en Proyecto de investigacion' => [
-                            [
-                                'Nombre del Proyecto'=> 'Indicadores',
-                                'Asesor'=> '686d545c64c3ad79300fd1c0',
-                                'Período'=> '68b5ec5fa75013f105000ee1'
-                            ]
+                                [
+                                    'Nombre del Proyecto' => 'Indicadores',
+                                    'Asesor' => '686d545c64c3ad79300fd1c0',
+                                    'Período' => '68b5ec5fa75013f105000ee1',
+                                ],
 
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ],
         ];
 
@@ -79,20 +77,20 @@ class DocumentosSeeder extends Seeder
         $collectionName = 'Alumnos_data';
 
         $collections = $db->listCollections([
-            'filter' => ['name' => $collectionName]
+            'filter' => ['name' => $collectionName],
         ]);
 
         $exists = false;
         foreach ($collections as $collection) {
             if ($collection->getName() === $collectionName) {
-               $exists = true;
+                $exists = true;
                 break;
             }
         }
 
-       // Si la colección no existe, crearla
-       if (!$exists) {
-          $db->createCollection($collectionName);
+        // Si la colección no existe, crearla
+        if (! $exists) {
+            $db->createCollection($collectionName);
         }
 
         // Insertar los documentos en la colección 'Alumnos_data'

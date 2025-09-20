@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Accion;
+use Illuminate\Database\Seeder;
 
 class AccionesSeeder extends Seeder
 {
@@ -15,25 +14,25 @@ class AccionesSeeder extends Seeder
     {
         $Acciones = [
             [
-                "nombre" => "*",
-                "descripcion" => "Todos los permisos",
+                'nombre' => '*',
+                'descripcion' => 'Todos los permisos',
             ],
             [
-            "nombre" => "crear",
-            "descripcion" => "Crear un nuevo registro"
+                'nombre' => 'crear',
+                'descripcion' => 'Crear un nuevo registro',
             ],
             [
-            "nombre" => "leer",
-            "descripcion" => "Leer o consultar un registro"
+                'nombre' => 'leer',
+                'descripcion' => 'Leer o consultar un registro',
             ],
             [
-            "nombre" => "actualizar",
-            "descripcion" => "Actualizar un registro existente"
+                'nombre' => 'actualizar',
+                'descripcion' => 'Actualizar un registro existente',
             ],
             [
-            "nombre" => "eliminar",
-            "descripcion" => "Eliminar un registro"
-            ]
+                'nombre' => 'eliminar',
+                'descripcion' => 'Eliminar un registro',
+            ],
         ];
 
         foreach ($Acciones as $Accion) {
