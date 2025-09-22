@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\User;
@@ -27,6 +28,7 @@ class PermissionBuilder
                 // --- Allowed ---
                 if (!empty($rol->permisos['allowed'])) {
                     foreach ($rol->permisos['allowed'] as $permiso) {
+                        
                         $allowedStr[] = ($this->buildPermisoStrings($permiso));
                     }
                 }
@@ -61,17 +63,30 @@ class PermissionBuilder
         $allowedStr = array_unique(array_merge(...$allowedStr));
         $deniedStr = array_unique(array_merge(...$deniedStr));
         $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
+
+        Log::debug("Permisos finales para el usuario {$user->id}: " . implode(', ', $permisos));
         // Aplanar el array si es necesario
         return array_unique(array_merge($permisos));
     }
 
     private function buildPermisoStrings(array $permiso): array
     {
-        // Comprobamos que exista el recurso
-        $recurso = optional(Recurso::find($permiso['recurso']))->nombre ?? 'recurso_desconocido';
-
-        // Inicializamos el arreglo de recursos
         $permisos = [];
+
+        // Primero intentamos encontrar en recursos estáticos
+        $recursoObj = Recurso::find($permiso['recurso']);
+        Log::debug("Buscando recurso con ID: {$permiso['recurso']}");
+
+        if ($recursoObj) {
+            // Caso recurso estático
+            $recurso = $recursoObj->nombre;
+            Log::debug("Recurso estático detectado: {$recurso}");
+        } else {
+            // Caso recurso dinámico → asumimos que es una plantilla
+            $plantillaId = $permiso['recurso'];
+            $recurso = "plantilla:{$plantillaId}";
+            Log::debug("Recurso dinámico detectado: {$recurso}");
+        }
 
         // Recorremos las acciones
         foreach ($permiso['acciones'] ?? [] as $accionId) {
@@ -85,7 +100,7 @@ class PermissionBuilder
 
     private function buildFinalAbilities(array $allow, array $deny): array
     {
-   $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
+        $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
         Log::debug($allRecursos);
         $allAcciones = Accion::pluck('nombre')->toArray();
 
@@ -129,4 +144,3 @@ class PermissionBuilder
         return array_values(array_unique($resolved));
     }
 }
-?>

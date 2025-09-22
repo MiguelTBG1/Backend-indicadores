@@ -38,7 +38,7 @@ class RecursosSeeder extends Seeder
                 'tipo' => 'estatico',
             ],
             [
-                'clave' => 'clave_prueba',
+                'clave' => 'Documentos',
                 'nombre' => 'Documentos',
                 'descripcion' => 'Todos los documentos del sistema',
                 'tipo' => 'patron',

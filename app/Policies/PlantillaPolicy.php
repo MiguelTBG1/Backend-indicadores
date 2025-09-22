@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Recurso;
 
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
 
 class PlantillaPolicy
 {
@@ -31,7 +32,10 @@ class PlantillaPolicy
         }
 
         // Caso 3: Usuarios particulares
-        
+        Log::debug("Verificando permiso 'plantilla:{$plantilla->_id}_leer' para el usuario {$user->id}");
+        if($user->currentAccessToken()?->can("plantilla:{$plantilla->_id}_leer")) {
+            return true;
+        }
         return false;
     }
 
