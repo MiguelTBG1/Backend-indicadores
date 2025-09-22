@@ -6,6 +6,9 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Plantillas;
 use MongoDB\BSON\ObjectId;
+use App\Services\DynamicModelService;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class PlantillasCollectionSeeder extends Seeder
 {
@@ -552,5 +555,46 @@ class PlantillasCollectionSeeder extends Seeder
                 ]
             ]
         ]);
+
+        try {
+            // Obtenemos todas las plantillas creadas
+            $plantillas = Plantillas::all();
+
+            // Recorremos las plantillas
+            foreach ($plantillas as $plantilla) {
+                // Creamos el arreglo de relaciones
+                $relations = [];
+
+                // Obtenemos las secciones de la plantilla
+                $secciones = $plantilla->secciones;
+
+                // Recorremos secciones para buscar las relaciones
+                DynamicModelService::getRelations($secciones, $relations);
+
+                // Logeamos las relaciones encontradas
+                Log::info('Relaciones encontradas', [
+                    'relaciones' => $relations
+                ]);
+
+                // Nombre del modelo
+                $modelName = $plantilla->nombre_modelo;
+
+                // Actualizamos el modelo dinámico
+                DynamicModelService::generate($modelName, $relations);
+
+                // Forzar la recarga del autoloader de Composer
+                $loader = require base_path('vendor/autoload.php');
+                $loader->unregister();
+                $loader->register(true);
+            }
+        } catch (Exception $e) {
+            // Registrar el error en el log
+            Log::error('Error en run', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+        }
     }
 }

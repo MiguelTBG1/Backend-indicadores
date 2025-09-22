@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Areas;
-use App\Models\ProgramaEducativo;
+use App\DynamicModels\Areas;
+use App\DynamicModels\ProgramaEducativo;
 use Illuminate\Database\Seeder;
 use MongoDB\Client as MongoClient;
 

@@ -62,11 +62,11 @@ class IndicadoresController extends Controller
             }
 
             // Verificamos si tiene el campo de configuración y calculamos el numerador
-            foreach ($indicadores as $indicador) {
+            /*foreach ($indicadores as $indicador) {
                 if (isset($indicador->configuracion)) {
                     $indicador->numerador = $this->calculateNumerador($indicador->configuracion);
                 }
-            }
+            }*/
 
             // Retornamos la respuesta con los indicadores
             return response()->json([

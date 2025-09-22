@@ -15,6 +15,8 @@ use DateTimeZone;
 use DateTimeImmutable;
 use Maatwebsite\Excel\Concerns\ToArray;
 
+use function Laravel\Prompts\form;
+
 class DocumentoController extends Controller
 {
     /**
@@ -36,7 +38,7 @@ class DocumentoController extends Controller
             // Mapear plantillas y verificar si tienen documentos
             $coleccionesConDocumentos = $plantillas->map(function ($plantilla) {
                 // Construir nombre de clase correctamente
-                $modelClass = "App\\Models\\{$plantilla->nombre_modelo}";
+                $modelClass = "App\\DynamicModels\\{$plantilla->nombre_modelo}";
 
                 // Validar que la clase exista
                 if (!class_exists($modelClass)) {
@@ -61,18 +63,11 @@ class DocumentoController extends Controller
 
                 return null; // explícito
             })
-            ->filter() // ← Elimina null, [], false, etc.
-            ->values(); // ← Reindexa el array (opcional, para JSON limpio)
-
-            // Loguear correctamente
-            Log::info('Colecciones con documentos', [
-                'count' => $coleccionesConDocumentos->count(),
-                'data' => $coleccionesConDocumentos->toArray()
-            ]);
+                ->filter() // ← Elimina null, [], false, etc.
+                ->values(); // ← Reindexa el array (opcional, para JSON limpio)
 
             // Retornamos el arreglo de colecciones con documentos
             return response()->json($coleccionesConDocumentos);
-
         } catch (\Exception $e) {
             Log::error("Error en templateNames: " . $e->getMessage());
             return response()->json(['error' => 'Error interno del servidor'], 500);
@@ -147,7 +142,7 @@ class DocumentoController extends Controller
 
             // Buscar los campos que tengan un valor en formato de fecha
             foreach ($documentData as $key => $value) {
-                foreach ($value['fields'] as $index => $data){
+                foreach ($value['fields'] as $index => $data) {
 
                     // Verificar que sea string y se pueda convertir a fecha
                     if (is_string($data) && strtotime($data)) {
@@ -155,20 +150,17 @@ class DocumentoController extends Controller
                         if ($timestamp !== false) {
                             $documentData[$key]['fields'][$index] =  new UTCDateTime($timestamp * 1000);
                         }
-                    }else if(is_array($data)){
+                    } else if (is_array($data)) {
                         // Llamamos la función recursiva
                         $documentData[$key]['fields'][$index] = $this->recusiveSubForm($data);
                     }
-
                 }
-
-
             }
 
             // Obtener el nombre del modelo de la plantilla
-            $modelName = $plantilla -> nombre_modelo;
+            $modelName = $plantilla->nombre_modelo;
             // creamos el documento
-            $modelClass = "App\\Models\\$modelName";
+            $modelClass = "App\\DynamicModels\\$modelName";
 
             //Validar que la clase exista
             if (!class_exists($modelClass)) {
@@ -184,7 +176,6 @@ class DocumentoController extends Controller
 
 
             return response()->json(['message' => 'Documento guardado con éxito'], 201);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al guardar documento: " . $e->getMessage());
@@ -202,15 +193,19 @@ class DocumentoController extends Controller
      */
     public function index($id)
     {
-        try{
+        try {
 
             // Verifica si la id de la plantilla es válida
             if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
                 throw new \Exception('ID de plantilla no válido: ' . $id);
             }
 
+            $plantilla = Plantillas::find($id);
+
+
+
             //Buscamos el nombre del modelo
-            $modelName = Plantillas::find($id)->nombre_modelo ?? null;
+            $modelName = $plantilla->nombre_modelo ?? null;
 
             // Validamos si se encontro el modelo
             if (!$modelName) {
@@ -218,7 +213,7 @@ class DocumentoController extends Controller
             }
 
             // creamos la clase del modelo
-            $modelClass = "App\\Models\\$modelName";
+            $modelClass = "App\\DynamicModels\\$modelName";
 
             //Validar que la clase exista
             if (!class_exists($modelClass)) {
@@ -228,23 +223,66 @@ class DocumentoController extends Controller
                 ], 400);
             }
 
-            // Obtener todos los registros del modelo relacionado
-            $documents = $modelClass::all()->toArray();
+            // Obtener todos los registros
+            $documents = $modelClass::all();
 
+            // Obtenemos todos los registros en formato JSON para poder modificar
+            $documentsArray = $documents->toArray();
 
-            // Convertir los documentos a un formato legible
+            // Obtenemos las secciones de la plantilla
+            $secciones = $plantilla->secciones;
+
+            // Creamos el arreglo de campos con dataSource
+            $fieldsWithDataSource = [];
+
+            // Recorremos las secciones
+            foreach ($secciones as $index => $seccion) {
+                // Llamamos la funcion recursiva
+                $this->extractFieldsWithDataSource($seccion['fields'], $fieldsWithDataSource);
+            };
+
+            // Recorremos los documentos
             foreach ($documents as $indexDocument => $document) {
 
+                //Recorrer las secciones del documento
+                foreach ($document['secciones'] as $indexSeccion => $seccion) {
+                    // Recorremos los campos de las secciones de manera recursiva
+                    foreach ($seccion['fields'] as $key => $field) {
 
-                /*Log::info('Documento ', [
-                            $indexDocument => $document ?? null,
-                        ]);*/
+                        if (is_array($field)) {
+
+                            // Llamamos la función recursiva
+                            $documentsArray[$indexDocument]['secciones'][$indexSeccion]['fields'][$key] = $this->recusiveSecciones($field, $document, $key, $fieldsWithDataSource);
+
+                            //Verificamos que sea una id
+                        } else if (preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+                            // nombre de la funcion
+                            $relacionName = $this->formatRelationName($key);
+
+                            // Ejecutamos la función de relacion
+                            $relacion = $document->$relacionName()->get()->first();
+
+                            $relacion = $relacion ? $relacion->toArray() : [];
+
+                            // Obtenemos el valor del campo
+                            $value = $this->getFieldValue($relacion, $fieldsWithDataSource[$key]['seccion'], $fieldsWithDataSource[$key]['campoMostrar']);
+
+                            // Guardamos el objeto
+                            $documentsArray[$indexDocument]['secciones'][$indexSeccion]['fields'][$key] = $value;
+
+                            continue;
+                        }
+                    }
+                }
             }
 
-            // Devolver los documentos en formato JSON
-            return response()->json($documents);
+            /*Log::info('Documentos obtenidos con éxito', [
+                'data' => $documentsArray
+            ]);*/
 
-        }catch(\Exception $e){
+            // Devolver los documentos en formato JSON
+            return response()->json($documentsArray);
+        } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al obtener los  documentos: " . $e->getMessage());
 
@@ -255,7 +293,7 @@ class DocumentoController extends Controller
 
     public function destroy($plantillaName, $documentId)
     {
-        try{
+        try {
 
             // Buscar plantilla por nombre
             $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
@@ -264,7 +302,7 @@ class DocumentoController extends Controller
             $nameModel = $plantilla->nombre_modelo;
 
             // Creamos la clase del modelo
-            $modelClass = "App\\Models\\$nameModel";
+            $modelClass = "App\\DynamicModels\\$nameModel";
 
             //Validar que la clase exista
             if (!class_exists($modelClass)) {
@@ -310,8 +348,7 @@ class DocumentoController extends Controller
             return response()->json([
                 'message' => 'Documento y archivos asociados eliminados con éxito',
             ]);
-
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al eliminar documento: " . $e->getMessage());
 
@@ -322,14 +359,12 @@ class DocumentoController extends Controller
 
     public function update(Request $request, $plantillaName, $documentId)
     {
-        try{
+        try {
 
             // Verifica si la id del documento es válida
             if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
                 throw new \Exception('ID de documento no válido');
             }
-
-            Log::info($plantillaName);
 
             // Buscar plantilla por nombre
             $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
@@ -338,7 +373,7 @@ class DocumentoController extends Controller
             $nameModel = $plantilla->nombre_modelo;
 
             // Creamos la clase del modelo
-            $modelClass = "App\\Models\\$nameModel";
+            $modelClass = "App\\DynamicModels\\$nameModel";
 
             //Validar que la clase exista
             if (!class_exists($modelClass)) {
@@ -399,13 +434,9 @@ class DocumentoController extends Controller
 
             $updateData = $updateData['secciones'];
 
-            Log::info("docuemento",[
-                ' ' => $updateData
-            ]);
-
             // Buscar los campos que tengan un valor en formato de fecha
             foreach ($updateData as $index => $seccion) {
-                foreach ($seccion['fields'] as $key => $field){
+                foreach ($seccion['fields'] as $key => $field) {
 
                     // Verificar que sea string y se pueda convertir a fecha
                     if (is_string($field) && strtotime($field)) {
@@ -413,14 +444,11 @@ class DocumentoController extends Controller
                         if ($timestamp !== false) {
                             $updateData[$index]['fields'][$key] =  new UTCDateTime($timestamp * 1000);
                         }
-                    }else if(is_array($field)){
+                    } else if (is_array($field)) {
                         // Llamamos la función recursiva
                         $updateData[$index]['fields'][$key] = $this->recusiveSubForm($field);
                     }
-
                 }
-
-
             }
 
             // Actualizar el documento en la colección de MongoDB
@@ -430,7 +458,6 @@ class DocumentoController extends Controller
             ]);
 
             return response()->json(['message' => 'Documento actualizado con éxito']);
-
         } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error en la actualización del documento: " . $e->getMessage());
@@ -444,14 +471,12 @@ class DocumentoController extends Controller
 
     public function show($plantillaName, $documentId)
     {
-        try{
+        try {
 
             // Verifica si la id del documento es válida
             if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
                 throw new \Exception('ID de documento no válido');
             }
-
-            Log::info($plantillaName);
 
             // Buscar plantilla por nombre
             $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
@@ -460,7 +485,7 @@ class DocumentoController extends Controller
             $nameModel = $plantilla->nombre_modelo;
 
             // Creamos la clase del modelo
-            $modelClass = "App\\Models\\$nameModel";
+            $modelClass = "App\\DynamicModels\\$nameModel";
 
             //Validar que la clase exista
             if (!class_exists($modelClass)) {
@@ -475,8 +500,7 @@ class DocumentoController extends Controller
 
             // Retornamos el documento
             return response()->json($document);
-
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             // Registrar el error en el log
             Log::error("Error al obtener el documento: " . $e->getMessage());
 
@@ -490,7 +514,8 @@ class DocumentoController extends Controller
      * @param array $data
      * @return array
      */
-    public function recusiveSubForm(array $data){
+    public function recusiveSubForm(array $data)
+    {
         // Recorremos el arraglo
         foreach ($data as $index => $value) {
             foreach ($value as $key => $field) {
@@ -501,7 +526,7 @@ class DocumentoController extends Controller
                     if ($timestamp !== false) {
                         $data[$index][$key] =  new UTCDateTime($timestamp * 1000);
                     }
-                }else if (is_array($field)) {
+                } else if (is_array($field)) {
                     // Llamamos la función recursiva
                     $data[$index][$key] = $this->recusiveSubForm($field);
                 }
@@ -510,5 +535,103 @@ class DocumentoController extends Controller
 
         // Retornamos $data
         return $data;
+    }
+
+    /**
+     * Función para recorrer de manera recursiva los campos de cada sección para obtener las relaciones
+     * @param array $data
+     * @return array
+     */
+    public function recusiveSecciones(array $data, $document, $nombre, $fieldsWithDataSource)
+    {
+        // Verificamos que sea un arrar y que no este vacio
+        if (!is_array($data) && empty($data)) {
+            return $data;
+        }
+
+        // Recorremos los campos
+        foreach ($data as $index => $value) {
+            foreach ($value as $key => $field) {
+                // Validamos si es un array y que no este vacio
+                if (is_array($field) && !empty($field)) {
+
+                    // Llamamos la función recursiva
+                    $data[$index][$key] = $this->recusiveSecciones($field, $document, $nombre . '_' . $key, $fieldsWithDataSource);
+
+                    //Verificamos que sea una id
+                } else if (preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+
+                    // nombre de la funcion
+                    $relacionName = $this->formatRelationName($nombre . '_' . $key);
+
+                    // Ejecutamos la función de relacion
+                    $relacion = $document->$relacionName()->where('_id', $field)->first();
+
+                    $array = $relacion ? $relacion->toArray() : [];
+
+
+                    // Obtenemos el valor del campo
+                    $value = $this->getFieldValue($relacion, $fieldsWithDataSource[$key]['seccion'], $fieldsWithDataSource[$key]['campoMostrar']);
+
+                    // Guardamos el objeto
+                    $data[$index][$key] = $value;
+
+                    continue;
+                }
+            }
+        }
+
+        // Retornamos $data
+        return $data;
+    }
+
+    /**
+     * Recorre recursivamente la plantilla y extrae todos los campos que tengan 'dataSource'
+     * @param array $plantilla Estructura completa de la plantilla
+     * @return array Lista de campos con dataSource, con info de ubicación
+     */
+    public function extractFieldsWithDataSource($fields, &$fieldsWithDataSource)
+    {
+        foreach ($fields as $indexField => $field) {
+            //Verificamos que tenga dataSource
+            if (isset($field['dataSource'])) {
+                $fieldsWithDataSource[$field['name']] = $field['dataSource'];
+            } else if ($field['type'] == 'subform') {
+                // Llamamos la funcion recursiva
+                $fieldsWithDataSource[$field['name']] = $this->extractFieldsWithDataSource($field['subcampos'], $fieldsWithDataSource);
+            }
+        }
+    }
+
+    /**
+     * Función para obtener el valor de un campo en un documento
+     * @param array $document Arreglo del documento
+     * @param string $nombreSeccion Nombre de la sección
+     * @param string $nombreCampo Nombre del campo
+     * @return string Valor del campo o null si no se encuentra
+     */
+    function getFieldValue($document, $nombreSeccion, $nombreCampo)
+    {
+        foreach ($document['secciones'] as $seccion) {
+            if ($seccion['nombre'] === $nombreSeccion) {
+                if (isset($seccion['fields'][$nombreCampo])) {
+                    return $seccion['fields'][$nombreCampo];
+                }
+            }
+        }
+        return null; // si no se encuentra
+    }
+    /**
+     * Función para formatear el nombre de la relación
+     * @param string $name Nombre del campo
+     * @return string Nombre formateado
+     */
+    function formatRelationName($name)
+    {
+        // Quita espacios, acentos y caracteres especiales, y convierte a snake_case
+        $name = preg_replace('/[áéíóúÁÉÍÓÚñÑ]/u', '', $name); // Opcional: quitar acentos
+        $name = str_replace([' ', '-'], '_', $name); // Reemplaza espacios y guiones por _
+        $name = preg_replace('/[^A-Za-z0-9_]/', '', $name); // Quita cualquier otro caracter especial
+        return strtolower($name);
     }
 }

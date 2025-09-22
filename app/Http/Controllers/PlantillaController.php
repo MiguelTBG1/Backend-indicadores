@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Exception;
-
+use App\Services\DynamicModelService;
 use function PHPUnit\Framework\isArray;
 
 class PlantillaController extends Controller
@@ -51,13 +51,6 @@ class PlantillaController extends Controller
     public function store(Request $request)
     {
         try {
-            // Tipos de campos permitidos
-            $tiposCamposPermitidos = ['string', 'number', 'file', 'date', 'subform', 'boolean', 'select', 'checkbox'];
-
-            // Tipos de campos que se permiten en subform
-            $tiposCamposPermitidosSubform = array_diff($tiposCamposPermitidos, ['subform']);
-
-
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
@@ -105,38 +98,17 @@ class PlantillaController extends Controller
                 throw new \Exception('Error al crear la plantilla', 500);
             }
 
-            // Recorremos secciones para buscar las relaciones
+            // Creamos el arreglo de relaciones
             $relations = [];
 
-            foreach ($secciones as $index => $seccion) {
-                foreach ($seccion['fields'] as $indexfield => $field) {
-                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
-                        // Guardamos dataSource
-                        $optionsSource = $field['dataSource'];
+            // Recorremos secciones para buscar las relaciones
+            DynamicModelService::getRelations($secciones, $relations);
 
-                        //Buscamos el nombre del modelo
-                        $relatedModel = Plantillas::find($optionsSource['plantillaId'])->nombre_modelo ?? null;
+            // Nombre del modelo
+            $modelName = $plantilla->nombre_modelo;
 
-                        // Validamos si se encontro el modelo
-                        if (!$relatedModel) {
-                            throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
-                        }
-
-                        $functionNAme = $this->formatRelationName($field['name']);
-
-                        // Agregamos la relación al array de relaciones
-                        $relations[$functionNAme] = [
-                            'type' => 'belongsTo',
-                            'model' => $relatedModel,
-                            'foreign' => $field['name'] . '_id'
-                        ];
-                    }
-                }
-            }
-
-            // Generamos el modelo dinámico
-            $generator = new \App\Services\DynamicModelGenerator();
-            $generator->generate($modelName, $relations);
+            // Actualizamos el modelo dinámico
+            DynamicModelService::generate($modelName, $relations);
 
             // Registramos la coleccion del documento a crear
             /*Recurso::create([
@@ -280,37 +252,13 @@ class PlantillaController extends Controller
             // Recorremos secciones para buscar las relaciones
             $relations = [];
 
-            foreach ($secciones as $index => $seccion) {
-                foreach ($seccion['fields'] as $indexfield => $field) {
-                    if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
-                        // Guardamos dataSource
-                        $optionsSource = $field['dataSource'];
-
-                        //Buscamos el nombre del modelo
-                        $relatedModel = Plantillas::find($optionsSource['plantillaId'])->nombre_modelo ?? null;
-
-                        // Validamos si se encontro el modelo
-                        if (!$relatedModel) {
-                            throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
-                        }
-
-                        $functionNAme = $this->formatRelationName($field['name']);
-                        // Agregamos la relación al array de relaciones
-                        $relations[$functionNAme] = [
-                            'type' => 'belongsTo',
-                            'model' => $relatedModel,
-                            'foreign' => $field['name'] . '_id'
-                        ];
-                    }
-                }
-            }
+            DynamicModelService::getRelations($secciones, $relations);
 
             // Nombre del modelo
             $modelName = $plantilla->nombre_modelo;
 
             // Actualizamos el modelo dinámico
-            $generator = new \App\Services\DynamicModelGenerator();
-            $generator->generate($modelName, $relations);
+            DynamicModelService::generate($modelName, $relations);
 
             // Retornar la respuesta JSON
             return response()->json([
@@ -354,7 +302,7 @@ class PlantillaController extends Controller
             // Obtener el nombre del modelo de la plantilla
             $modelName = $plantilla->nombre_modelo;
             // creamos el documento
-            $modelClass = "App\\Models\\$modelName";
+            $modelClass = "App\\DynamicModels\\$modelName";
 
             //Validar que la clase exista
             if (!class_exists($modelClass)) {
@@ -380,8 +328,7 @@ class PlantillaController extends Controller
             //$modelClass::getCollection()->drop();
 
             // Eliminar el modelo dinamico
-            $remover = new \App\Services\DynamicModelRemover();
-            $remover::remove($modelName);
+            DynamicModelService::remove($modelName);
 
             return response()->json([
                 'message' => 'Plantilla eliminada exitosamente'
@@ -420,7 +367,7 @@ class PlantillaController extends Controller
                 }
 
                 // creamos el documento
-                $modelClass = "App\\Models\\$modelName";
+                $modelClass = "App\\DynamicModels\\$modelName";
 
                 //Validar que la clase exista
                 if (!class_exists($modelClass)) {
@@ -459,14 +406,5 @@ class PlantillaController extends Controller
         }
 
         return $fields;
-    }
-
-    function formatRelationName($name)
-    {
-        // Quita espacios, acentos y caracteres especiales, y convierte a snake_case
-        $name = preg_replace('/[áéíóúÁÉÍÓÚñÑ]/u', '', $name); // Opcional: quitar acentos
-        $name = str_replace([' ', '-'], '_', $name); // Reemplaza espacios y guiones por _
-        $name = preg_replace('/[^A-Za-z0-9_]/', '', $name); // Quita cualquier otro caracter especial
-        return strtolower($name);
     }
 }

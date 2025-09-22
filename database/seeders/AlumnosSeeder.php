@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Alumnos;
+use App\DynamicModels\Alumnos;
 use Illuminate\Database\Seeder;
 
 class AlumnosSeeder extends Seeder
