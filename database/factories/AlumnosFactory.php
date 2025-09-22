@@ -26,6 +26,10 @@ class AlumnosFactory extends Factory
         Log::debug($periodos);
         Log::debug($asesores);
 
+        // Arreglos para guardar los IDs usados
+        $periodosUsados = [];
+        $asesoresUsados = [];
+        
         return [
             'secciones' => [
                 // Información General (siempre presente)
@@ -44,12 +48,25 @@ class AlumnosFactory extends Factory
                     'nombre' => 'Movilidad',
                     'fields' => [
                         'Participa en movilidad' => collect(range(1, $this->faker->numberBetween(0, 3))) // entre 0 y 3 movilidades
-                            ->map(function () use($periodos, $asesores) {
+                            ->map(function () use($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
                                 return [
-                                    'Período de la movilidad' => !empty($periodos) ? $this->faker->randomElement($periodos) : null,
+                                    // Guardar el ID de período en un arreglo externo
+                                    'Período de la movilidad' => !empty($periodos) ? (
+                                        function() use (&$periodosUsados, $periodos) {
+                                            $periodo = $this->faker->randomElement($periodos);
+                                            $periodosUsados[] = $periodo;
+                                            return $periodo;
+                                        }
+                                    )() : null,
                                     'Lugar al que asistió' => $this->faker->city(),
                                     'Proyecto que realizó' => $this->faker->word(),
-                                    'Asesor' => !empty($asesores) ? $this->faker->randomElement($asesores) : null,
+                                    'Asesor' => !empty($asesores) ? (
+                                        function() use (&$asesoresUsados, $asesores) {
+                                            $asesor = $this->faker->randomElement($asesores);
+                                            $asesoresUsados[] = $asesor;
+                                            return $asesor;
+                                        }
+                                    )() : null,
                                     'Obtuvo algún premio o reconocimiento' =>
                                     collect(range(1, $this->faker->numberBetween(0, 2))) // 0-2 premios
                                         ->map(function () {
@@ -68,11 +85,17 @@ class AlumnosFactory extends Factory
                     'nombre' => 'Eventos',
                     'fields' => [
                         'Participa en evento' => collect(range(1, $this->faker->numberBetween(0, 4))) // hasta 4 eventos
-                            ->map(function () use($periodos, $asesores) {
+                            ->map(function () use($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
                                 return [
                                     'Tipo de evento' => $this->faker->randomElement(['Foro', 'Congreso', 'Concurso']),
                                     'Nombre del evento' => $this->faker->sentence(2),
-                                    'Período' => !empty($periodos) ? $this->faker->randomElement($periodos) : null,
+                                    'Período' => !empty($periodos) ? (
+                                        function() use (&$periodosUsados, $periodos) {
+                                            $periodo = $this -> faker->randomElement($periodos);
+                                            $periodosUsados[] = $periodo;
+                                            return $periodo;
+                                        }
+                                    )() : null,
                                     'Institución' => $this->faker->randomElement(['ITChetumal', 'UQROO', 'Modelo', 'Bizcaya']),
                                     'Lugar' => $this->faker->streetName(),
                                     'Obtuvo algún premio o reconocimiento' =>
@@ -93,11 +116,23 @@ class AlumnosFactory extends Factory
                     'nombre' => 'Proyecto de investigación',
                     'fields' => [
                         'Participa en Proyecto de investigacion' => collect(range(1, $this->faker->numberBetween(0, 2))) // 0-2 proyectos
-                            ->map(function () use($periodos, $asesores) {
+                            ->map(function () use($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
                                 return [
                                     'Nombre del Proyecto' => $this->faker->word(),
-                                    'Asesor' => !empty($asesores) ? $this->faker->randomElement($asesores) : null,
-                                    'Período' => !empty($periodos) ? $this->faker->randomElement($periodos) : null,
+                                    'Asesor' =>!empty($asesores) ? (
+                                        function() use (&$asesoresUsados, $asesores) {
+                                            $asesor = $this->faker->randomElement($asesores);
+                                            $asesoresUsados[] = $asesor;
+                                            return $asesor;
+                                        }
+                                    )() : null,
+                                    'Período' => !empty($periodos) ? (
+                                        function() use (&$periodosUsados, $periodos) {
+                                            $periodo = $this -> faker->randomElement($periodos);
+                                            $periodosUsados[] = $periodo;
+                                            return $periodo;
+                                        }
+                                    )() : null,
                                     'Productos obtenidos' =>
                                     collect(range(1, $this->faker->numberBetween(0, 3)))
                                         ->map(function () {
@@ -112,6 +147,8 @@ class AlumnosFactory extends Factory
                     ],
                 ],
             ],
+            'periodos_ids' => array_values(array_unique($periodosUsados)),
+            'profesores_ids' => array_values(array_unique($asesoresUsados)),
         ];
     }
 }
