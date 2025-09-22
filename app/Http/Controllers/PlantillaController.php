@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Plantillas;
+use App\Models\Recurso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -17,14 +18,21 @@ class PlantillaController extends Controller
      * @return \Illuminate\Http\JsonResponse
      *
      */
-    public function index(Request $request)
+    public function index(Request $requestRequest $request)
     {
         try {
             $user = $request->user();
 
             Log::debug($user);
 
+            $user = $request->user();
+
+            Log::debug($user);
+
             // Obtener todas las plantillas
+            $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
+            return $user->can('view', $plantilla);
+        });
             $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
             return $user->can('view', $plantilla);
         });
