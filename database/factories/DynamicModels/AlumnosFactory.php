@@ -1,16 +1,14 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\DynamicModels;
 
-use App\Models\Alumnos;
-use App\Models\ProgramaEducativo;
-use App\Models\Periodos;
-use App\Models\Profesores;
+use App\DynamicModels\Alumnos;
+use App\DynamicModels\ProgramaEducativo;
+use App\DynamicModels\Periodos;
+use App\DynamicModels\Profesores;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Laravel\Pail\ValueObjects\Origin\Console;
 
 class AlumnosFactory extends Factory
 {

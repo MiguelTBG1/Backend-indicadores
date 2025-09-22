@@ -12,21 +12,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
         // Llamamos a los seeders
         $this->call([
+            PlantillasCollectionSeeder::class,
             RecursosSeeder::class,
             AccionesSeeder::class,
-            AreasSeeder::class,
             RolesSeeder::class,
             UserCollectionSeeder::class,
             EjesCollectionSeeder::class,
             IndicadoresCollectionSeeder::class,
-            PlantillasCollectionSeeder::class,
+            AreasSeeder::class,
             PeriodosSeeder::class,
             ProfesoresSeeder::class,
             ProgramaEducativoSeeder::class,
-            DocumentosSeeder::class,
+            //DocumentosSeeder::class,
             AlumnosSeeder::class,
         ]);
     }
