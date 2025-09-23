@@ -158,7 +158,6 @@ class User extends Authenticatable
     function buildFinalAbilities(array $allow, array $deny): array
     {
         $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
-        Log::debug($allRecursos);
         $allAcciones = Accion::pluck('nombre')->toArray();
 
         $resolved = [];

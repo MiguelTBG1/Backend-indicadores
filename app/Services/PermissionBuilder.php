@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Log;
 
 class PermissionBuilder
 {
+    /** Genera los habilidades del token para el usuario
+     * 
+     * Estas habilidades siguen el siguiente formato:
+     * <tipo_recurso>:<identificador>.<accion>
+     */
     public function buildForUser(User $user): array
     {
         // Arreglo para almacenar todos los permisos
@@ -64,7 +69,6 @@ class PermissionBuilder
         $deniedStr = array_unique(array_merge(...$deniedStr));
         $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
 
-        Log::debug("Permisos finales para el usuario {$user->id}: " . implode(', ', $permisos));
         // Aplanar el array si es necesario
         return array_unique(array_merge($permisos));
     }
@@ -75,24 +79,21 @@ class PermissionBuilder
 
         // Primero intentamos encontrar en recursos estáticos
         $recursoObj = Recurso::find($permiso['recurso']);
-        Log::debug("Buscando recurso con ID: {$permiso['recurso']}");
 
         if ($recursoObj) {
             // Caso recurso estático
             $recurso = $recursoObj->nombre;
-            Log::debug("Recurso estático detectado: {$recurso}");
         } else {
             // Caso recurso dinámico → asumimos que es una plantilla
             $plantillaId = $permiso['recurso'];
             $recurso = "plantilla:{$plantillaId}";
-            Log::debug("Recurso dinámico detectado: {$recurso}");
         }
 
         // Recorremos las acciones
         foreach ($permiso['acciones'] ?? [] as $accionId) {
             $accion = optional(Accion::find($accionId))->nombre ?? 'accion_desconocida';
             // Formateamos a la estructura recurso_accion
-            $permisos[] = strtolower("{$recurso}_{$accion}");
+            $permisos[] = strtolower("{$recurso}.{$accion}");
         }
 
         return $permisos;
@@ -101,18 +102,17 @@ class PermissionBuilder
     private function buildFinalAbilities(array $allow, array $deny): array
     {
         $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
-        Log::debug($allRecursos);
-        $allAcciones = Accion::pluck('nombre')->toArray();
+        $allAcciones = Accion::where('nombre', '!=', '*')->pluck('nombre')->toArray();
 
         $resolved = [];
 
         foreach ($allow as $perm) {
-            [$recurso, $accion] = explode('_', $perm);
+            [$recurso, $accion] = explode('.', $perm);
             // Caso 1: comodín total
             if ($recurso === '*' && $accion === '*') {
                 foreach ($allRecursos as $r) {
                     foreach ($allAcciones as $a) {
-                        $resolved[] = "{$r}_{$a}";
+                        $resolved[] = "{$r}.{$a}";
                     }
                 }
                 continue;
@@ -121,7 +121,7 @@ class PermissionBuilder
             // Caso 2: comodín de acción
             if ($recurso === '*') {
                 foreach ($allRecursos as $r) {
-                    $resolved[] = "{$r}_{$accion}";
+                    $resolved[] = "{$r}.{$accion}";
                 }
                 continue;
             }
@@ -129,7 +129,7 @@ class PermissionBuilder
             // Caso 3: comodín de recurso
             if ($accion === '*') {
                 foreach ($allAcciones as $a) {
-                    $resolved[] = "{$recurso}_{$a}";
+                    $resolved[] = "{$recurso}.{$a}";
                 }
                 continue;
             }

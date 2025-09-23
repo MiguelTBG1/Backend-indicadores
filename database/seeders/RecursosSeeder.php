@@ -16,33 +16,32 @@ class RecursosSeeder extends Seeder
             [
                 'clave' => '*',
                 'nombre' => '*',
-                'descripcion' => 'Permisos en todas las tablas',
+                'descripcion' => 'Todos los recursos estaticos',
                 'tipo' => 'estatico',
             ],
             [
                 'clave' => 'usuarios',
                 'nombre' => 'Usuarios',
                 'tipo' => 'estatico',
-                'descripcion' => 'Gestión de usuarios del sistema',
+                'descripcion' => 'Rutas de usuarios del sistema',
             ],
             [
-                'claves' => 'indicadores',
+                'clave' => 'indicadores',
                 'nombre' => 'Indicadores',
-                'descripcion' => 'Colección de indicadores del sistema',
+                'descripcion' => 'Rutas de indicadores del sistema',
                 'tipo' => 'estatico',
             ],
             [
-                'clave' => 'Plantillas',
+                'clave' => 'plantillas',
                 'nombre' => 'Plantillas',
-                'descripcion' => 'Todas las plantillas para la creación de documentos',
+                'descripcion' => 'Rutas de plantillas del sistema',
                 'tipo' => 'estatico',
             ],
             [
-                'clave' => 'Documentos',
+                'clave' => 'documentos',
                 'nombre' => 'Documentos',
-                'descripcion' => 'Todos los documentos del sistema',
+                'descripcion' => 'Rutas de documentos del sistema',
                 'tipo' => 'patron',
-                'patron_regex' => '^documentos_.*$',
             ],
         ];
 

@@ -2,10 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\Plantillas;
 use App\Models\Rol;
 use App\Models\User;
+use App\Models\Accion;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+
+use Illuminate\Support\Facades\Log;
 
 class UserCollectionSeeder extends Seeder
 {
@@ -23,7 +27,12 @@ class UserCollectionSeeder extends Seeder
         $analistaIndicador = Rol::where('nombre', 'Analista de indicadores')->first();
         $creadorDocumentos = Rol::where('nombre', 'Creador de documentos')->first();
 
-        // Super Usuario
+
+        // Plantillas
+        $plantillaPeriodos = "68b0938423ed6ec87508548c";
+        $plantillaProgramaEducativo = "68b1df5f34dafa1c910aa02c";
+
+        $todosAcciones = Accion::where('nombre', '*')->first();
         User::create(
             [
                 'nombre' => 'Rodrigo Alexander',
@@ -119,6 +128,36 @@ class UserCollectionSeeder extends Seeder
             'ocupacion' => 'Documentalista',
             'escolaridad' => 'Licenciatura',
             'roles' => [$creadorDocumentos->_id],
+        ]);
+
+        // Usuario de prueba para permisos
+        User::create([
+            'nombre' => 'Prueba',
+            'apellido_paterno' => 'Ramírez',
+            'apellido_materno' => 'Torres',
+            'email' => 'prueba@test.com',
+            'password' => Hash::make('123456'),
+            'edad' => 29,
+            'genero' => 'Masculino',
+            'estado' => 'Activo',
+            'ocupacion' => 'Documentalista',
+            'escolaridad' => 'Licenciatura',
+            'permisos' => [
+                'allowed' => [
+                    [
+                        'recurso' => $plantillaPeriodos,
+                        'acciones' => [
+                            $todosAcciones->_id
+                        ]
+                    ],
+                    [
+                        'recurso' => $plantillaProgramaEducativo,
+                        'acciones' => [
+                            $todosAcciones->_id
+                        ]
+                    ]
+                ]
+            ],
         ]);
     }
 }
