@@ -44,6 +44,10 @@ class PlantillaPolicy
      */
     public function create(User $user): bool
     {
+
+        if($user->currentAccessToken()?->can('Plantillas_crear')) {
+            return true;
+        }
         return false;
     }
 
@@ -52,6 +56,14 @@ class PlantillaPolicy
      */
     public function update(User $user, Plantillas $plantillas): bool
     {
+        if($plantillas->creado_por === $user->id) {
+            return true;
+        }
+
+        if($user->currentAccessToken()?->can("plantilla:{$plantillas->_id}_editar")) {
+            return true;
+        }
+
         return false;
     }
 

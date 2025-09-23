@@ -27,8 +27,8 @@ class PlantillaController extends Controller
 
             // Obtener todas las plantillas
             $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
-            return $user->can('view', $plantilla);
-        });
+                return $user->can('view', $plantilla);
+            });
 
             // Verificar si hay plantillas
             if ($plantillas->isEmpty()) {
@@ -58,7 +58,7 @@ class PlantillaController extends Controller
     public function store(Request $request)
     {
         try {
-            
+
             $user = $request->user();
 
             // Validar la solicitud
@@ -96,6 +96,12 @@ class PlantillaController extends Controller
             $secciones = $request->input('secciones');
 
             // Agregar la plantilla a la colección de Plantillas
+            // Verificar permisos antes de crear la plantilla
+            if (!$user->can('create', Plantillas::class)) {
+                Log::debug('El usuario {' . $user->nombre . '} no tiene permisos para crear plantillas');
+                throw new \Exception('No tienes permisos para crear plantillas', 403);
+            }
+
             $plantilla = Plantillas::create([
                 'nombre_plantilla' => $plantillaName,
                 'nombre_modelo' => $modelName,
@@ -103,7 +109,7 @@ class PlantillaController extends Controller
                 'secciones' => $secciones,
                 'creado_por' => $user->_id
             ]);
-            
+
 
             Log::debug($plantilla->_id);
 
@@ -211,6 +217,9 @@ class PlantillaController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            // Recuperamos el usuario actual
+            $user = $request->user();
+
             // Validar el ID
             if (!preg_match('/^[a-f\d]{24}$/i', $id)) {
                 throw new \Exception('El ID proporcionado no tiene un formato válido', 422);
@@ -244,6 +253,11 @@ class PlantillaController extends Controller
                 throw new \Exception(json_encode($validator->errors()), 422);
             }
 
+            // Validamos si el usuario puede actualizar la plantilla
+            if (!$user->can('update', Plantillas::class)) {
+                Log::debug('El usuario ' . $user->nombre . ' no puede actualizar la plantilla');
+                throw new \Exception('El usuario no puede actualizar la plantilla ');
+            }
             $secciones = $request->input('secciones');
 
             $plantilla->update([
