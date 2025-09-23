@@ -254,10 +254,11 @@ class PlantillaController extends Controller
             }
 
             // Validamos si el usuario puede actualizar la plantilla
-            if (!$user->can('update', Plantillas::class)) {
+            if (!$user->can('update', $plantilla)) {
                 Log::debug('El usuario ' . $user->nombre . ' no puede actualizar la plantilla');
                 throw new \Exception('El usuario no puede actualizar la plantilla ');
             }
+
             $secciones = $request->input('secciones');
 
             $plantilla->update([
@@ -302,9 +303,12 @@ class PlantillaController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
+
+            // Recuperamos el usuario actual
+            $user = $request->user();
 
             // Validar el ID
             if (!preg_match('/^[a-f\d]{24}$/i', $id)) {
@@ -339,6 +343,9 @@ class PlantillaController extends Controller
                 throw new \Exception('No se puede eliminar la plantilla porque tiene datos asociados', 409);
             }
 
+            if(!$user->can('delete', $plantilla)) {
+                throw new \Exception('El usuario no puede eliminar la plantilla ');
+            }
             // Eliminar la plantilla de la colección de Plantillas
             if (!$plantilla->delete()) {
                 throw new \Exception('Error al eliminar la plantilla', 500);
