@@ -589,13 +589,21 @@ class PlantillasCollectionSeeder extends Seeder
                 // Recorremos secciones para buscar las relaciones
                 DynamicModelService::getRelations($secciones, $relations);
 
-                // Logeamos las relaciones encontradas
+                // Nombre del modelo
+                $modelName = $plantilla->nombre_modelo;
+                Log::debug("Generando modelo dinámico para la plantilla: {$plantilla->nombre_plantilla} con el nombre de modelo: $modelName");
+                                // Logeamos las relaciones encontradas
                 Log::info('Relaciones encontradas', [
                     'relaciones' => $relations
                 ]);
-
-                // Nombre del modelo
-                $modelName = $plantilla->nombre_modelo;
+                                // Verificar si el archivo del modelo fue creado
+                $modelPath = app_path('Models/' . $modelName . '.php');
+                Log::debug("Verificando la existencia del archivo del modelo en: $modelPath");
+                if (file_exists($modelPath)) {
+                    echo "El modelo $modelName fue generado correctamente.\n";
+                } else {
+                    echo "Error: El modelo $modelName no fue encontrado.\n";
+                }
 
                 // Actualizamos el modelo dinámico
                 DynamicModelService::generate($modelName, $relations);
