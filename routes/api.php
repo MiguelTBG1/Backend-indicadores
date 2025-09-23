@@ -31,38 +31,38 @@ Route::middleware(['auth.sanctum'])->group(function () {
     Route::controller(IndicadoresController::class)
         ->prefix('indicadores')
         ->group(function () {
-            Route::get('/', 'index')->middleware(['abilities:indicadores_leer']);
-            Route::get('{id}', 'show')->middleware(['abilities:indicadores_leer']);
-            Route::post('/', 'store')->middleware(['abilities:indicadores_crear']);
-            Route::put('{id}', 'update')->middleware(['abilities:indicadores_actualizar']);
-            Route::delete('{id}', 'destroy')->middleware(['abilities:indicadores_eliminar']);
+            Route::get('/', 'index')->middleware(['abilities:indicadores.leer']);
+            Route::get('{id}', 'show')->middleware(['abilities:indicadores.leer']);
+            Route::post('/', 'store')->middleware(['abilities:indicadores.crear']);
+            Route::put('{id}', 'update')->middleware(['abilities:indicadores.actualizar']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:indicadores.eliminar']);
             Route::put('{id}/configuracion', 'updateConfig');
             Route::get('{id}/configuracion', 'getConfig');
             Route::post('filterByDates',  'filterByDateRange');
-            Route::post('upload', 'upload')->middleware(['abilities:indicadores_crear']);
+            Route::post('upload', 'upload')->middleware(['abilities:indicadores.crear']);
         });
 
     /* PLANTILLAS */
     Route::controller(PlantillaController::class)
         ->prefix('plantillas')
         ->group(function () {
-            Route::get('/', 'index')->middleware(['abilities:plantillas_leer']);
-            Route::get('{id}', 'show')->middleware(['abilities:plantillas_leer']);
-            Route::post('/',  'store')->middleware(['abilities:plantillas_crear']);
-            Route::put('{id}',  'update')->middleware(['abilities:plantillas_actualizar']);
-            Route::delete('{id}',  'destroy')->middleware(['abilities:plantillas_borrar']);
-            Route::get('{id}/secciones',  'getSecciones')->middleware((['abilities:plantillas_leer']));
+            Route::get('/', 'index')->middleware(['abilities:plantillas.leer']);
+            Route::get('{id}', 'show')->middleware(['abilities:plantillas.leer']);
+            Route::post('/',  'store')->middleware(['abilities:plantillas.crear']);
+            Route::put('{id}',  'update')->middleware(['abilities:plantillas.actualizar']);
+            Route::delete('{id}',  'destroy')->middleware(['abilities:plantillas.borrar']);
+            Route::get('{id}/secciones',  'getSecciones')->middleware((['abilities:plantillas.leer']));
         });
 
     /* DOCUMENTOS */
     Route::controller(DocumentoController::class)
         ->prefix('documentos')
         ->group(function () {
-            Route::get('{id}', 'index')->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos_leer']);
-            Route::get('{plantillaName}/{documentId}', 'show')->middleware(['abilities:documentos_leer']);
-            Route::post('{id}', 'store')->middleware(['abilities:documentos_crear']);
-            Route::post('{plantillaName}/{documentId}', 'update')->middleware(['abilities:documentos_actualizar']);
-            Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos_borrar']);
+            Route::get('{id}', 'index')->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos.leer']);
+            Route::get('{plantillaName}/{documentId}', 'show')->middleware(['abilities:documentos.leer']);
+            Route::post('{id}', 'store')->middleware(['abilities:documentos.crear']);
+            Route::post('{plantillaName}/{documentId}', 'update')->middleware(['abilities:documentos.actualizar']);
+            Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos.borrar']);
             Route::get('plantillas', 'templateNames');
         });
 

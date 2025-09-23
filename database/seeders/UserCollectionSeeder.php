@@ -158,6 +158,7 @@ class UserCollectionSeeder extends Seeder
                     ]
                 ]
             ],
+            'roles' => [$super_usuario->_id]
         ]);
     }
 }
