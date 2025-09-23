@@ -5,6 +5,8 @@ namespace App\Services;
 use function PHPUnit\Framework\isArray;
 use App\Models\Plantillas;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
+use PhpParser\Node\Expr\Cast\Bool_;
 
 class DynamicModelService
 {
@@ -31,21 +33,21 @@ class DynamicModelService
         $content .= implode("\n", $imports) . "\n\n";
 
         $content .= "class {$name} extends Model\n{\n";
-        $content .= "    use hasFactory;\n";
+        $content .= "    use HasFactory;\n";
         $content .= "    protected \$connection = 'mongodb';\n\n";
         $content .= "    protected \$collection = '{$name}_data';\n\n";
         $content .= "    protected \$primaryKey = '_id';\n\n";
-        $content .= "    protected \$fillable = [\n        'secciones',\n    ];\n\n";
+        $content .= "    protected \$fillable = [\n        'secciones',\n";
+        foreach ($relations as $relation) {
+            $name = strtolower($relation['modelo']);
+            $content .= "        '{$name}_ids',\n";
+        }
+        $content .= "    ];\n\n";
 
         foreach ($relations as $relation) {
-            $content .= "    public function {$relation['funcionName']}()\n    {\n";
-            $content .= "        \$ids = DynamicModelService::extractIdsByPath(\$this->secciones ?? [], '{$relation['seccion']}', ";
-            foreach ($relation['subForms'] as $name){
-                $content .= "'{$name}', ";
-            }
-            $content .= "'{$relation['campo']}');\n";
-
-            $content .= "        return {$relation['modelo']}::whereIn('_id', \$ids);\n";
+            $content .= "    public function {$relation['modelo']}()\n    {\n";
+            $name = strtolower($relation['modelo']);
+            $content .= "        return {$relation['modelo']}::{$relation['type']}('_id', \$this->{$name}_ids);\n";
             $content .= "    }\n\n";
         }
 
@@ -78,17 +80,15 @@ class DynamicModelService
     public static function getRelations($secciones, array &$relations)
     {
         foreach ($secciones as $index => $seccion) {
-            self::getRelationsRecursive($seccion['nombre'],$seccion['fields'], $relations);
+            self::getRelationsRecursive($seccion['fields'], $relations);
         }
     }
 
-    private static function getRelationsRecursive(string $nombre, array $fields, array &$relations, array $subForms = [])
+    private static function getRelationsRecursive(array $fields, array &$relations, Bool $subForm = false)
     {
         foreach ($fields as $index => $field) {
             if ($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])) {
-                $subForms[] = $field['name'];
-                self::getRelationsRecursive($nombre, $field['subcampos'], $relations, $subForms);
-                array_pop($subForms);
+                self::getRelationsRecursive($field['subcampos'], $relations, true);
             }elseif ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
                 // Guardamos dataSource
                 $optionsSource = $field['dataSource'];
@@ -101,14 +101,9 @@ class DynamicModelService
                     throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
                 }
 
-                $functionName = self::formatRelationName($field['name'], $subForms);
-
                 // Agregamos la relación al array de relaciones
-                $relations[$functionName] = [
-                    'funcionName' => $functionName,
-                    'seccion' => $nombre,
-                    'subForms' => $subForms,
-                    'campo' => $field['name'],
+                $relations[$relatedModel] = [
+                    'type' => $subForm ? 'whereIn' : 'where',
                     'modelo' => $relatedModel
                 ];
 
@@ -116,98 +111,12 @@ class DynamicModelService
         }
     }
 
-    private static function formatRelationName($name, array $subForms)
+    public static function formatRelationName($name)
     {
-        // Concatenamos los nombres de los subformularios
-        if (count($subForms) > 0) {
-            $name = implode("_", $subForms) . "_" . $name;
-        }
-
         // Quita espacios, acentos y caracteres especiales, y convierte a snake_case
         $name = preg_replace('/[áéíóúÁÉÍÓÚñÑ]/u', '', $name); // Opcional: quitar acentos
         $name = str_replace([' ', '-'], '_', $name); // Reemplaza espacios y guiones por _
         $name = preg_replace('/[^A-Za-z0-9_]/', '', $name); // Quita cualquier otro caracter especial
         return strtolower($name);
-    }
-
-    public static function extractIdsByPath($secciones, string ...$path)
-    {
-        $ids = [];
-        $currentLevel = $secciones;
-        $contPath = count($path);
-
-        Log::info('c5_c6_c7', [
-            'conut' => $contPath,
-        ]);
-
-        // Primer paso: localizar la sección
-        $seccionName = array_shift($path);
-        $foundSection = null;
-
-        foreach ($currentLevel as $seccion) {
-            $nombre = is_array($seccion) ? ($seccion['nombre'] ?? null) : ($seccion->nombre ?? null);
-            if ($nombre === $seccionName) {
-                $foundSection = $seccion;
-                break;
-            }
-        }
-
-        if (!$foundSection) {
-            return [];
-        }
-
-        Log::info('c5_c6_c7', [
-            'conut' => $path,
-            'foundSection' => $foundSection
-        ]);
-
-        $currentLevel = is_array($foundSection) ? ($foundSection['fields'] ?? []) : ($foundSection->fields ?? []);
-
-        // Recorremos la ruta (subforms anidados)
-        if (count($path) > 1) {
-            $subformName = array_shift($path);
-
-            if (!isset($currentLevel[$subformName]) || !is_array($currentLevel[$subformName])) {
-                return [];
-            }
-            $currentLevel = $currentLevel[$subformName];
-            Log::info('c5_c6_c7', [
-                'conut' => $path,
-                'currentLevel' => $currentLevel
-            ]);
-        }
-
-        if (count($path) > 1) {
-            self::extractIdsByPathRecursive($ids, $currentLevel, $path);
-            return $ids;
-        }
-
-        // Último paso: extraer el campo
-        $fieldName = array_shift($path);
-
-        if ($contPath > 2) {
-            foreach ($currentLevel as $item) {
-                if (is_array($item) && isset($item[$fieldName]) && !empty($item[$fieldName])) {
-                    $ids[] = new \MongoDB\BSON\ObjectId($item[$fieldName]);
-                }
-            }
-        } else {
-            if (is_array($currentLevel) && isset($currentLevel[$fieldName]) && !empty($currentLevel[$fieldName])) {
-                $ids[] = new \MongoDB\BSON\ObjectId($currentLevel[$fieldName]);
-            }
-        }
-
-        return $ids;
-    }
-
-    private static function extractIdsByPathRecursive(&$ids, $currentLevel, $path){
-        $name = array_shift($path);
-        foreach ($currentLevel as $item) {
-            if (is_array($item) && isset($item[$name]) && is_array($item[$name])){
-                self::extractIdsByPathRecursive($ids, $item[$name], $path);
-            }else{
-                $ids[] = new \MongoDB\BSON\ObjectId($item[$name]);
-            }
-        }
     }
 }

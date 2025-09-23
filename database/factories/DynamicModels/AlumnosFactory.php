@@ -25,7 +25,9 @@ class AlumnosFactory extends Factory
         // Arreglos para guardar los IDs usados
         $periodosUsados = [];
         $asesoresUsados = [];
-        
+
+        $programaEducativo = !empty($programas) ? $this->faker->randomElement($programas) : null;
+
         return [
             'secciones' => [
                 // Información General (siempre presente)
@@ -34,7 +36,7 @@ class AlumnosFactory extends Factory
                     'fields' => [
                         'Nombre Completo' => $this->faker->name(),
                         'Género' => $this->faker->randomElement(['Masculino', 'Femenino']),
-                        'Programa educativo' => !empty($programas) ? $this->faker->randomElement($programas) : null,
+                        'Programa educativo' => $programaEducativo ,
                         'Número de control' => $this->faker->numerify('########'),
                     ],
                 ],
@@ -143,6 +145,7 @@ class AlumnosFactory extends Factory
                     ],
                 ],
             ],
+            'programaeducativo_ids' => $programaEducativo,
             'periodos_ids' => array_values(array_unique($periodosUsados)),
             'profesores_ids' => array_values(array_unique($asesoresUsados)),
         ];

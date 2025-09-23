@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Plantillas;
+use App\Services\DynamicModelService;
 use MongoDB\Client as MongoClient;
 use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
@@ -232,17 +233,39 @@ class DocumentoController extends Controller
             // Obtenemos las secciones de la plantilla
             $secciones = $plantilla->secciones;
 
-            // Creamos el arreglo de campos con dataSource
-            $fieldsWithDataSource = [];
+            // Creamos el arreglo para guardar el campo y su modelo relacionado
+            $fieldsWithModel = [];
 
             // Recorremos las secciones
             foreach ($secciones as $index => $seccion) {
                 // Llamamos la funcion recursiva
-                $this->extractFieldsWithDataSource($seccion['fields'], $fieldsWithDataSource);
+                $this->extractFieldsWithModel($seccion['fields'], $fieldsWithModel);
             };
+
+            // Obtenemos los modelo distintos
+            $modelDistinc = [];
+
+            foreach ($fieldsWithModel as $key => $value) {
+                if (!in_array($value['modelo'], $modelDistinc)) {
+                    $modelDistinc[] = $value['modelo'];
+                }
+            }
 
             // Recorremos los documentos
             foreach ($documents as $indexDocument => $document) {
+
+                // Creamos el arreglo para guardar los objetos de las relaciones
+                $arrayObjectRelations = [];
+
+                foreach ($modelDistinc as $model) {
+                    $modelFormat = DynamicModelService::formatRelationName($model);
+                    $relation = $document->$modelFormat();        // ← Objeto relación (BelongsToMany, etc.)
+                    $result = $relation->get();             // ← ¡Ejecuta la consulta y obtén los datos!
+                    //Log::info('Relación ' . $modelFormat . ': ' . json_encode($result->toArray(), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+                    $arrayObjectRelations[$model] = $result;
+                }
+
+
 
                 //Recorrer las secciones del documento
                 foreach ($document['secciones'] as $indexSeccion => $seccion) {
@@ -252,20 +275,18 @@ class DocumentoController extends Controller
                         if (is_array($field)) {
 
                             // Llamamos la función recursiva
-                            $documentsArray[$indexDocument]['secciones'][$indexSeccion]['fields'][$key] = $this->recusiveSecciones($field, $document, $key, $fieldsWithDataSource);
+                            $documentsArray[$indexDocument]['secciones'][$indexSeccion]['fields'][$key] = $this->recusiveSecciones($field, $arrayObjectRelations, $fieldsWithModel);
 
                             //Verificamos que sea una id
                         } else if (preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
                             // nombre de la funcion
-                            $relacionName = $this->formatRelationName($key);
+                            $modelRelation = $fieldsWithModel[$key]['modelo'];
 
-                            // Ejecutamos la función de relacion
-                            $relacion = $document->$relacionName()->get()->first();
-
-                            $relacion = $relacion ? $relacion->toArray() : [];
+                            // Obtenemos el documento relacionado
+                            $relacion = $arrayObjectRelations[$modelRelation]->first();
 
                             // Obtenemos el valor del campo
-                            $value = $this->getFieldValue($relacion, $fieldsWithDataSource[$key]['seccion'], $fieldsWithDataSource[$key]['campoMostrar']);
+                            $value = $this->getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $fieldsWithModel[$key]['campoMostrar']);
 
                             // Guardamos el objeto
                             $documentsArray[$indexDocument]['secciones'][$indexSeccion]['fields'][$key] = $value;
@@ -284,7 +305,12 @@ class DocumentoController extends Controller
             return response()->json($documentsArray);
         } catch (\Exception $e) {
             // Registrar el error en el log
-            Log::error("Error al obtener los  documentos: " . $e->getMessage());
+            Log::error('Error al obtener los documentos: ', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             // Registrar el error completo
             return response()->json(['message' => 'Error al obtener documentos', 'error' => $e->getMessage()], 500);
@@ -542,7 +568,7 @@ class DocumentoController extends Controller
      * @param array $data
      * @return array
      */
-    public function recusiveSecciones(array $data, $document, $nombre, $fieldsWithDataSource)
+    public function recusiveSecciones(array $data, $arrayObjectRelations, $fieldsWithModel)
     {
         // Verificamos que sea un arrar y que no este vacio
         if (!is_array($data) && empty($data)) {
@@ -556,22 +582,21 @@ class DocumentoController extends Controller
                 if (is_array($field) && !empty($field)) {
 
                     // Llamamos la función recursiva
-                    $data[$index][$key] = $this->recusiveSecciones($field, $document, $nombre . '_' . $key, $fieldsWithDataSource);
+                    $data[$index][$key] = $this->recusiveSecciones($field, $arrayObjectRelations, $fieldsWithModel);
 
                     //Verificamos que sea una id
                 } else if (preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
 
-                    // nombre de la funcion
-                    $relacionName = $this->formatRelationName($nombre . '_' . $key);
+                    // nombre del modelo
+                    $modelRelation = $fieldsWithModel[$key]['modelo'];
 
                     // Ejecutamos la función de relacion
-                    $relacion = $document->$relacionName()->where('_id', $field)->first();
-
-                    $array = $relacion ? $relacion->toArray() : [];
-
+                    $relacion = $arrayObjectRelations[$modelRelation]->where('_id', $field)->first();
 
                     // Obtenemos el valor del campo
-                    $value = $this->getFieldValue($relacion, $fieldsWithDataSource[$key]['seccion'], $fieldsWithDataSource[$key]['campoMostrar']);
+                    $value = $this->getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $fieldsWithModel[$key]['campoMostrar']);
+
+                    Log::info("value ".$key.": ". $value);
 
                     // Guardamos el objeto
                     $data[$index][$key] = $value;
@@ -590,15 +615,21 @@ class DocumentoController extends Controller
      * @param array $plantilla Estructura completa de la plantilla
      * @return array Lista de campos con dataSource, con info de ubicación
      */
-    public function extractFieldsWithDataSource($fields, &$fieldsWithDataSource)
+    public function extractFieldsWithModel($fields, &$fieldsWithModel)
     {
         foreach ($fields as $indexField => $field) {
             //Verificamos que tenga dataSource
             if (isset($field['dataSource'])) {
-                $fieldsWithDataSource[$field['name']] = $field['dataSource'];
+                // Obtenemos el nombre del modelo
+                $modelName = Plantillas::find($field['dataSource']['plantillaId'])->nombre_modelo ?? null;
+
+                $field['dataSource']['modelo'] = $modelName;
+
+                // Agregamos el campo con su modelo
+                $fieldsWithModel[$field['name']] = $field['dataSource'];
             } else if ($field['type'] == 'subform') {
                 // Llamamos la funcion recursiva
-                $fieldsWithDataSource[$field['name']] = $this->extractFieldsWithDataSource($field['subcampos'], $fieldsWithDataSource);
+                $this->extractFieldsWithModel($field['subcampos'], $fieldsWithModel);
             }
         }
     }
