@@ -98,7 +98,7 @@ class PlantillasCollectionSeeder extends Seeder
                             'required' => false,
                             'dataSource' => [
                                 'plantillaId' => '68cc40d088161ce06d09312c',
-                                'nombrePlantilla' => 'Areas',
+                                'plantillaNombre' => 'Areas',
                                 'seccion' => 'Información General',
                                 'campoMostrar' => 'Nombre del area'
                             ]
@@ -149,7 +149,7 @@ class PlantillasCollectionSeeder extends Seeder
                             'required' => false,
                             'dataSource' => [
                                 'plantillaId' => '68b1df5f34dafa1c910aa02c',
-                                'nombrePlantilla' => 'Programa Educativo',
+                                'plantillaNombre' => 'Programa Educativo',
                                 'seccion' => 'Información General',
                                 'campoMostrar' => 'Nombre del programa'
                             ]
@@ -358,7 +358,7 @@ class PlantillasCollectionSeeder extends Seeder
                             'required' => true,
                             'dataSource' => [
                                 'plantillaId' => '68b1df5f34dafa1c910aa02c',
-                                'nombrePlantilla' => 'Programa Educativo',
+                                'plantillaNombre' => 'Programa Educativo',
                                 'seccion' => 'Información General',
                                 'campoMostrar' => 'Nombre del programa'
                             ]
@@ -381,7 +381,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     'required' => false,
                                     'dataSource' => [
                                         'plantillaId' => '68b0938423ed6ec87508548c',
-                                        'nombrePlantilla' => 'Periodos',
+                                        'plantillaNombre' => 'Periodos',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
                                     ]
@@ -402,7 +402,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     'required' => false,
                                     'dataSource' => [
                                         'plantillaId' => '68b0a68006688a676a0e6a5d',
-                                        'nombrePlantilla' => 'Profesores',
+                                        'plantillaNombre' => 'Profesores',
                                         'seccion' => 'Información Personal',
                                         'campoMostrar' => 'Nombres',
                                     ]
@@ -456,7 +456,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     'required' => false,
                                     'dataSource' => [
                                         'plantillaId' => '68b0938423ed6ec87508548c',
-                                        'nombrePlantilla' => 'Periodos',
+                                        'plantillaNombre' => 'Periodos',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
                                     ]
@@ -515,7 +515,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     'required' => false,
                                     'dataSource' => [
                                         'plantillaId' => '68b0a68006688a676a0e6a5d',
-                                        'nombrePlantilla' => '68b1df5f34dafa1c910aa02c',
+                                        'plantillaNombre' => '68b1df5f34dafa1c910aa02c',
                                         'seccion' => 'Información Personal',
                                         'campoMostrar' => 'Nombres',
                                     ]
@@ -526,7 +526,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     'required' => false,
                                     'dataSource' => [
                                         'plantillaId' => '68b0938423ed6ec87508548c',
-                                        'nombrePlantilla' => 'Periodos',
+                                        'plantillaNombre' => 'Periodos',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
                                     ]
