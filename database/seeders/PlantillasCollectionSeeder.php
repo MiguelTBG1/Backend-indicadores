@@ -515,7 +515,7 @@ class PlantillasCollectionSeeder extends Seeder
                                     'required' => false,
                                     'dataSource' => [
                                         'plantillaId' => '68b0a68006688a676a0e6a5d',
-                                        'plantillaNombre' => '68b1df5f34dafa1c910aa02c',
+                                        'plantillaNombre' => 'Profesores',
                                         'seccion' => 'Información Personal',
                                         'campoMostrar' => 'Nombres',
                                     ]
