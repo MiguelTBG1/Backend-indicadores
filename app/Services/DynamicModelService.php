@@ -7,6 +7,7 @@ use App\Models\Plantillas;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
 use PhpParser\Node\Expr\Cast\Bool_;
+use Illuminate\Support\Facades\File;
 
 class DynamicModelService
 {
@@ -77,6 +78,16 @@ class DynamicModelService
         return $deleted;
     }
 
+    public static function removeModels()
+    {
+
+        // Eliminamos la carpeta 'DynamicModels' y los modelos
+        $rutaCarpeta = app_path("DynamicModels");
+        if (File::exists($rutaCarpeta)) {
+            File::deleteDirectory($rutaCarpeta);
+        }
+    }
+
     public static function getRelations($secciones, array &$relations)
     {
         foreach ($secciones as $index => $seccion) {
@@ -89,7 +100,7 @@ class DynamicModelService
         foreach ($fields as $index => $field) {
             if ($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])) {
                 self::getRelationsRecursive($field['subcampos'], $relations, true);
-            }elseif ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
+            } elseif ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
                 // Guardamos dataSource
                 $optionsSource = $field['dataSource'];
 
@@ -106,7 +117,6 @@ class DynamicModelService
                     'type' => $subForm ? 'whereIn' : 'where',
                     'modelo' => $relatedModel
                 ];
-
             }
         }
     }

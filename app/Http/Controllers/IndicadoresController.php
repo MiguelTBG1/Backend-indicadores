@@ -289,21 +289,15 @@ class IndicadoresController extends Controller
         // Agrupamos por el campo de la configuración
         $this->recursiveGroup($pipeline, $arrayConfig);
 
-        Log::info('pipeline', $pipeline );
+        Log::info('pipeline', $pipeline);
 
-        $db = $this->connectToMongoDB();
+        // 👇 Aquí ya no necesitas $db->selectCollection()
+        $cursor = $modelClass::raw(function ($collection) use ($pipeline) {
+            return $collection->aggregate($pipeline);
+        });
 
-        // Seleccionamos la colección
-        $collection = $db->selectCollection($configuracion['coleccion']);
-
-        // Ejecutamos el pipeline
-        $cursor = $collection->aggregate($pipeline);
-
-        // Procesamos resultado de forma más segura
-        $resultados = [];
-        foreach ($cursor as $document) {
-            $resultados[] = $document;
-        }
+        // Convertir a array (si lo necesitas)
+        $resultados = iterator_to_array($cursor);
 
         Log::info('Cursor obtenido de la agregación', $resultados);
 
@@ -414,13 +408,19 @@ class IndicadoresController extends Controller
         }
     }
 
-    private function convertOperation($operacion, $operacionContent){
+    /**
+     * Función para convertir la operacion
+     * @param string $operacion Operación a convertir
+     * @param string $operacionContent Contenido de la operación
+     */
+    private function convertOperation($operacion, $operacionContent)
+    {
         return match ($operacion) {
-            'contar' => [ '$sum' => 1],
-            'sumar' => [ '$sum' => $operacionContent],
-            'promedio' => [ '$avg' => $operacionContent],
-            'maximo' => [ '$max' => $operacionContent],
-            'minimo' => [ '$min' => $operacionContent],
+            'contar' => ['$sum' => 1],
+            'sumar' => ['$sum' => $operacionContent],
+            'promedio' => ['$avg' => $operacionContent],
+            'maximo' => ['$max' => $operacionContent],
+            'minimo' => ['$min' => $operacionContent],
         };
     }
 
@@ -449,19 +449,6 @@ class IndicadoresController extends Controller
         }
 
         return $subPipeline;
-    }
-
-    /**
-     * Conexión a la base de datos MongoDB
-     * @return MongoDB\Database La conexión a la base de datos
-     */
-    private function connectToMongoDB()
-    {
-        // Conexión a MongoDB
-        $client = new MongoClient(config('database.connections.mongodb.url'));
-        $db = $client->selectDatabase(config('database.connections.mongodb.database'));
-
-        return $db;
     }
 
     /**

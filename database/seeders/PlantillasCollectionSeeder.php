@@ -565,6 +565,9 @@ class PlantillasCollectionSeeder extends Seeder
         ]);
 
         try {
+            // Eliminamos los modelos existentes
+            DynamicModelService::removeModels();
+
             // Obtenemos todas las plantillas creadas
             $plantillas = Plantillas::all();
 
@@ -578,11 +581,6 @@ class PlantillasCollectionSeeder extends Seeder
 
                 // Recorremos secciones para buscar las relaciones
                 DynamicModelService::getRelations($secciones, $relations);
-
-                // Logeamos las relaciones encontradas
-                Log::info('Relaciones encontradas', [
-                    'relaciones' => $relations
-                ]);
 
                 // Nombre del modelo
                 $modelName = $plantilla->nombre_modelo;
