@@ -22,11 +22,11 @@ class RolesSeeder extends Seeder
         $documentos = Recurso::where('nombre', 'Documentos')->first();
 
         // Obtenemos las acciones
-        $todosAcciones = Accion::where('nombre', '*')->first();
-        $crear = Accion::where('nombre', 'crear')->first();
-        $leer = Accion::where('nombre', 'leer')->first();
-        $actualizar = Accion::where('nombre', 'actualizar')->first();
-        $eliminar = Accion::where('nombre', 'eliminar')->first();
+        $comodin = Accion::where('clave', '*')->first();
+        $create = Accion::where('clave', 'create')->first();
+        $read = Accion::where('clave', 'read')->first();
+        $update = Accion::where('clave', 'update')->first();
+        $delete = Accion::where('clave', 'delete')->first();
 
         $roles = [
             [
@@ -37,7 +37,7 @@ class RolesSeeder extends Seeder
                         [
                             'recurso' => $todosRecursos->_id,
                             'acciones' => [
-                                $todosAcciones->_id,
+                                $comodin->_id,
                             ],
                         ],
                     ],
@@ -50,11 +50,11 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $indicadores->_id,
-                            'acciones' => [$todosAcciones->_id],
+                            'acciones' => [$comodin->_id],
                         ],
                         [
                             'recurso' => $documentos->_id,
-                            'acciones' => [$todosAcciones->_id],
+                            'acciones' => [$comodin->_id],
                         ],
                     ],
                 ],
@@ -66,7 +66,7 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $plantillas->_id,
-                            'acciones' => [$todosAcciones->_id],
+                            'acciones' => [$comodin->_id],
                         ],
                     ],
                 ],
@@ -78,7 +78,7 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $todosRecursos->_id,
-                            'acciones' => [$leer->_id],
+                            'acciones' => [$read->_id],
                         ],
                     ],
                 ],
@@ -90,7 +90,7 @@ class RolesSeeder extends Seeder
                     'allowed' => [
                         [
                             'recurso' => $indicadores->_id,
-                            'acciones' => [$leer->_id],
+                            'acciones' => [$read->_id],
                         ],
                     ],
                 ],
@@ -103,8 +103,8 @@ class RolesSeeder extends Seeder
                         [
                             'recurso' => $documentos->_id,
                             'acciones' => [
-                                $crear->_id,
-                                $actualizar->_id,
+                                $create->_id,
+                                $update->_id,
                             ],
                         ],
                     ],

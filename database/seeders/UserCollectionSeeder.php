@@ -32,7 +32,7 @@ class UserCollectionSeeder extends Seeder
         $plantillaPeriodos = "68b0938423ed6ec87508548c";
         $plantillaProgramaEducativo = "68b1df5f34dafa1c910aa02c";
 
-        $todosAcciones = Accion::where('nombre', '*')->first();
+        $comodin = Accion::where('clave', '*')->first();
         User::create(
             [
                 'nombre' => 'Rodrigo Alexander',
@@ -147,13 +147,13 @@ class UserCollectionSeeder extends Seeder
                     [
                         'recurso' => $plantillaPeriodos,
                         'acciones' => [
-                            $todosAcciones->_id
+                            $comodin->_id
                         ]
                     ],
                     [
                         'recurso' => $plantillaProgramaEducativo,
                         'acciones' => [
-                            $todosAcciones->_id
+                            $comodin->_id
                         ]
                     ]
                 ]

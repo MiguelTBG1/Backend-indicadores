@@ -91,7 +91,7 @@ class PermissionBuilder
 
         // Recorremos las acciones
         foreach ($permiso['acciones'] ?? [] as $accionId) {
-            $accion = optional(Accion::find($accionId))->nombre ?? 'accion_desconocida';
+            $accion = optional(Accion::find($accionId))->clave ?? 'accion_desconocida';
             // Formateamos a la estructura recurso_accion
             $permisos[] = strtolower("{$recurso}.{$accion}");
         }
@@ -102,7 +102,7 @@ class PermissionBuilder
     private function buildFinalAbilities(array $allow, array $deny): array
     {
         $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
-        $allAcciones = Accion::where('nombre', '!=', '*')->pluck('nombre')->toArray();
+        $allAcciones = Accion::where('clave', '!=', '*')->pluck('clave')->toArray();
 
         $resolved = [];
 
