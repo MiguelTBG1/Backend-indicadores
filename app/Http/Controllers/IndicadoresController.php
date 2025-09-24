@@ -146,7 +146,13 @@ class IndicadoresController extends Controller
                 'indicadores' => $resultado, // Cambiado de $indicadores a $resultado
             ], Response::HTTP_OK);
         } catch (Exception $e) {
-            Log::error('Error al obtener los indicadores: ' . $e->getMessage());
+            Log::error('Error al obtener los indicadores:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+            return 0;
             return response()->json([
                 'message' => 'Error del sistema al obtener los indicadores',
                 'error' => $e->getMessage()
@@ -216,27 +222,19 @@ class IndicadoresController extends Controller
             return 0;
         }
 
-        log::info('1');
-
         //Buscamos la plantilla
         $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first() ?? null;
-
-        log::info('1.1');
 
         // Validamos si se encontro el nombre del modelo
         if (!$plantilla) {
             throw new \Exception('No se encontró la plantilla ', 404);
         }
 
-        log::info('1.2');
-
         // Obtenemos el nombre del modelo
         $modelName = $plantilla->nombre_modelo ?? null;
 
-        log::info('1.5');
-
         // creamos la clase del modelo
-        $modelClass = "App\\Models\\$modelName";
+        $modelClass = "App\\DynamicModels\\$modelName";
 
         //Validar que la clase exista
         if (!class_exists($modelClass)) {
@@ -245,8 +243,6 @@ class IndicadoresController extends Controller
                 'error' => 'Modelo inválido o no encontrado.',
             ], 400);
         }
-
-        log::info('2');
 
         // Obtener todos los registros del modelo
         $documents = $modelClass::all();
@@ -257,169 +253,202 @@ class IndicadoresController extends Controller
             return 0;
         }
 
+        // Obtenemos el arreglo de campos y operacion
+        $arrayConfig = [];
+        $this->recursiveConfig($configuracion, $arrayConfig);
+
+        Log::info('$arrayConfig', [
+            ': ' => $arrayConfig
+        ]);
+
         // Creamos el pipeline de agregación
         $pipeline = [];
 
-        // Obtenemos las secciones de la plantilla
-        $secciones = $plantilla->secciones ?? [];
+        // Expandimos secciones
+        $pipeline[] = ['$unwind' => '$secciones'];
 
-        // Obtenemos los campos de las secciones con su tipo
-        $campos = [];
+        // Filtramos las secciones por la sección definida en la configuración
+        $pipeline[] = ['$match' => ['secciones.nombre' => $configuracion['secciones']]];
 
-        log::info('3');
 
-        foreach ($secciones as $seccion) {
-            foreach ($seccion['fields'] as $campo) {
-                $nombreCompleto = $seccion['nombre'] . '_' . $campo['name'];
-                $campos[$nombreCompleto] = $campo['type'];
+        foreach ($arrayConfig['campo'] as $index => $campo) {
+            // Verificamos si es la ultima pisición para saltarlo
+            if (count($arrayConfig['campo']) == $index + 1) {
+                continue;
             }
+            // Filtramos el arraglo
+            $arrayFilter = array_slice($arrayConfig['campo'], 0, $index + 1);
+
+            // Concatenamos los campos
+            $campoConcat = implode('.', $arrayFilter);
+
+            // Agregamos el campo al pipeline
+            $pipeline[] = ['$unwind' => '$secciones.fields.' . $campoConcat];
         }
 
-        log::info('4');
+        // Agrupamos por el campo de la configuración
+        $this->recursiveGroup($pipeline, $arrayConfig);
 
-        $pipeline = [
-            ['$unwind' => '$secciones'],
-            ['$match' => [
-                '$and' => array_merge(
-                    [['secciones.nombre' => $configuracion['secciones']]],
-                    $this->recursiveCondicion($configuracion) // debe devolver un array de condiciones
-                )]
-            ],
-            ['$project' => ['campo' => ['$ifNull' => ['$secciones.fields.' . $this->recursiveCampo($configuracion), []]]]],
-            ['$group' => ['_id' => null, 'resultado' => $this->recursiveOperation($configuracion)]]
-        ];
+        Log::info('pipeline', $pipeline );
 
+        $db = $this->connectToMongoDB();
 
+        // Seleccionamos la colección
+        $collection = $db->selectCollection($configuracion['coleccion']);
 
-        try {
+        // Ejecutamos el pipeline
+        $cursor = $collection->aggregate($pipeline);
 
-            Log::info('pipeline', $pipeline);
+        // Procesamos resultado de forma más segura
+        $resultados = [];
+        foreach ($cursor as $document) {
+            $resultados[] = $document;
+        }
 
-            $db = $this->connectToMongoDB();
+        Log::info('Cursor obtenido de la agregación', $resultados);
 
-            // Seleccionamos la colección
-            $collection = $db->selectCollection($configuracion['coleccion']);
-
-            // Ejecutamos el pipeline
-            $cursor = $collection->aggregate($pipeline);
-
-            // Procesamos resultado de forma más segura
-            $resultados = [];
-            foreach ($cursor as $document) {
-                $resultados[] = $document;
-            }
-
-            Log::info('Cursor obtenido de la agregación', $resultados);
-
-            if (empty($resultados)) {
-                return 0;
-            }
-
-            return $resultados[0]['resultado'] ?? 0;
-        } catch (\Exception $e) {
-            Log::error('Error específico: ' . $e->getMessage());
-            Log::error('Línea del error: ' . $e->getLine());
-            Log::error('Archivo del error: ' . $e->getFile());
+        if (empty($resultados)) {
             return 0;
         }
-    }
 
-    public function recursiveOperation($configuracion)
-    {
-
-        // Validamos que la configuración sea válida
-        if (!is_array($configuracion) || !isset($configuracion['operacion'])) {
-            throw new Exception('Configuración inválida', Response::HTTP_BAD_REQUEST);
-        }
-
-        Log::info("5");
-
-        $operacion = match ($configuracion['operacion']) {
-            'contar' => ['$size' => '$campo'],
-            'sumar' => ['$sum' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
-            'promedio' => ['$avg' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
-            'maximo' => ['$max' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
-            'minimo' => ['$min' => !empty($configuracion['subConfiguracion']) ? $this->recursiveOperation($configuracion['subConfiguracion']) : '$campo'],
-            default => throw new Exception('Operación no válida: ' . $configuracion['operacion'], Response::HTTP_BAD_REQUEST),
-        };
-
-        Log::info('6');
-
-        return $operacion;
-    }
-
-    public function recursiveCampo($configuracion)
-    {
-        // Tomamos el campo actual
-        $campo = $configuracion['campo'] ?? null;
-
-        if (!$campo) {
-            return null; // si no hay campo, detenemos
-        }
-
-        // Si hay subConfiguracion, procesarla
-        if (!empty($configuracion['subConfiguracion'])) {
-            $campoRecursivo = $this->recursiveCampo($configuracion['subConfiguracion']);
-
-            // Solo concatenamos si el recursivo trae algo
-            if ($campoRecursivo != null) {
-                return $campo . '.' . $campoRecursivo;
-            }
-        }
-
-        Log::info($campo);
-        return $campo;
+        // Retornamos el resultado
+        return $resultados[0]['resultado'] ?? 0;
     }
 
     /**
-     * Función recuriva para formatear las condiciones de la configuración
-     * @param array
-     * @return array
+     * Función para obtener el arreglos de campos y operaciones
+     * @param array $configuracion Configuración del indicador
+     * @param array &$arrayConfig Arreglo de campos y operaciones
      */
-    public function recursiveCondicion($configuracion)
+    private function recursiveConfig($configuracion, &$arrayConfig)
+    {
+        // agregamos el campo y la operación
+        $arrayConfig['campo'][] = $configuracion['campo'];
+        $arrayConfig['operacion'][] = $configuracion['operacion'];
+
+        // Verificamos si tiene subconfiguracion
+        if (isset($configuracion['subConfiguracion'])) {
+            $this->recursiveConfig($configuracion['subConfiguracion'], $arrayConfig);
+        }
+    }
+
+    /**
+     * Función para crear y agregar los $group al pipeline de agregación
+     * @param array &$pipeline Pipeline de agregación
+     * @param array $arrayConfig Arreglo de campos y operaciones
+     */
+    private function recursiveGroup(&$pipeline, $arrayConfig)
     {
 
-        // Validamos que la configuración sea válida
-        if (!is_array($configuracion) || !isset($configuracion['condicion']) || !is_array($configuracion['condicion'])) {
-            throw new Exception('Configuración inválida', Response::HTTP_BAD_REQUEST);
-        }
+        // Obtenemos el arreglo de campos y operacion
+        $array = $arrayConfig['campo'];
+        $arrayOperacion = $arrayConfig['operacion'];
 
-        // Creamos el array de condiciones
-        $condiciones = [];
+        // Determinamos el nombre del resultado
+        $resultName = count($array) >= 2
+            ? "resultado_{$array[count($array) - 2]}"
+            : "resultado";
 
-        // Recorremos las condiciones
-        foreach ($configuracion['condicion'] as $condicion) {
-            $operador = match ($condicion['operador']) {
-                'mayor' => '$gt',
-                'menor' => '$lt',
-                'igual' => '$eq',
-                'diferente' => '$ne',
-                'mayor_igual' => '$gte',
-                'menor_igual' => '$lte',
-                default => throw new Exception('Operador no válido: ' . $condicion['operador'])
-            };
+        // Determinamos el valor del resultado
+        $resultContent = $this->convertOperation($arrayOperacion[0], '$secciones.fields.' . implode('.', $array));
 
-            $condiciones[] = [
-                'secciones.fields.' . $condicion['campo'] => [ $operador => $condicion['valor'] ]
-            ];
-        }
+        // Agregamos el primer $group
+        $pipeline[] = [
+            '$group' => [
+                '_id' => array_merge(
+                    ['doc' => '$_id'],
+                    $this->recursiveCampo(array_slice($array, 0, -1))
+                ),
+                $resultName => $resultContent
+            ]
+        ];
 
-        // Si hay subConfiguracion, procesarla
-        if (!empty($configuracion['subConfiguracion']) && is_array($configuracion['subConfiguracion']) && isset($configuracion['subConfiguracion']['condicion']) && is_array($configuracion['subConfiguracion']['condicion']) && !empty($configuracion['subConfiguracion']['condicion'])) {
-            // Concatenamos el nombre del campo con el nombre del subcampo
-            if( $configuracion['subConfiguracion']['campo'] != null || $configuracion['subConfiguracion']['campo'] != 'null' ){
-                $configuracion['subConfiguracion']['campo'] = $configuracion['campo'] . '.' . $configuracion['subConfiguracion']['campo'];
+        // Elinamos el último campo y operación
+        array_pop($arrayOperacion);
+        array_pop($array);
+
+        foreach ($array as $index => $campo) {
+            // Tomamos todos los campos excepto el último
+            $camposParaGroup = array_slice($array, 0, -1);
+
+            // Mapeamos los campos para el _id
+            $mapCampos = array_map(function ($campo) {
+                return [$campo => $campo];
+            }, $camposParaGroup);
+
+            // Aplanamos el array de arrays en un solo array asociativo
+            $idFields = [];
+            foreach ($mapCampos as $item) {
+                $idFields[key($item)] = current($item);
             }
 
-            // Llamamos recursivamente a la función para procesar la subconfiguracion
-            $condicionesRecursivo = $this->recursiveCondicion($configuracion['subConfiguracion']);
+            // Agregamos 'doc' => '$_id.doc'
+            $idFields = count($array) >= 2
+                ? array_merge(['doc' => '$_id.doc'], $idFields)
+                : null;
 
-            // Agregamos las condiciones recursivas al array de condiciones
-            $condiciones[] = $condicionesRecursivo;
+            // Determinamos el campo para el nombre de resultado (penúltimo o segundo)
+            $campoResultado = count($array) >= 2
+                ? "resultado_{$array[count($array) - 2]}"
+                : "resultado";
+
+            // Determinamos el nombre de resultado
+            $resultado =   count($array) >= 2
+                ? $array[count($array) - 1]
+                : ($array[1] ?? $array[0]);
+
+            // Determinamos el valor del resultado
+            $resultContent = $this->convertOperation($arrayOperacion[0], '$resultado_' . $resultado);
+
+            // Construimos el stage de agregación
+            $pipeline[] = [
+                '$group' => [
+                    '_id' => $idFields,
+                    $campoResultado => $resultContent // o la lógica que necesites
+                ]
+            ];
+
+            // Eliminamos el último campo y operación
+            array_pop($array);
+            array_pop($arrayOperacion);
+        }
+    }
+
+    private function convertOperation($operacion, $operacionContent){
+        return match ($operacion) {
+            'contar' => [ '$sum' => 1],
+            'sumar' => [ '$sum' => $operacionContent],
+            'promedio' => [ '$avg' => $operacionContent],
+            'maximo' => [ '$max' => $operacionContent],
+            'minimo' => [ '$min' => $operacionContent],
+        };
+    }
+
+    private function recursiveCampo($array)
+    {
+        if (empty($array)) {
+            return [];
         }
 
-        // Retornamos las condiciones
-        return $condiciones;
+        Log::info('Array', [
+            ': ' => json_encode($array, JSON_PRETTY_PRINT)
+        ]);
+
+        // Creamos el arreglo con los campo para el pipeline
+        $subPipeline = [];
+
+        foreach ($array as $index => $campo) {
+            // Filtramos el arraglo
+            $arrayFilter = array_slice($array, 0, $index + 1);
+
+            // Concatenamos los campos
+            $campoConcat = implode('.', $arrayFilter);
+
+            // Agregamos el campo al pipeline
+            $subPipeline[$campo] = '$secciones.fields.' . $campoConcat;
+        }
+
+        return $subPipeline;
     }
 
     /**
