@@ -285,6 +285,11 @@ class DocumentoController extends Controller
                             // Obtenemos el documento relacionado
                             $relacion = $arrayObjectRelations[$modelRelation]->first();
 
+                            // Verificar si no es null
+                            if (!$relacion) {
+                                continue;
+                            }
+
                             // Obtenemos el valor del campo
                             $value = $this->getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $fieldsWithModel[$key]['campoMostrar']);
 
@@ -593,10 +598,15 @@ class DocumentoController extends Controller
                     // Ejecutamos la función de relacion
                     $relacion = $arrayObjectRelations[$modelRelation]->where('_id', $field)->first();
 
+                    // Verificar si no es null
+                    if (!$relacion) {
+                        continue;
+                    }
+
                     // Obtenemos el valor del campo
                     $value = $this->getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $fieldsWithModel[$key]['campoMostrar']);
 
-                    Log::info("value ".$key.": ". $value);
+                    Log::info("value " . $key . ": " . $value);
 
                     // Guardamos el objeto
                     $data[$index][$key] = $value;

@@ -23,6 +23,8 @@ class ProfesoresSeeder extends Seeder
         $progIngenieria = '68b5ec5fa75013f105000dd8';
 
         $ProgramaElectica = ProgramaEducativo::where('secciones.fields.Nombre del programa', 'Ingeniería Eléctrica')->first();
+
+
         /**
          * Código para insertar documentos en la colección 'Profesores_data'
          */
@@ -55,6 +57,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => '68b5ec5fa75013f105000dd8',
+                'areas_ids' => $AreaElectronica->_id,
             ],
             [
                 'secciones' => [
@@ -90,6 +94,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => '68b5ec5fa75013f105000dd8',
+                'areas_ids' => $AreaElectronica->_id,
             ],
             [
                 'secciones' => [
@@ -119,6 +125,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => '68b5ec5fa75013f105000dd8',
+                'areas_ids' => $AreaElectronica->_id,
             ],
             [
                 'secciones' => [
@@ -154,6 +162,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => '68b5ec5fa75013f105000dd8',
+                'areas_ids' => $AreaElectronica->_id,
             ],
             [
                 'secciones' => [
@@ -180,6 +190,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id,
             ],
 
             // 2) DIAZ CARVAJAL, MANUEL CIPRIANO
@@ -211,6 +223,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id,
             ],
 
             // 3) PALACIOS RAMIREZ, MARIA NORMA
@@ -234,8 +248,10 @@ class ProfesoresSeeder extends Seeder
                                 ['Nombre de la licenciatura' => 'Licenciatura en Física'],
                             ],
                             'Maestría' => [
-                                ['Nombre de maestría' => 'Óptica',
-                                    'Estado' => 'Acreditado'],
+                                [
+                                    'Nombre de maestría' => 'Óptica',
+                                    'Estado' => 'Acreditado'
+                                ],
                             ],
                             'Doctorado' => [
                                 [
@@ -250,6 +266,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                                'programaeducativo_ids' => $progLicenciaSindical,
+                'areas_ids' => $AreaElectronica->_id
             ],
 
             // 4) RIVAS RUIZ, WILLIAM
@@ -278,6 +296,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id
             ],
 
             // 5) RODRIGUEZ MAY, GERMAN ALBERTO
@@ -306,6 +326,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id
             ],
 
             // 6) SANTILLAN SANVICENTE, DAVID DE JESUS
@@ -334,6 +356,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id
             ],
 
             // 7) SONDA MARTINEZ, JUAN RAMON
@@ -359,6 +383,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id
             ],
 
             // 8) VELASCO TEH, LIMBER LEONARDO
@@ -387,6 +413,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => $progSistemas,
+                'areas_ids' => $AreaElectronica->_id
             ],
 
             // 9) ZAVALA PIMENTEL, JUAN MANUEL
@@ -415,6 +443,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id
             ],
 
             // 10) TE AZARCOYA, JULIO HUMBERTO
@@ -445,6 +475,8 @@ class ProfesoresSeeder extends Seeder
                         ],
                     ],
                 ],
+                'programaeducativo_ids' => $progIngenieria,
+                'areas_ids' => $AreaElectronica->_id
             ],
         ];
 
