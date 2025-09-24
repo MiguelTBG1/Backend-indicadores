@@ -153,7 +153,6 @@ class User extends Model
     function buildFinalAbilities(array $allow, array $deny): array
     {
         $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
-        Log::debug($allRecursos);
         $allAcciones = Accion::pluck('nombre')->toArray();
 
         $resolved = [];

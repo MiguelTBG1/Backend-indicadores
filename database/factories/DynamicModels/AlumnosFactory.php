@@ -21,8 +21,6 @@ class AlumnosFactory extends Factory
         $programas = ProgramaEducativo::all()->map(fn($doc) => (string) $doc->_id)->toArray();
         $periodos  = Periodos::all()->map(fn($doc) => (string) $doc->_id)->toArray();
         $asesores  = Profesores::all()->map(fn($doc) => (string) $doc->_id)->toArray();
-        Log::debug($periodos);
-        Log::debug($asesores);
 
         // Arreglos para guardar los IDs usados
         $periodosUsados = [];
