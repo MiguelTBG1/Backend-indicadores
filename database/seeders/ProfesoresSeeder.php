@@ -23,6 +23,8 @@ class ProfesoresSeeder extends Seeder
         $progIngenieria = '68b5ec5fa75013f105000dd8';
 
         $ProgramaElectica = ProgramaEducativo::where('secciones.fields.Nombre del programa', 'Ingeniería Eléctrica')->first();
+
+
         /**
          * Código para insertar documentos en la colección 'Profesores_data'
          */
@@ -446,6 +448,8 @@ class ProfesoresSeeder extends Seeder
                     ],
                 ],
             ],
+            'programaeducativo_ids' => [$progSistemas, $progLicenciaSindical, $progIngenieria], "68b5ec5fa75013f105000dd8",
+            'area_ids' => [$AreaElectronica->_id],
         ];
 
         // Verificar si la colección 'Profesores_data' ya existe
