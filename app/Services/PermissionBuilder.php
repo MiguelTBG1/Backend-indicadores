@@ -97,8 +97,10 @@ class PermissionBuilder
             // Separamos el tipo de la id
             [$tipo, $id] = explode(':', $permiso['recurso'], 2);
 
+            Log::debug("Tipo: {$tipo}, ID: {$id}");
             // Revisamos si la id es del recurso comodin:
-            if (Recurso::where('clave', $id)->exists()) {
+            if (Recurso::where('_id', $id)->exists()) {
+                Log::debug('Recurso comodin encontrado: ' . $id);
                 $recurso = "{$tipo}:*";
             }
         }
@@ -141,7 +143,7 @@ class PermissionBuilder
                 }
                 continue;
             }
-ual
+
             // Caso 3: comodin de recurso especifico:
             if (str_ends_with($recurso, ':*')) {
                 [$tipo, $id] = explode (':', $recurso, 2);

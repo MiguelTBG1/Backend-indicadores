@@ -6,6 +6,7 @@ use App\Models\Plantillas;
 use App\Models\Rol;
 use App\Models\User;
 use App\Models\Accion;
+use App\Models\Recurso;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -32,7 +33,8 @@ class UserCollectionSeeder extends Seeder
         $plantillaPeriodos = "68b0938423ed6ec87508548c";
         $plantillaProgramaEducativo = "68b1df5f34dafa1c910aa02c";
         $plantillaAlumnos = "68bb162223bbc9264e05fca0";
-        $comodin = Accion::where('clave', '*')->first();
+        $comodinRecurso = Recurso::where('clave', '*')->first();
+        $comodinAccion = Accion::where('clave', '*')->first();
         $read = Accion::where('clave', 'read')->first();
         $update = Accion::where('clave', 'update')->first();
         $delete = Accion::where('clave', 'delete')->first();
@@ -152,13 +154,13 @@ class UserCollectionSeeder extends Seeder
                     [
                         'recurso' => 'plantilla:' . $plantillaPeriodos,
                         'acciones' => [
-                            $comodin->_id
+                            $comodinAccion->_id
                         ]
                     ],
                     [
                         'recurso' => 'plantilla:' . $plantillaProgramaEducativo,
                         'acciones' => [
-                            $comodin->_id
+                            $comodinAccion->_id
                         ]
                     ],
                     [
@@ -169,7 +171,7 @@ class UserCollectionSeeder extends Seeder
                         ]
                     ],
                     [
-                        'recurso' => 'documento:' . $plantillaAlumnos,
+                        'recurso' => 'documento:' . $comodinRecurso->_id,
                         'acciones' => [
                             $read->_id,
                             $update->_id
