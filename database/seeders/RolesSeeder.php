@@ -41,17 +41,17 @@ class RolesSeeder extends Seeder
                             ],
                         ],
                         [
-                            'recurso' => 'plantilla:' . $todosRecursos->_id,
+                            'recurso' => 'plantilla:'.$todosRecursos->_id,
                             'acciones' => [
                                 $comodin->_id,
                             ],
                         ],
                         [
-                            'recurso' => 'documento:' . $todosRecursos->_id,
+                            'recurso' => 'documento:'.$todosRecursos->_id,
                             'acciones' => [
                                 $comodin->_id,
                             ],
-                        ]
+                        ],
                     ],
                 ],
             ],

@@ -40,7 +40,6 @@ class AccionesSeeder extends Seeder
             ],
         ];
 
-
         foreach ($Acciones as $Accion) {
             Accion::create($Accion);
         }

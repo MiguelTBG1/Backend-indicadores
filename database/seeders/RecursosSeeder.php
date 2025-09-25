@@ -60,7 +60,7 @@ class RecursosSeeder extends Seeder
                 'nombre' => 'Recursos',
                 'descripcion' => 'Rutas de recursos del sistema',
                 'tipo' => 'estatico',
-            ]
+            ],
         ];
 
         foreach ($recursos as $recurso) {

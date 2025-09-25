@@ -2,21 +2,19 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Plantillas;
 use App\Models\User;
-use MongoDB\BSON\ObjectId;
 use App\Services\DynamicModelService;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
+use MongoDB\BSON\ObjectId;
 
 class PlantillasCollectionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-
     public function run(): void
     {
         // Usuario administrador
@@ -38,10 +36,10 @@ class PlantillasCollectionSeeder extends Seeder
                             'name' => 'Nombre periodo',
                             'type' => 'string',
                             'required' => true,
-                        ]
-                    ]
-                ]
-            ]
+                        ],
+                    ],
+                ],
+            ],
         ]);
 
         // Plantilla de Area
@@ -57,11 +55,11 @@ class PlantillasCollectionSeeder extends Seeder
                         [
                             'name' => 'Nombre del area',
                             'type' => 'string',
-                            'required' => true
-                        ]
-                    ]
-                ]
-            ]
+                            'required' => true,
+                        ],
+                    ],
+                ],
+            ],
         ]);
 
         // Plantilla de Programas Educativos
@@ -78,14 +76,14 @@ class PlantillasCollectionSeeder extends Seeder
                         [
                             'name' => 'Nombre del programa',
                             'type' => 'string',
-                            'required' => true
-                        ]
-                    ]
-                ]
-            ]
+                            'required' => true,
+                        ],
+                    ],
+                ],
+            ],
         ]);
 
-        //Plantilla de Profesores
+        // Plantilla de Profesores
         Plantillas::create([
             '_id' => new ObjectId('68b0a68006688a676a0e6a5d'),
             'nombre_plantilla' => 'Profesores',
@@ -108,8 +106,8 @@ class PlantillasCollectionSeeder extends Seeder
                                 'plantillaId' => '68cc40d088161ce06d09312c',
                                 'plantillaNombre' => 'Areas',
                                 'seccion' => 'Información General',
-                                'campoMostrar' => 'Nombre del area'
-                            ]
+                                'campoMostrar' => 'Nombre del area',
+                            ],
                         ],
                         ['name' => 'Género', 'type' => 'select', 'required' => false, 'options' => ['Masculino', 'Femenino']],
                         ['name' => 'RFC', 'type' => 'string', 'required' => false],
@@ -122,25 +120,25 @@ class PlantillasCollectionSeeder extends Seeder
                             'subcampos' => [
                                 ['name' => 'Idioma', 'type' => 'string', 'required' => false],
                                 ['name' => 'Nivel', 'type' => 'select', 'required' => false, 'options' => ['Básico', 'Intermedio', 'Avanzado']],
-                                ['name' => 'Certificación', 'type' => 'file', 'required' => false]
-                            ]
+                                ['name' => 'Certificación', 'type' => 'file', 'required' => false],
+                            ],
                         ],
                         [
                             'name' => 'Vigencia en el SNI',
                             'type' => 'date',
-                            'required' => false
+                            'required' => false,
                         ],
                         [
                             'name' => 'Cuerpo académico al que pertenece',
                             'type' => 'string',
-                            'required' => false
+                            'required' => false,
                         ],
                         [
                             'name' => 'Vigencia del cuerpo académico al que pertenece',
                             'type' => 'date',
-                            'required' => false
-                        ]
-                    ]
+                            'required' => false,
+                        ],
+                    ],
                 ],
                 [
                     'nombre' => 'Información Académica',
@@ -149,7 +147,7 @@ class PlantillasCollectionSeeder extends Seeder
                             'name' => 'Estado',
                             'type' => 'select',
                             'required' => false,
-                            'options' => ['Activo', 'Inactivo']
+                            'options' => ['Activo', 'Inactivo'],
                         ],
                         [
                             'name' => 'Programa educativo',
@@ -159,8 +157,8 @@ class PlantillasCollectionSeeder extends Seeder
                                 'plantillaId' => '68b1df5f34dafa1c910aa02c',
                                 'plantillaNombre' => 'Programa Educativo',
                                 'seccion' => 'Información General',
-                                'campoMostrar' => 'Nombre del programa'
-                            ]
+                                'campoMostrar' => 'Nombre del programa',
+                            ],
                         ],
                         [
                             'name' => 'Licenciatura',
@@ -168,10 +166,10 @@ class PlantillasCollectionSeeder extends Seeder
                             'required' => false,
                             'subcampos' => [
                                 [
-                                    'name' => "Nombre de la licenciatura",
-                                    "type" => "string",
-                                    "required" => false
-                                ]
+                                    'name' => 'Nombre de la licenciatura',
+                                    'type' => 'string',
+                                    'required' => false,
+                                ],
                             ],
                         ],
                         [
@@ -180,17 +178,17 @@ class PlantillasCollectionSeeder extends Seeder
                             'required' => false,
                             'subcampos' => [
                                 [
-                                    'name' => "Nombre de maestría",
-                                    "type" => "string",
-                                    "required" => false
+                                    'name' => 'Nombre de maestría',
+                                    'type' => 'string',
+                                    'required' => false,
                                 ],
                                 [
-                                    'name' => "Estado",
-                                    "type" => "select",
-                                    "required" => false,
-                                    "options" => ["Cursado sin acreditar", "Cursando", "Acreditado"]
-                                ]
-                            ]
+                                    'name' => 'Estado',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'options' => ['Cursado sin acreditar', 'Cursando', 'Acreditado'],
+                                ],
+                            ],
                         ],
                         [
                             'name' => 'Doctorado',
@@ -198,45 +196,45 @@ class PlantillasCollectionSeeder extends Seeder
                             'required' => false,
                             'subcampos' => [
                                 [
-                                    'name' => "Nombre del Doctorado",
-                                    "type" => "string",
-                                    "required" => false
+                                    'name' => 'Nombre del Doctorado',
+                                    'type' => 'string',
+                                    'required' => false,
                                 ],
                                 [
-                                    'name' => "Estado",
-                                    "type" => "select",
-                                    "required" => false,
-                                    "options" => ["Cursado sin acreditar", "Cursando", "Acreditado"]
-                                ]
-                            ]
+                                    'name' => 'Estado',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'options' => ['Cursado sin acreditar', 'Cursando', 'Acreditado'],
+                                ],
+                            ],
                         ],
                         [
-                            "name" => "Cursos impartidos",
-                            "type" => "subform",
-                            "required" => false,
-                            "subcampos" => [
+                            'name' => 'Cursos impartidos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
                                 [
-                                    "name" => "Nombre del curso",
-                                    "type" => "string",
-                                    "required" => true
+                                    'name' => 'Nombre del curso',
+                                    'type' => 'string',
+                                    'required' => true,
                                 ],
                                 [
-                                    "name" => "Evidencia",
-                                    "type" => "file",
-                                    "required" => false
+                                    'name' => 'Evidencia',
+                                    'type' => 'file',
+                                    'required' => false,
                                 ],
                                 [
-                                    "name" => "Fecha de inicio",
-                                    "type" => "date",
-                                    "required" => false
+                                    'name' => 'Fecha de inicio',
+                                    'type' => 'date',
+                                    'required' => false,
                                 ],
                                 [
-                                    "name" => "Fecha de término",
-                                    "type" => "date",
-                                    "required" => false,
-                                    "filterable" => true
-                                ]
-                            ]
+                                    'name' => 'Fecha de término',
+                                    'type' => 'date',
+                                    'required' => false,
+                                    'filterable' => true,
+                                ],
+                            ],
                         ],
                         [
                             'name' => 'Especialidades Académicas',
@@ -247,39 +245,39 @@ class PlantillasCollectionSeeder extends Seeder
                                     'name' => 'Nombre de la especialidad',
                                     'type' => 'string',
                                     'required' => true,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Tipo de especialidad',
                                     'type' => 'select',
                                     'required' => true,
-                                    'options' => ['Diplomado', 'Maestría', 'Doctorado']
+                                    'options' => ['Diplomado', 'Maestría', 'Doctorado'],
                                 ],
                                 [
                                     'name' => 'Descripción',
                                     'type' => 'string',
                                     'required' => false,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Evidencia',
                                     'type' => 'file',
                                     'required' => false,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Institución',
                                     'type' => 'string',
                                     'required' => true,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Fecha de obtención',
                                     'type' => 'date',
                                     'required' => true,
-                                    'filterable' => true
-                                ]
-                            ]
+                                    'filterable' => true,
+                                ],
+                            ],
                         ],
                         [
                             'name' => 'Cursos y formación continua',
@@ -297,56 +295,56 @@ class PlantillasCollectionSeeder extends Seeder
                                         'Doctorado',
                                         'Taller pedagógico',
                                         'Actualización disciplinar',
-                                        'Otro'
-                                    ]
+                                        'Otro',
+                                    ],
                                 ],
                                 [
                                     'name' => 'Nombre del curso o programa',
                                     'type' => 'string',
                                     'required' => true,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Institución',
                                     'type' => 'string',
                                     'required' => true,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Fecha de participación o término',
                                     'type' => 'date',
                                     'required' => true,
-                                    'filterable' => true
+                                    'filterable' => true,
                                 ],
                                 [
                                     'name' => 'Duración en horas',
                                     'type' => 'number',
                                     'required' => true,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Modalidad',
                                     'type' => 'select',
                                     'required' => true,
-                                    'options' => ['Presencial', 'En línea', 'Híbrido']
+                                    'options' => ['Presencial', 'En línea', 'Híbrido'],
                                 ],
                                 [
                                     'name' => 'Evidencia',
                                     'type' => 'file',
                                     'required' => false,
-                                    'filterable' => false
+                                    'filterable' => false,
                                 ],
                                 [
                                     'name' => 'Descripción o temas abordados',
                                     'type' => 'string',
                                     'required' => false,
-                                    'filterable' => false
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                    'filterable' => false,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ]);
 
         // Plantilla de alumnos
@@ -370,11 +368,11 @@ class PlantillasCollectionSeeder extends Seeder
                                 'plantillaId' => '68b1df5f34dafa1c910aa02c',
                                 'plantillaNombre' => 'Programa Educativo',
                                 'seccion' => 'Información General',
-                                'campoMostrar' => 'Nombre del programa'
-                            ]
+                                'campoMostrar' => 'Nombre del programa',
+                            ],
                         ],
-                        ['name' => 'Número de control', 'type' => 'string', 'required' => true]
-                    ]
+                        ['name' => 'Número de control', 'type' => 'string', 'required' => true],
+                    ],
                 ],
                 [
                     'nombre' => 'Movilidad',
@@ -383,8 +381,7 @@ class PlantillasCollectionSeeder extends Seeder
                             'name' => 'Participa en movilidad',
                             'type' => 'subform',
                             'required' => false,
-                            'subcampos' =>
-                            [
+                            'subcampos' => [
                                 [
                                     'name' => 'Período de la movilidad',
                                     'type' => 'select',
@@ -394,17 +391,17 @@ class PlantillasCollectionSeeder extends Seeder
                                         'plantillaNombre' => 'Periodos',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
-                                    ]
+                                    ],
                                 ],
                                 [
                                     'name' => 'Lugar al que asistió',
                                     'type' => 'string',
-                                    'required' => false
+                                    'required' => false,
                                 ],
                                 [
                                     'name' => 'Proyecto que realizó',
                                     'type' => 'string',
-                                    'required' => false
+                                    'required' => false,
                                 ],
                                 [
                                     'name' => 'Asesor',
@@ -415,31 +412,31 @@ class PlantillasCollectionSeeder extends Seeder
                                         'plantillaNombre' => 'Profesores',
                                         'seccion' => 'Información Personal',
                                         'campoMostrar' => 'Nombres',
-                                    ]
+                                    ],
                                 ],
                                 [
-                                    'name' => "Obtuvo algún premio o reconocimiento",
-                                    'type' => "subform",
+                                    'name' => 'Obtuvo algún premio o reconocimiento',
+                                    'type' => 'subform',
                                     'required' => false,
                                     'filterable' => false,
                                     'subcampos' => [
                                         [
-                                            'name' => "Nombre del premio",
-                                            'type' => "string",
+                                            'name' => 'Nombre del premio',
+                                            'type' => 'string',
                                             'required' => false,
-                                            'filterable' => false
+                                            'filterable' => false,
                                         ],
                                         [
-                                            'name' => "Lugar obtenido",
-                                            'type' => "string",
+                                            'name' => 'Lugar obtenido',
+                                            'type' => 'string',
                                             'required' => false,
-                                            'filterable' => false
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
+                                            'filterable' => false,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 [
                     'nombre' => 'Eventos',
@@ -453,12 +450,12 @@ class PlantillasCollectionSeeder extends Seeder
                                     'name' => 'Tipo de evento',
                                     'type' => 'select',
                                     'options' => ['Foro', 'Congreso', 'Concurso'],
-                                    'required' => false
+                                    'required' => false,
                                 ],
                                 [
                                     'name' => 'Nombre del evento',
                                     'type' => 'string',
-                                    'required' => false
+                                    'required' => false,
                                 ],
                                 [
                                     'name' => 'Período',
@@ -469,42 +466,42 @@ class PlantillasCollectionSeeder extends Seeder
                                         'plantillaNombre' => 'Periodos',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
-                                    ]
+                                    ],
                                 ],
                                 [
                                     'name' => 'Institución',
                                     'type' => 'select',
                                     'options' => ['ITChetumal', 'UQROO', 'Modelo', 'Bizcaya'],
-                                    'required' => false
+                                    'required' => false,
                                 ],
                                 [
                                     'name' => 'Lugar',
                                     'type' => 'string',
-                                    'required' => false
+                                    'required' => false,
                                 ],
                                 [
-                                    'name' => "Obtuvo algún premio o reconocimiento",
-                                    'type' => "subform",
+                                    'name' => 'Obtuvo algún premio o reconocimiento',
+                                    'type' => 'subform',
                                     'required' => false,
                                     'filterable' => false,
                                     'subcampos' => [
                                         [
-                                            'name' => "Nombre del premio",
-                                            'type' => "string",
+                                            'name' => 'Nombre del premio',
+                                            'type' => 'string',
                                             'required' => false,
-                                            'filterable' => false
+                                            'filterable' => false,
                                         ],
                                         [
-                                            'name' => "Lugar obtenido",
-                                            'type' => "string",
+                                            'name' => 'Lugar obtenido',
+                                            'type' => 'string',
                                             'required' => false,
-                                            'filterable' => false
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
+                                            'filterable' => false,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 [
                     'nombre' => 'Proyecto de investigación',
@@ -517,7 +514,7 @@ class PlantillasCollectionSeeder extends Seeder
                                 [
                                     'name' => 'Nombre del Proyecto',
                                     'type' => 'string',
-                                    'required' => false
+                                    'required' => false,
                                 ],
                                 [
                                     'name' => 'Asesor',
@@ -528,7 +525,7 @@ class PlantillasCollectionSeeder extends Seeder
                                         'plantillaNombre' => 'Profesores',
                                         'seccion' => 'Información Personal',
                                         'campoMostrar' => 'Nombres',
-                                    ]
+                                    ],
                                 ],
                                 [
                                     'name' => 'Período',
@@ -539,39 +536,39 @@ class PlantillasCollectionSeeder extends Seeder
                                         'plantillaNombre' => 'Periodos',
                                         'seccion' => 'Información General',
                                         'campoMostrar' => 'Nombre periodo',
-                                    ]
+                                    ],
                                 ],
                                 [
-                                    'name' => "Productos obtenidos",
-                                    'type' => "subform",
+                                    'name' => 'Productos obtenidos',
+                                    'type' => 'subform',
                                     'required' => false,
                                     'filterable' => false,
                                     'subcampos' => [
                                         [
-                                            'name' => "Publicacion",
-                                            'type' => "string",
+                                            'name' => 'Publicacion',
+                                            'type' => 'string',
                                             'required' => false,
-                                            'filterable' => false
+                                            'filterable' => false,
                                         ],
                                         [
-                                            'name' => "Tesis",
-                                            'type' => "string",
+                                            'name' => 'Tesis',
+                                            'type' => 'string',
                                             'required' => false,
-                                            'filterable' => false
+                                            'filterable' => false,
                                         ],
                                         [
-                                            'name' => "Residencia Profesional",
-                                            'type' => "string",
+                                            'name' => 'Residencia Profesional',
+                                            'type' => 'string',
                                             'required' => false,
-                                            'filterable' => false
+                                            'filterable' => false,
                                         ],
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ]);
 
         try {
@@ -592,12 +589,12 @@ class PlantillasCollectionSeeder extends Seeder
                 // Nombre del modelo
                 $modelName = $plantilla->nombre_modelo;
                 Log::debug("Generando modelo dinámico para la plantilla: {$plantilla->nombre_plantilla} con el nombre de modelo: $modelName");
-                                // Logeamos las relaciones encontradas
+                // Logeamos las relaciones encontradas
                 Log::info('Relaciones encontradas', [
-                    'relaciones' => $relations
+                    'relaciones' => $relations,
                 ]);
-                                // Verificar si el archivo del modelo fue creado
-                $modelPath = app_path('Models/' . $modelName . '.php');
+                // Verificar si el archivo del modelo fue creado
+                $modelPath = app_path('Models/'.$modelName.'.php');
 
                 // Actualizamos el modelo dinámico
                 DynamicModelService::generate($modelName, $relations);
@@ -611,9 +608,9 @@ class PlantillasCollectionSeeder extends Seeder
             // Registrar el error en el log
             Log::error('Error en run', [
                 'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
-                'trace'   => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }

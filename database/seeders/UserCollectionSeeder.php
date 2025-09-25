@@ -2,15 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Accion;
 use App\Models\Plantillas;
+use App\Models\Recurso;
 use App\Models\Rol;
 use App\Models\User;
-use App\Models\Accion;
-use App\Models\Recurso;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-
-use Illuminate\Support\Facades\Log;
 
 class UserCollectionSeeder extends Seeder
 {
@@ -28,11 +26,10 @@ class UserCollectionSeeder extends Seeder
         $analistaIndicador = Rol::where('nombre', 'Analista de indicadores')->first();
         $creadorDocumentos = Rol::where('nombre', 'Creador de documentos')->first();
 
-
         // Plantillas
-        $plantillaPeriodos = "68b0938423ed6ec87508548c";
-        $plantillaProgramaEducativo = "68b1df5f34dafa1c910aa02c";
-        $plantillaAlumnos = "68bb162223bbc9264e05fca0";
+        $plantillaPeriodos = '68b0938423ed6ec87508548c';
+        $plantillaProgramaEducativo = '68b1df5f34dafa1c910aa02c';
+        $plantillaAlumnos = '68bb162223bbc9264e05fca0';
         $comodinRecurso = Recurso::where('clave', '*')->first();
         $plantillaRecurso = Recurso::where('clave', 'plantillas')->first();
         $comodinAccion = Accion::where('clave', '*')->first();
@@ -155,29 +152,29 @@ class UserCollectionSeeder extends Seeder
                     [
                         'recurso' => $plantillaRecurso->_id,
                         'acciones' => [
-                            $comodinAccion->_id
-                        ]
+                            $comodinAccion->_id,
+                        ],
                     ],
                     [
-                        'recurso' => 'plantilla:' . $plantillaPeriodos,
+                        'recurso' => 'plantilla:'.$plantillaPeriodos,
                         'acciones' => [
-                            $comodinAccion->_id
-                        ]
+                            $comodinAccion->_id,
+                        ],
                     ],
                     [
-                        'recurso' => 'plantilla:' . $plantillaProgramaEducativo,
+                        'recurso' => 'plantilla:'.$plantillaProgramaEducativo,
                         'acciones' => [
-                            $comodinAccion->_id
-                        ]
+                            $comodinAccion->_id,
+                        ],
                     ],
                     [
-                        'recurso' => 'documento:' . $plantillaAlumnos,
+                        'recurso' => 'documento:'.$plantillaAlumnos,
                         'acciones' => [
-                            $update->_id
-                        ]
+                            $update->_id,
+                        ],
                     ],
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 }

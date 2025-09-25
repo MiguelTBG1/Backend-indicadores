@@ -3,30 +3,27 @@
 namespace Database\Factories\DynamicModels;
 
 use App\DynamicModels\Alumnos;
-use App\DynamicModels\ProgramaEducativo;
 use App\DynamicModels\Periodos;
 use App\DynamicModels\Profesores;
-
+use App\DynamicModels\ProgramaEducativo;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Log;
 
 class AlumnosFactory extends Factory
 {
-
     protected $model = Alumnos::class;
 
     public function definition(): array
     {
         // Cargar los IDs reales de otras colecciones
-        $programas = ProgramaEducativo::all()->map(fn($doc) => (string) $doc->_id)->toArray();
-        $periodos  = Periodos::all()->map(fn($doc) => (string) $doc->_id)->toArray();
-        $asesores  = Profesores::all()->map(fn($doc) => (string) $doc->_id)->toArray();
+        $programas = ProgramaEducativo::all()->map(fn ($doc) => (string) $doc->_id)->toArray();
+        $periodos = Periodos::all()->map(fn ($doc) => (string) $doc->_id)->toArray();
+        $asesores = Profesores::all()->map(fn ($doc) => (string) $doc->_id)->toArray();
 
         // Arreglos para guardar los IDs usados
         $periodosUsados = [];
         $asesoresUsados = [];
 
-        $programaEducativo = !empty($programas) ? $this->faker->randomElement($programas) : null;
+        $programaEducativo = ! empty($programas) ? $this->faker->randomElement($programas) : null;
 
         return [
             'secciones' => [
@@ -36,7 +33,7 @@ class AlumnosFactory extends Factory
                     'fields' => [
                         'Nombre Completo' => $this->faker->name(),
                         'Género' => $this->faker->randomElement(['Masculino', 'Femenino']),
-                        'Programa educativo' => $programaEducativo ,
+                        'Programa educativo' => $programaEducativo,
                         'Número de control' => $this->faker->numerify('########'),
                     ],
                 ],
@@ -46,27 +43,28 @@ class AlumnosFactory extends Factory
                     'nombre' => 'Movilidad',
                     'fields' => [
                         'Participa en movilidad' => collect(range(1, $this->faker->numberBetween(0, 3))) // entre 0 y 3 movilidades
-                            ->map(function () use($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
+                            ->map(function () use ($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
                                 return [
                                     // Guardar el ID de período en un arreglo externo
-                                    'Período de la movilidad' => !empty($periodos) ? (
-                                        function() use (&$periodosUsados, $periodos) {
+                                    'Período de la movilidad' => ! empty($periodos) ? (
+                                        function () use (&$periodosUsados, $periodos) {
                                             $periodo = $this->faker->randomElement($periodos);
                                             $periodosUsados[] = $periodo;
+
                                             return $periodo;
                                         }
                                     )() : null,
                                     'Lugar al que asistió' => $this->faker->city(),
                                     'Proyecto que realizó' => $this->faker->word(),
-                                    'Asesor' => !empty($asesores) ? (
-                                        function() use (&$asesoresUsados, $asesores) {
+                                    'Asesor' => ! empty($asesores) ? (
+                                        function () use (&$asesoresUsados, $asesores) {
                                             $asesor = $this->faker->randomElement($asesores);
                                             $asesoresUsados[] = $asesor;
+
                                             return $asesor;
                                         }
                                     )() : null,
-                                    'Obtuvo algún premio o reconocimiento' =>
-                                    collect(range(1, $this->faker->numberBetween(0, 2))) // 0-2 premios
+                                    'Obtuvo algún premio o reconocimiento' => collect(range(1, $this->faker->numberBetween(0, 2))) // 0-2 premios
                                         ->map(function () {
                                             return [
                                                 'Nombre del premio' => $this->faker->word(),
@@ -83,21 +81,21 @@ class AlumnosFactory extends Factory
                     'nombre' => 'Eventos',
                     'fields' => [
                         'Participa en evento' => collect(range(1, $this->faker->numberBetween(0, 4))) // hasta 4 eventos
-                            ->map(function () use($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
+                            ->map(function () use ($periodos, &$periodosUsados, &$asesoresUsados) {
                                 return [
                                     'Tipo de evento' => $this->faker->randomElement(['Foro', 'Congreso', 'Concurso']),
                                     'Nombre del evento' => $this->faker->sentence(2),
-                                    'Período' => !empty($periodos) ? (
-                                        function() use (&$periodosUsados, $periodos) {
-                                            $periodo = $this -> faker->randomElement($periodos);
+                                    'Período' => ! empty($periodos) ? (
+                                        function () use (&$periodosUsados, $periodos) {
+                                            $periodo = $this->faker->randomElement($periodos);
                                             $periodosUsados[] = $periodo;
+
                                             return $periodo;
                                         }
                                     )() : null,
                                     'Institución' => $this->faker->randomElement(['ITChetumal', 'UQROO', 'Modelo', 'Bizcaya']),
                                     'Lugar' => $this->faker->streetName(),
-                                    'Obtuvo algún premio o reconocimiento' =>
-                                    collect(range(1, $this->faker->numberBetween(0, 2)))
+                                    'Obtuvo algún premio o reconocimiento' => collect(range(1, $this->faker->numberBetween(0, 2)))
                                         ->map(function () {
                                             return [
                                                 'Nombre del premio' => $this->faker->word(),
@@ -114,25 +112,26 @@ class AlumnosFactory extends Factory
                     'nombre' => 'Proyecto de investigación',
                     'fields' => [
                         'Participa en Proyecto de investigacion' => collect(range(1, $this->faker->numberBetween(0, 2))) // 0-2 proyectos
-                            ->map(function () use($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
+                            ->map(function () use ($periodos, $asesores, &$periodosUsados, &$asesoresUsados) {
                                 return [
                                     'Nombre del Proyecto' => $this->faker->word(),
-                                    'Asesor' =>!empty($asesores) ? (
-                                        function() use (&$asesoresUsados, $asesores) {
+                                    'Asesor' => ! empty($asesores) ? (
+                                        function () use (&$asesoresUsados, $asesores) {
                                             $asesor = $this->faker->randomElement($asesores);
                                             $asesoresUsados[] = $asesor;
+
                                             return $asesor;
                                         }
                                     )() : null,
-                                    'Período' => !empty($periodos) ? (
-                                        function() use (&$periodosUsados, $periodos) {
-                                            $periodo = $this -> faker->randomElement($periodos);
+                                    'Período' => ! empty($periodos) ? (
+                                        function () use (&$periodosUsados, $periodos) {
+                                            $periodo = $this->faker->randomElement($periodos);
                                             $periodosUsados[] = $periodo;
+
                                             return $periodo;
                                         }
                                     )() : null,
-                                    'Productos obtenidos' =>
-                                    collect(range(1, $this->faker->numberBetween(0, 3)))
+                                    'Productos obtenidos' => collect(range(1, $this->faker->numberBetween(0, 3)))
                                         ->map(function () {
                                             return [
                                                 'Publicacion' => $this->faker->optional()->sentence(2),

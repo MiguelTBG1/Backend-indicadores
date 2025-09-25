@@ -4,9 +4,6 @@ namespace App\Policies;
 
 use App\Models\Plantillas;
 use App\Models\User;
-use App\Models\Recurso;
-
-use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Log;
 
 class PlantillaPolicy
@@ -30,16 +27,19 @@ class PlantillaPolicy
         // Caso 2: creador puede ver lo suyo
         if ($plantilla->creado_por === $user->_id) {
             Log::info("El usuario '{$user->_id}' es el creador de la plantilla '{$plantilla->_id}'");
+
             return true;
         }
 
         // Caso 3: Usuarios particulares
         if ($user->currentAccessToken()?->can("plantilla:{$plantilla->_id}.read")) {
             Log::info("El usuario '{$user->_id}' tiene permiso para ver la plantilla '{$plantilla->_id}'");
+
             return true;
         }
 
         Log::info("El usuario '{$user->_id}' NO tiene permiso para ver la plantilla '{$plantilla->_id}'");
+
         return false;
     }
 
@@ -52,6 +52,7 @@ class PlantillaPolicy
         if ($user->currentAccessToken()?->can('plantillas.create')) {
             return true;
         }
+
         return false;
     }
 
@@ -62,16 +63,19 @@ class PlantillaPolicy
     {
         Log::info("Verificando habilidad: plantilla:{$plantillas->_id}.update para el usuario: {$user->_id}  ");
         if ($plantillas->creado_por === $user->_id) {
-            Log::info("El usuario es el creador de la plantilla, puede editarla");
+            Log::info('El usuario es el creador de la plantilla, puede editarla');
+
             return true;
         }
 
         if ($user->currentAccessToken()?->can("plantilla:{$plantillas->_id}.update")) {
             Log::info("Habilidad encontrada: plantilla:{$plantillas->_id}.update para el usuario: {$user->_id}  ");
+
             return true;
         }
 
         Log::info("Habilidad NO encontrada: plantilla:{$plantillas->_id}.update para el usuario: {$user->_id}  ");
+
         return false;
     }
 
@@ -90,8 +94,8 @@ class PlantillaPolicy
             return true;
         }
 
+        Log::info('El usuario NO tiene permiso para eliminar la plantilla');
 
-        Log::info("El usuario NO tiene permiso para eliminar la plantilla");
         return false;
     }
 
@@ -111,7 +115,7 @@ class PlantillaPolicy
         return false;
     }
 
-        /**
+    /**
      * Determine wich documents can the user read
      */
     public function viewReadableDocument(User $user, Plantillas $plantilla): bool
@@ -134,7 +138,7 @@ class PlantillaPolicy
      */
     public function viewEditableDocument(User $user, Plantillas $plantilla): bool
     {
-                // El creador puede ver lo suyo
+        // El creador puede ver lo suyo
         if ($plantilla->creado_por === $user->_id) {
             return true;
         }

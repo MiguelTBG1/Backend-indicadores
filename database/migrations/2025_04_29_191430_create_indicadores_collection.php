@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('indicadores', function (Blueprint $table) {
-            $table -> id();
-            $table -> timestamps();
-            $table -> string('_idProyecto');
-            $table -> integer('numero');
-            $table -> string('nombreIndicador');
-            $table -> integer('numerador');
-            $table -> integer('denominador');
+            $table->id();
+            $table->timestamps();
+            $table->string('_idProyecto');
+            $table->integer('numero');
+            $table->string('nombreIndicador');
+            $table->integer('numerador');
+            $table->integer('denominador');
         });
     }
 

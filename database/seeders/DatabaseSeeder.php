@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             PeriodosSeeder::class,
             ProfesoresSeeder::class,
             ProgramaEducativoSeeder::class,
-            //DocumentosSeeder::class,
+            // DocumentosSeeder::class,
             AlumnosSeeder::class,
         ]);
     }
