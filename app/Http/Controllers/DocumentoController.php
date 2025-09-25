@@ -8,13 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Plantillas;
 use App\Services\DynamicModelService;
-use MongoDB\Client as MongoClient;
-use MongoDB\BSON\ObjectId;
 use MongoDB\BSON\UTCDateTime;
-use DateTime;
-use DateTimeZone;
-use DateTimeImmutable;
-use Maatwebsite\Excel\Concerns\ToArray;
 
 use function Laravel\Prompts\form;
 
@@ -39,13 +33,7 @@ class DocumentoController extends Controller
             // Mapear plantillas y verificar si tienen documentos
             $coleccionesConDocumentos = $plantillas->map(function ($plantilla) {
                 // Construir nombre de clase correctamente
-                $modelClass = "App\\DynamicModels\\{$plantilla->nombre_modelo}";
-
-                // Validar que la clase exista
-                if (!class_exists($modelClass)) {
-                    Log::warning("Modelo no encontrado: {$modelClass}");
-                    return null; // Valor consistente
-                }
+                $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
 
                 // Contar los registros del modelo
                 $documentsCount = $modelClass::count();
@@ -142,15 +130,7 @@ class DocumentoController extends Controller
             $modelName = $plantilla->nombre_modelo ?? null;
 
             // creamos la clase del modelo
-            $modelClass = "App\\DynamicModels\\$modelName";
-
-            //Validar que la clase exista
-            if (!class_exists($modelClass)) {
-                Log::error("Clase de modelo no encontrada: $modelClass");
-                return response()->json([
-                    'error' => 'Modelo inválido o no encontrado.',
-                ], 400);
-            }
+            $modelClass = DynamicModelService::createModelClass($modelName);
 
             // Obtenemos las secciones de la plantilla
             $secciones = $plantilla->secciones;
@@ -245,15 +225,7 @@ class DocumentoController extends Controller
             }
 
             // creamos la clase del modelo
-            $modelClass = "App\\DynamicModels\\$modelName";
-
-            //Validar que la clase exista
-            if (!class_exists($modelClass)) {
-                Log::error("Clase de modelo no encontrada: $modelClass");
-                return response()->json([
-                    'error' => 'Modelo inválido o no encontrado.',
-                ], 400);
-            }
+            $modelClass = DynamicModelService::createModelClass($modelName);
 
             // Obtener todos los registros
             $documents = $modelClass::all();
@@ -364,15 +336,7 @@ class DocumentoController extends Controller
             $nameModel = $plantilla->nombre_modelo;
 
             // Creamos la clase del modelo
-            $modelClass = "App\\DynamicModels\\$nameModel";
-
-            //Validar que la clase exista
-            if (!class_exists($modelClass)) {
-                Log::error("Clase de modelo no encontrada: $modelClass");
-                return response()->json([
-                    'error' => 'Modelo inválido o no encontrado.',
-                ], 400);
-            }
+            $modelClass = DynamicModelService::createModelClass($nameModel);
 
             // Obtenemos el documento
             $document = $modelClass::find($documentId)->toArray();
@@ -435,15 +399,7 @@ class DocumentoController extends Controller
             $nameModel = $plantilla->nombre_modelo;
 
             // Creamos la clase del modelo
-            $modelClass = "App\\DynamicModels\\$nameModel";
-
-            //Validar que la clase exista
-            if (!class_exists($modelClass)) {
-                Log::error("Clase de modelo no encontrada: $modelClass");
-                return response()->json([
-                    'error' => 'Modelo inválido o no encontrado.',
-                ], 400);
-            }
+            $modelClass = DynamicModelService::createModelClass($nameModel);
 
             // Obtenemos el documento
             $document = $modelClass::find($documentId)->toArray();
@@ -575,15 +531,7 @@ class DocumentoController extends Controller
             $nameModel = $plantilla->nombre_modelo;
 
             // Creamos la clase del modelo
-            $modelClass = "App\\DynamicModels\\$nameModel";
-
-            //Validar que la clase exista
-            if (!class_exists($modelClass)) {
-                Log::error("Clase de modelo no encontrada: $modelClass");
-                return response()->json([
-                    'error' => 'Modelo inválido o no encontrado.',
-                ], 400);
-            }
+            $modelClass = DynamicModelService::createModelClass($nameModel);
 
             // Obtenemos el documento
             $document = $modelClass::find($documentId)->toArray();

@@ -13,6 +13,7 @@ use MongoDB\Client as MongoClient;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Log;
 use App\Models\Plantillas;
+use App\Services\DynamicModelService;
 use DateTime;
 
 /**
@@ -234,15 +235,7 @@ class IndicadoresController extends Controller
         $modelName = $plantilla->nombre_modelo ?? null;
 
         // creamos la clase del modelo
-        $modelClass = "App\\DynamicModels\\$modelName";
-
-        //Validar que la clase exista
-        if (!class_exists($modelClass)) {
-            Log::error("Clase de modelo no encontrada: $modelClass");
-            return response()->json([
-                'error' => 'Modelo inválido o no encontrado.',
-            ], 400);
-        }
+        $modelClass = DynamicModelService::createModelClass($modelName);
 
         // Obtener todos los registros del modelo
         $documents = $modelClass::all();

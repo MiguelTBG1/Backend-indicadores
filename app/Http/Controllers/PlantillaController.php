@@ -301,17 +301,11 @@ class PlantillaController extends Controller
 
             // Obtener el nombre del modelo de la plantilla
             $modelName = $plantilla->nombre_modelo;
-            // creamos el documento
-            $modelClass = "App\\DynamicModels\\$modelName";
 
-            //Validar que la clase exista
-            if (!class_exists($modelClass)) {
-                Log::error("Clase de modelo no encontrada: $modelClass");
-                return response()->json([
-                    'error' => 'Modelo inválido o no encontrado.',
-                ], 400);
-            }
+            // creamos la clase del modelo
+            $modelClass = DynamicModelService::createModelClass($modelName);
 
+            // Obtener el número de documentos en la colección
             $count = $modelClass::count();
 
             // Si la colección tiene datos, no se puede eliminar
@@ -367,15 +361,7 @@ class PlantillaController extends Controller
                 }
 
                 // creamos el documento
-                $modelClass = "App\\DynamicModels\\$modelName";
-
-                //Validar que la clase exista
-                if (!class_exists($modelClass)) {
-                    Log::error("Clase de modelo no encontrada: $modelClass");
-                    return response()->json([
-                        'error' => 'Modelo inválido o no encontrado.',
-                    ], 400);
-                }
+                $modelClass = DynamicModelService::createModelClass($modelName);
 
                 // Obtener todos los registros del modelo relacionado
                 $relatedModels = $modelClass::all();

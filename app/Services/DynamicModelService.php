@@ -4,10 +4,8 @@ namespace App\Services;
 
 use function PHPUnit\Framework\isArray;
 use App\Models\Plantillas;
-use Illuminate\Support\Facades\Log;
-use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
-use PhpParser\Node\Expr\Cast\Bool_;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class DynamicModelService
 {
@@ -93,6 +91,20 @@ class DynamicModelService
         foreach ($secciones as $index => $seccion) {
             self::getRelationsRecursive($seccion['fields'], $relations);
         }
+    }
+
+    public static function createModelClass($modelName)
+    {
+        // creamos la clase del modelo
+        $modelClass = "App\\DynamicModels\\$modelName";
+
+        //Validar que la clase exista
+        if (!class_exists($modelClass)) {
+            throw new \Exception('Modelo no encontrado: ' . $modelClass, 404);
+        }
+
+        // Retornamos el modelo
+        return $modelClass;
     }
 
     private static function getRelationsRecursive(array $fields, array &$relations, Bool $subForm = false)
