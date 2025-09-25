@@ -33,7 +33,7 @@ class PermissionBuilder
                 // --- Allowed ---
                 if (!empty($rol->permisos['allowed'])) {
                     foreach ($rol->permisos['allowed'] as $permiso) {
-                        
+
                         $allowedStr[] = ($this->buildPermisoStrings($permiso));
                     }
                 }
@@ -84,9 +84,9 @@ class PermissionBuilder
             // Caso recurso estático
             $recurso = $recursoObj->nombre;
         } else {
-            // Caso recurso dinámico → asumimos que es una plantilla
-            $plantillaId = $permiso['recurso'];
-            $recurso = "plantilla:{$plantillaId}";
+            if (str_contains($permiso['recurso'], 'plantilla')) {
+                $recurso = $permiso['recurso'];
+            }
         }
 
         // Recorremos las acciones

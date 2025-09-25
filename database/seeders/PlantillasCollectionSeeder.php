@@ -598,12 +598,6 @@ class PlantillasCollectionSeeder extends Seeder
                 ]);
                                 // Verificar si el archivo del modelo fue creado
                 $modelPath = app_path('Models/' . $modelName . '.php');
-                Log::debug("Verificando la existencia del archivo del modelo en: $modelPath");
-                if (file_exists($modelPath)) {
-                    echo "El modelo $modelName fue generado correctamente.\n";
-                } else {
-                    echo "Error: El modelo $modelName no fue encontrado.\n";
-                }
 
                 // Actualizamos el modelo dinámico
                 DynamicModelService::generate($modelName, $relations);

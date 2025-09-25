@@ -28,18 +28,18 @@ class PlantillaPolicy
         Log::info("Revisando permiso de lectura para el usuario '{$user->id}' en la plantilla '{$plantilla->_id}'. Habilidad esperada: 'plantilla:{$plantilla->_id}.read'");
 
         // Caso 2: creador puede ver lo suyo
-        if ($plantilla->creado_por === $user->id) {
-            Log::info("El usuario '{$user->id}' es el creador de la plantilla '{$plantilla->_id}'");
+        if ($plantilla->creado_por === $user->_id) {
+            Log::info("El usuario '{$user->_id}' es el creador de la plantilla '{$plantilla->_id}'");
             return true;
         }
 
         // Caso 3: Usuarios particulares
         if ($user->currentAccessToken()?->can("plantilla:{$plantilla->_id}.read")) {
-            Log::info("El usuario '{$user->id}' tiene permiso para ver la plantilla '{$plantilla->_id}'");
+            Log::info("El usuario '{$user->_id}' tiene permiso para ver la plantilla '{$plantilla->_id}'");
             return true;
         }
 
-        Log::info("El usuario '{$user->id}' NO tiene permiso para ver la plantilla '{$plantilla->_id}'");
+        Log::info("El usuario '{$user->_id}' NO tiene permiso para ver la plantilla '{$plantilla->_id}'");
         return false;
     }
 
@@ -86,7 +86,7 @@ class PlantillaPolicy
             return true;
         }
 
-        if ($user->currentAccessToken()?->can("plantillas:{$plantillas->_id}.delete")) {
+        if ($user->currentAccessToken()?->can("plantilla:{$plantillas->_id}.delete")) {
             return true;
         }
 
