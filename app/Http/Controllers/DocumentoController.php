@@ -138,29 +138,10 @@ class DocumentoController extends Controller
                 $documentData['Recurso Digital'] = $uploadedFiles;
             }
 
-            // Obtenemos las secciones y lo formateamos a un json valido
-            $documentData = json_decode($documentData['secciones'], true);
+            //Buscamos el nombre del modelo
+            $modelName = $plantilla->nombre_modelo ?? null;
 
-            // Buscar los campos que tengan un valor en formato de fecha
-            foreach ($documentData as $key => $value) {
-                foreach ($value['fields'] as $index => $data) {
-
-                    // Verificar que sea string y se pueda convertir a fecha
-                    if (is_string($data) && strtotime($data)) {
-                        $timestamp = strtotime($data);
-                        if ($timestamp !== false) {
-                            $documentData[$key]['fields'][$index] =  new UTCDateTime($timestamp * 1000);
-                        }
-                    } else if (is_array($data)) {
-                        // Llamamos la función recursiva
-                        $documentData[$key]['fields'][$index] = $this->recusiveSubForm($data);
-                    }
-                }
-            }
-
-            // Obtener el nombre del modelo de la plantilla
-            $modelName = $plantilla->nombre_modelo;
-            // creamos el documento
+            // creamos la clase del modelo
             $modelClass = "App\\DynamicModels\\$modelName";
 
             //Validar que la clase exista
@@ -171,15 +152,65 @@ class DocumentoController extends Controller
                 ], 400);
             }
 
-            $modelClass::create([
-                'secciones' => $documentData,
-            ]);
+            // Obtenemos las secciones de la plantilla
+            $secciones = $plantilla->secciones;
+
+            // Creamos el arreglo para guardar el campo y su modelo relacionado
+            $fieldsWithModel = [];
+
+            // Recorremos las secciones
+            foreach ($secciones as $index => $seccion) {
+                // Llamamos la funcion recursiva
+                $this->extractFieldsWithModel($seccion['fields'], $fieldsWithModel);
+            };
+
+            // Creamos el arreglo para obtener los campos de las relaciones
+            $relations = [];
+
+            // Obtenemos las secciones y lo formateamos a un json valido
+            $documentData = json_decode($documentData['secciones'], true);
+
+            // Buscar los campos que tengan un valor en formato de fecha
+            foreach ($documentData as $indexSeccion => $seccion) {
+                foreach ($seccion['fields'] as $keyField => $field) {
+
+                    // Verificar que sea string y se pueda convertir a fecha
+                    if (is_string($field) && strtotime($field)) {
+                        $timestamp = strtotime($field);
+                        if ($timestamp !== false) {
+                            $documentData[$indexSeccion]['fields'][$keyField] =  new UTCDateTime($timestamp * 1000);
+                        }
+                        // Verificamos si es una id
+                    } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+
+                        // nombre de la funcion
+                        $modelRelation = $fieldsWithModel[$keyField]['modelo'];
+
+                        // Agregamos la id al arreglo de relaciones
+                        $relations[strtolower($modelRelation) . '_ids'] = $field;
+
+                    } elseif (is_array($field)) {
+                        // Llamamos la función recursiva
+                        $documentData[$indexSeccion]['fields'][$keyField] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
+                    }
+                }
+            }
+
+            $modelClass::create(
+                array_merge([
+                    'secciones' => $documentData,
+                ], $relations));
 
 
             return response()->json(['message' => 'Documento guardado con éxito'], 201);
         } catch (\Exception $e) {
             // Registrar el error en el log
-            Log::error("Error al guardar documento: " . $e->getMessage());
+            Log::error('Error al guardar documento:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             // Registrar el error completo
             return response()->json(['message' => 'Error al crear documento', 'error' => $e->getMessage()], 500);
@@ -465,6 +496,21 @@ class DocumentoController extends Controller
 
             $updateData = $updateData['secciones'];
 
+            // Obtenemos las secciones de la plantilla
+            $secciones = $plantilla->secciones;
+
+            // Creamos el arreglo para guardar el campo y su modelo relacionado
+            $fieldsWithModel = [];
+
+            // Recorremos las secciones
+            foreach ($secciones as $index => $seccion) {
+                // Llamamos la funcion recursiva
+                $this->extractFieldsWithModel($seccion['fields'], $fieldsWithModel);
+            };
+
+            // Creamos el arreglo para obtener los campos de las relaciones
+            $relations = [];
+
             // Buscar los campos que tengan un valor en formato de fecha
             foreach ($updateData as $index => $seccion) {
                 foreach ($seccion['fields'] as $key => $field) {
@@ -475,18 +521,31 @@ class DocumentoController extends Controller
                         if ($timestamp !== false) {
                             $updateData[$index]['fields'][$key] =  new UTCDateTime($timestamp * 1000);
                         }
-                    } else if (is_array($field)) {
+                    // Verificamos si es una id
+                    } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+
+                        // nombre de la funcion
+                        $modelRelation = $fieldsWithModel[$key]['modelo'];
+
+                        // Agregamos la id al arreglo de relaciones
+                        $relations[strtolower($modelRelation) . '_ids'] = $field;
+
+                    } elseif (is_array($field)) {
                         // Llamamos la función recursiva
-                        $updateData[$index]['fields'][$key] = $this->recusiveSubForm($field);
+                        $updateData[$index]['fields'][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
                     }
                 }
             }
 
+            Log::info('relaciones',[
+                ':' => $relations
+            ]);
+
             // Actualizar el documento en la colección de MongoDB
-            $modelClass::where('_id', $documentId)->update([
+            $modelClass::where('_id', $documentId)->update(array_merge([
                 'secciones' => $updateData,
                 'Recursos Digitales' => $archivosActuales
-            ]);
+            ], $relations));
 
             return response()->json(['message' => 'Documento actualizado con éxito']);
         } catch (\Exception $e) {
@@ -545,7 +604,7 @@ class DocumentoController extends Controller
      * @param array $data
      * @return array
      */
-    public function recusiveSubForm(array $data)
+    public function recusiveSubForm(array $data, &$relations, $fieldsWithModel)
     {
         // Recorremos el arraglo
         foreach ($data as $index => $value) {
@@ -557,9 +616,18 @@ class DocumentoController extends Controller
                     if ($timestamp !== false) {
                         $data[$index][$key] =  new UTCDateTime($timestamp * 1000);
                     }
+                    // Verificamos si es una id
+                } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+
+                    // nombre de la funcion
+                    $modelRelation = $fieldsWithModel[$key]['modelo'];
+
+                    // Agregamos la id al arreglo de relaciones
+                    $relations[strtolower($modelRelation) . '_ids'][] = $field;
+
                 } else if (is_array($field)) {
                     // Llamamos la función recursiva
-                    $data[$index][$key] = $this->recusiveSubForm($field);
+                    $data[$index][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
                 }
             }
         }
