@@ -94,15 +94,16 @@ Route::middleware(['auth.sanctum'])->group(function () {
     Route::controller(UsersController::class)
         ->prefix('usuarios')
         ->group(function () {
-            Route::get('/', 'index');
-            Route::get('{id}', 'show');
-            Route::put('{id}', 'update');
-            Route::delete('{id}', 'destroy');
+            Route::get('/', 'index')->middleware(['abilities:usuarios.read']);
+            Route::post('/register', [UsersController::class, 'register'])->middleware(['abilities:usuarios.create']);
+            Route::get('{id}', 'show')->middleware(['abilities:usuarios.read']);
+            Route::put('{id}', 'update')->middleware(['abilities:usuarios.update']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:usuarios.delete']);
         });
 
-    Route::post('/register', [UsersController::class, 'register']);
-    Route::get('/acciones', [AccionesController::class, 'index']);
-    Route::get('/recursos', [RecursosController::class, 'index']);
+
+        Route::get('/acciones', [AccionesController::class, 'index'])->middleware(['abilities:acciones.read']);
+        Route::get('/recursos', [RecursosController::class, 'index'])->middleware(['abilities:recursos.read']);
 
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout']);

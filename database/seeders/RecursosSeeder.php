@@ -41,8 +41,26 @@ class RecursosSeeder extends Seeder
                 'clave' => 'documentos',
                 'nombre' => 'Documentos',
                 'descripcion' => 'Rutas de documentos del sistema',
-                'tipo' => 'patron',
+                'tipo' => 'estatico',
             ],
+            [
+                'clave' => 'roles',
+                'nombre' => 'Roles',
+                'descripcion' => 'Rutas de roles del sistema',
+                'tipo' => 'estatico',
+            ],
+            [
+                'clave' => 'acciones',
+                'nombre' => 'Acciones',
+                'descripcion' => 'Rutas de acciones del sistema',
+                'tipo' => 'estatico',
+            ],
+            [
+                'clave' => 'recursos',
+                'nombre' => 'Recursos',
+                'descripcion' => 'Rutas de recursos del sistema',
+                'tipo' => 'estatico',
+            ]
         ];
 
         foreach ($recursos as $recurso) {
