@@ -25,11 +25,69 @@ class DocumentoController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function templateNames()
+    public function editableTemplateNames(Request $request)
     {
         try {
+            $user = $request->user();
+
             // Obtener todas las plantillas
-            $plantillas = Plantillas::all();
+            $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
+                return $user->can('viewEditableDocument', $plantilla);
+            });
+
+            // Verificar si hay plantillas
+            if ($plantillas->isEmpty()) {
+                throw new \Exception('No hay plantillas disponibles', 404);
+            }
+
+            // Mapear plantillas y verificar si tienen documentos
+            $coleccionesConDocumentos = $plantillas->map(function ($plantilla) {
+                // Construir nombre de clase correctamente
+                $modelClass = "App\\DynamicModels\\{$plantilla->nombre_modelo}";
+
+                // Validar que la clase exista
+                if (!class_exists($modelClass)) {
+                    Log::warning("Modelo no encontrado: {$modelClass}");
+                    return null; // Valor consistente
+                }
+
+                // Contar los registros del modelo
+                $documentsCount = $modelClass::count();
+
+                // Log opcional (solo para debug)
+                Log::debug("{$plantilla->nombre_modelo} tiene {$documentsCount} documentos");
+
+                // Verificar si hay documentos
+                if ($documentsCount > 0) {
+                    return [
+                        'id' => $plantilla->_id,
+                        'nombre_plantilla' => $plantilla->nombre_plantilla,
+                        'nombre_coleccion' => $plantilla->nombre_coleccion,
+                    ];
+                }
+
+                return null; // explícito
+            })
+                ->filter() // ← Elimina null, [], false, etc.
+                ->values(); // ← Reindexa el array (opcional, para JSON limpio)
+
+            // Retornamos el arreglo de colecciones con documentos
+            return response()->json($coleccionesConDocumentos);
+        } catch (\Exception $e) {
+            Log::error("Error en templateNames: " . $e->getMessage());
+            return response()->json(['error' => 'Error interno del servidor'], 500);
+        }
+    }
+
+    public function redableTemplateNames(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            // Obtener todas las plantillas
+            $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
+                return $user->can('redableEditableDocument', $plantilla);
+            });
 
             // Verificar si hay plantillas
             if ($plantillas->isEmpty()) {

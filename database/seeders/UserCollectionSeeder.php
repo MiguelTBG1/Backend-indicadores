@@ -34,6 +34,7 @@ class UserCollectionSeeder extends Seeder
         $plantillaProgramaEducativo = "68b1df5f34dafa1c910aa02c";
         $plantillaAlumnos = "68bb162223bbc9264e05fca0";
         $comodinRecurso = Recurso::where('clave', '*')->first();
+        $plantillaRecurso = Recurso::where('clave', 'plantillas')->first();
         $comodinAccion = Accion::where('clave', '*')->first();
         $read = Accion::where('clave', 'read')->first();
         $update = Accion::where('clave', 'update')->first();
@@ -152,6 +153,12 @@ class UserCollectionSeeder extends Seeder
             'permisos' => [
                 'allowed' => [
                     [
+                        'recurso' => $plantillaRecurso->_id,
+                        'acciones' => [
+                            $comodinAccion->_id
+                        ]
+                    ],
+                    [
                         'recurso' => 'plantilla:' . $plantillaPeriodos,
                         'acciones' => [
                             $comodinAccion->_id
@@ -164,22 +171,13 @@ class UserCollectionSeeder extends Seeder
                         ]
                     ],
                     [
-                        'recurso' => 'plantilla:' . $plantillaAlumnos,
+                        'recurso' => 'documento:' . $plantillaAlumnos,
                         'acciones' => [
-                            $read->_id,
                             $update->_id
                         ]
                     ],
-                    [
-                        'recurso' => 'documento:' . $comodinRecurso->_id,
-                        'acciones' => [
-                            $read->_id,
-                            $update->_id
-                        ]
-                    ]
                 ]
-            ],
-            'roles' => [$super_usuario->_id]
+            ]
         ]);
     }
 }

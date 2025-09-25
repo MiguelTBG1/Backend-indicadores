@@ -110,4 +110,40 @@ class PlantillaPolicy
     {
         return false;
     }
+
+        /**
+     * Determine wich documents can the user read
+     */
+    public function viewReadableDocument(User $user, Plantillas $plantilla): bool
+    {
+        // El creador puede ver lo suyo
+        if ($plantilla->creado_por === $user->_id) {
+            return true;
+        }
+
+        // Usuario particular
+        if ($user->currentAccessToken()?->can("documento:{$plantilla->_id}.read")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine wich documents are editable
+     */
+    public function viewEditableDocument(User $user, Plantillas $plantilla): bool
+    {
+                // El creador puede ver lo suyo
+        if ($plantilla->creado_por === $user->_id) {
+            return true;
+        }
+
+        // Usuario particular
+        if ($user->currentAccessToken()?->can("documento:{$plantilla->_id}.update")) {
+            return true;
+        }
+
+        return false;
+    }
 }

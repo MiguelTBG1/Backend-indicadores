@@ -2,17 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Rol;
-use App\Models\Recurso;
 use App\Models\Accion;
 use App\Models\Plantillas;
+use App\Models\Recurso;
+use App\Models\Rol;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class PermissionBuilder
 {
     /** Genera los habilidades del token para el usuario
-     * 
+     *
      * Estas habilidades siguen el siguiente formato:
      * <tipo_recurso>:<identificador>.<accion>
      */
@@ -28,10 +28,12 @@ class PermissionBuilder
 
                 // Comprobamos que exista el rol
                 $rol = Rol::find($roleId);
-                if (!$rol) continue;
+                if (! $rol) {
+                    continue;
+                }
 
                 // --- Allowed ---
-                if (!empty($rol->permisos['allowed'])) {
+                if (! empty($rol->permisos['allowed'])) {
                     foreach ($rol->permisos['allowed'] as $permiso) {
 
                         $allowedStr[] = ($this->buildPermisoStrings($permiso));
@@ -40,7 +42,7 @@ class PermissionBuilder
 
                 // --- Denied ---
                 // Aqui filtramos los permisos que sean negados explicitamente
-                if (!empty($rol->permisos['denied'])) {
+                if (! empty($rol->permisos['denied'])) {
                     foreach ($rol->permisos['denied'] as $permiso) {
                         $deniedStr[] = $this->buildPermisoStrings($permiso);
                     }
@@ -49,16 +51,15 @@ class PermissionBuilder
         }
 
         // Recorremos los permisos particulares
-        if (!empty($user->permisos['allowed'])) {
+        if (! empty($user->permisos['allowed'])) {
             $allowed = $user->permisos['allowed'];
             foreach ($allowed as $permiso) {
                 $allowedStr[] = $this->buildPermisoStrings($permiso);
             }
         }
 
-
         // QUitamos los permisos negados particulares
-        if (!empty($user->permisos['denied'])) {
+        if (! empty($user->permisos['denied'])) {
             $denied = $user->permisos['denied'];
             foreach ($denied as $permisoNegado) {
                 $deniedStr[] = $this->buildPermisoStrings($permisoNegado);
@@ -85,12 +86,12 @@ class PermissionBuilder
             $recurso = $recursoObj->nombre;
         } else {
             if (str_contains($permiso['recurso'], 'plantilla')) {
-                Log::debug('Recurso plantilla encontrado: ' . $permiso['recurso']);
+                Log::debug('Recurso plantilla encontrado: '.$permiso['recurso']);
                 $recurso = $permiso['recurso'];
             } else {
 
                 if (str_contains($permiso['recurso'], 'documento')) {
-                    Log::debug('Recurso documento encontrado: ' . $permiso['recurso']);
+                    Log::debug('Recurso documento encontrado: '.$permiso['recurso']);
                     $recurso = $permiso['recurso'];
                 }
             }
@@ -100,7 +101,7 @@ class PermissionBuilder
             Log::debug("Tipo: {$tipo}, ID: {$id}");
             // Revisamos si la id es del recurso comodin:
             if (Recurso::where('_id', $id)->exists()) {
-                Log::debug('Recurso comodin encontrado: ' . $id);
+                Log::debug('Recurso comodin encontrado: '.$id);
                 $recurso = "{$tipo}:*";
             }
         }
@@ -133,17 +134,19 @@ class PermissionBuilder
                         $resolved[] = "{$r}.{$a}";
                     }
                 }
+
                 continue;
             }
 
             // Caso 2: comodin de recurso especifico y de accion
-            if(str_ends_with($recurso, ':*') && $accion === '*') {
-                [$tipo, $id] = explode (':', $recurso, 2);
+            if (str_ends_with($recurso, ':*') && $accion === '*') {
+                [$tipo, $id] = explode(':', $recurso, 2);
                 foreach ($allPlantillas as $plantillaId) {
                     foreach ($allAcciones as $a) {
                         $resolved[] = "{$tipo}:{$plantillaId}.{$a}";
                     }
                 }
+
                 continue;
             }
 
@@ -152,15 +155,17 @@ class PermissionBuilder
                 foreach ($allRecursos as $r) {
                     $resolved[] = "{$r}.{$accion}";
                 }
+
                 continue;
             }
 
             // Caso 4: comodin de recurso especifico:
             if (str_ends_with($recurso, ':*')) {
-                [$tipo, $id] = explode (':', $recurso, 2);
+                [$tipo, $id] = explode(':', $recurso, 2);
                 foreach ($allPlantillas as $plantillaId) {
                     $resolved[] = "{$tipo}:{$plantillaId}.{$accion}";
                 }
+
                 continue;
             }
 
@@ -169,6 +174,7 @@ class PermissionBuilder
                 foreach ($allAcciones as $a) {
                     $resolved[] = "{$recurso}.{$a}";
                 }
+
                 continue;
             }
 

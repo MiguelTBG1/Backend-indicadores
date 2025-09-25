@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth.sanctum' => \App\Http\Middleware\SanctumApiMiddleware::class,
             'abilities' => \App\Http\Middleware\CheckAbility::class,
+            'checkDocumentAbility' => \App\Http\Middleware\CheckDocumentAbility::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

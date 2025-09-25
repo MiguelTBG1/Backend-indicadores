@@ -6,7 +6,9 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 use App\Models\PersonalAccessToken;
 use App\Models\Plantillas;
+use App\Models\Documentos;
 use App\Policies\PlantillaPolicy;
+use App\Policies\DocumentoPolicy;
 use Laravel\Sanctum\Sanctum;
 use Illuminate\Support\Facades\Gate;
 class AppServiceProvider extends ServiceProvider

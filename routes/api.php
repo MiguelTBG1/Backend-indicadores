@@ -59,11 +59,12 @@ Route::middleware(['auth.sanctum'])->group(function () {
         ->prefix('documentos')
         ->group(function () {
             Route::get('{id}', 'index')->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos.read']);
-            Route::get('{plantillaName}/{documentId}', 'show')->middleware(['abilities:documentos.read']);
-            Route::post('{id}', 'store')->middleware(['abilities:documentos.create']);
-            Route::post('{plantillaName}/{documentId}', 'update')->middleware(['abilities:documentos.update']);
-            Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos.delete']);
-            Route::get('plantillas', 'templateNames');
+            Route::get('{plantillaName}/{documentId}', 'show')->middleware(['abilities:documentos.read'])->middleware('checkDocumentAbility:read');
+            Route::post('{id}', 'store')->middleware(['abilities:documentos.create'])->middleware('checkDocumentAbility:create');
+            Route::post('{plantillaName}/{documentId}', 'update')->middleware(['abilities:documentos.update'])->middleware('checkDocumentAbility:update');
+            Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos.delete'])->middleware('checkDocumentAbility:delete');
+            Route::get('plantillas', 'editableTemplateNames');
+            Route::get('plantillas-read', 'redableTemplateNames')->middleware(['abilities:documentos.read']);
         });
 
     /* EJES */
@@ -97,17 +98,14 @@ Route::middleware(['auth.sanctum'])->group(function () {
             Route::get('{id}', 'show');
             Route::put('{id}', 'update');
             Route::delete('{id}', 'destroy');
+            Route::post('/register', [UsersController::class, 'register']);
+            Route::get('/acciones', [AccionesController::class, 'index']);
+            Route::get('/recursos', [RecursosController::class, 'index']);
         });
-    Route::post('/register', [UsersController::class, 'register']);
+
+
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout']);
-
-
-    /* ACCIONES */
-    Route::get('/acciones', [AccionesController::class, 'index']);
-
-    /* RECURSOS */
-    Route::get('/recursos', [RecursosController::class, 'index']);
 });
 
 // Reporte PDF
