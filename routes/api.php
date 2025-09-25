@@ -98,11 +98,11 @@ Route::middleware(['auth.sanctum'])->group(function () {
             Route::get('{id}', 'show');
             Route::put('{id}', 'update');
             Route::delete('{id}', 'destroy');
-            Route::post('/register', [UsersController::class, 'register']);
-            Route::get('/acciones', [AccionesController::class, 'index']);
-            Route::get('/recursos', [RecursosController::class, 'index']);
         });
 
+    Route::post('/register', [UsersController::class, 'register']);
+    Route::get('/acciones', [AccionesController::class, 'index']);
+    Route::get('/recursos', [RecursosController::class, 'index']);
 
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout']);

@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\Plantillas;
+use Illuminate\Support\Facades\Log;
 
 class CheckDocumentAbility
 {
@@ -21,18 +22,27 @@ class CheckDocumentAbility
             return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
         }
 
-        $plantillaName = $request->route('plantillaName'); 
-        $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
+        $idPlantilla = null;
+        $plantillaName = $request->route('plantillaName');
 
-        // Nombre del model
-        $idPlantilla = $plantilla->_id;
+        if (!$plantillaName) {
+            $idPlantilla = $request->route('id');
+        } else {
+            $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
 
-        $requiredAbility = "documentos:{$idPlantilla}.{$action}";
+            // Nombre del model
+            $idPlantilla = $plantilla->_id;
+        }
+
+
+        Log::info('ID de plantilla obtenido: ' . $idPlantilla);
+
+        $requiredAbility = "documento:{$idPlantilla}.{$action}";
 
         if (!$request->user()->tokenCan($requiredAbility)) {
             return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
         }
-        
+
         return $next($request);
     }
 }
