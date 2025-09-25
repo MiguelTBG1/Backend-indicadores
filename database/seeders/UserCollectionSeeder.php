@@ -31,8 +31,13 @@ class UserCollectionSeeder extends Seeder
         // Plantillas
         $plantillaPeriodos = "68b0938423ed6ec87508548c";
         $plantillaProgramaEducativo = "68b1df5f34dafa1c910aa02c";
-
+        $plantillaAlumnos = "68bb162223bbc9264e05fca0";
         $comodin = Accion::where('clave', '*')->first();
+        $read = Accion::where('clave', 'read')->first();
+        $update = Accion::where('clave', 'update')->first();
+        $delete = Accion::where('clave', 'delete')->first();
+        $create = Accion::where('clave', 'create')->first();
+
         User::create(
             [
                 'nombre' => 'Rodrigo Alexander',
@@ -154,6 +159,13 @@ class UserCollectionSeeder extends Seeder
                         'recurso' => $plantillaProgramaEducativo,
                         'acciones' => [
                             $comodin->_id
+                        ]
+                    ],
+                    [
+                        'recurso' => $plantillaAlumnos,
+                        'acciones' => [
+                            $read->_id,
+                            $update->_id
                         ]
                     ]
                 ]
