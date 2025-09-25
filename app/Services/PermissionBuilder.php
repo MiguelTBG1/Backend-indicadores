@@ -136,7 +136,18 @@ class PermissionBuilder
                 continue;
             }
 
-            // Caso 2: comodín de acción
+            // Caso 2: comodin de recurso especifico y de accion
+            if(str_ends_with($recurso, ':*') && $accion === '*') {
+                [$tipo, $id] = explode (':', $recurso, 2);
+                foreach ($allPlantillas as $plantillaId) {
+                    foreach ($allAcciones as $a) {
+                        $resolved[] = "{$tipo}:{$plantillaId}.{$a}";
+                    }
+                }
+                continue;
+            }
+
+            // Caso 3: comodín de acción
             if ($recurso === '*') {
                 foreach ($allRecursos as $r) {
                     $resolved[] = "{$r}.{$accion}";
@@ -144,7 +155,7 @@ class PermissionBuilder
                 continue;
             }
 
-            // Caso 3: comodin de recurso especifico:
+            // Caso 4: comodin de recurso especifico:
             if (str_ends_with($recurso, ':*')) {
                 [$tipo, $id] = explode (':', $recurso, 2);
                 foreach ($allPlantillas as $plantillaId) {
@@ -153,7 +164,7 @@ class PermissionBuilder
                 continue;
             }
 
-            // Caso 4: comodín de recurso
+            // Caso 5: comodín de recurso
             if ($accion === '*') {
                 foreach ($allAcciones as $a) {
                     $resolved[] = "{$recurso}.{$a}";

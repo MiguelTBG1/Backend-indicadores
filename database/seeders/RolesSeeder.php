@@ -15,7 +15,7 @@ class RolesSeeder extends Seeder
     public function run(): void
     {
         // Obtenemos los recursos del sistema
-        $todosRecursos = Recurso::where('nombre', '*')->first();
+        $todosRecursos = Recurso::where('clave', '*')->first();
         $usuarios = Recurso::where('nombre', 'Usuarios')->first();
         $indicadores = Recurso::where('nombre', 'Indicadores')->first();
         $plantillas = Recurso::where('nombre', 'Plantillas')->first();
@@ -40,6 +40,18 @@ class RolesSeeder extends Seeder
                                 $comodin->_id,
                             ],
                         ],
+                        [
+                            'recurso' => 'plantilla:' . $todosRecursos->_id,
+                            'acciones' => [
+                                $comodin->_id,
+                            ],
+                        ],
+                        [
+                            'recurso' => 'documento:' . $todosRecursos->_id,
+                            'acciones' => [
+                                $comodin->_id,
+                            ],
+                        ]
                     ],
                 ],
             ],
