@@ -150,19 +150,26 @@ class UserCollectionSeeder extends Seeder
             'permisos' => [
                 'allowed' => [
                     [
-                        'recurso' => 'plantilla:'.$plantillaPeriodos,
+                        'recurso' => 'plantilla:' . $plantillaPeriodos,
                         'acciones' => [
                             $comodin->_id
                         ]
                     ],
                     [
-                        'recurso' => 'plantilla:'.$plantillaProgramaEducativo,
+                        'recurso' => 'plantilla:' . $plantillaProgramaEducativo,
                         'acciones' => [
                             $comodin->_id
                         ]
                     ],
                     [
-                        'recurso' => 'plantilla:'.$plantillaAlumnos,
+                        'recurso' => 'plantilla:' . $plantillaAlumnos,
+                        'acciones' => [
+                            $read->_id,
+                            $update->_id
+                        ]
+                    ],
+                    [
+                        'recurso' => 'documento:' . $plantillaAlumnos,
                         'acciones' => [
                             $read->_id,
                             $update->_id

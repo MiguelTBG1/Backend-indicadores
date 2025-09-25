@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\Rol;
 use App\Models\Recurso;
 use App\Models\Accion;
-
+use App\Models\Plantillas;
 use Illuminate\Support\Facades\Log;
 
 class PermissionBuilder
@@ -85,7 +85,21 @@ class PermissionBuilder
             $recurso = $recursoObj->nombre;
         } else {
             if (str_contains($permiso['recurso'], 'plantilla')) {
+                Log::debug('Recurso plantilla encontrado: ' . $permiso['recurso']);
                 $recurso = $permiso['recurso'];
+            } else {
+
+                if (str_contains($permiso['recurso'], 'documento')) {
+                    Log::debug('Recurso documento encontrado: ' . $permiso['recurso']);
+                    $recurso = $permiso['recurso'];
+                }
+            }
+            // Separamos el tipo de la id
+            [$tipo, $id] = explode(':', $permiso['recurso'], 2);
+
+            // Revisamos si la id es del recurso comodin:
+            if (Recurso::where('clave', $id)->exists()) {
+                $recurso = "{$tipo}:*";
             }
         }
 
@@ -103,6 +117,8 @@ class PermissionBuilder
     {
         $allRecursos = Recurso::where('clave', '!=', '*')->pluck('clave')->toArray();
         $allAcciones = Accion::where('clave', '!=', '*')->pluck('clave')->toArray();
+
+        $allPlantillas = Plantillas::all()->pluck('_id')->toArray();
 
         $resolved = [];
 
@@ -125,8 +141,17 @@ class PermissionBuilder
                 }
                 continue;
             }
+ual
+            // Caso 3: comodin de recurso especifico:
+            if (str_ends_with($recurso, ':*')) {
+                [$tipo, $id] = explode (':', $recurso, 2);
+                foreach ($allPlantillas as $plantillaId) {
+                    $resolved[] = "{$tipo}:{$plantillaId}.{$accion}";
+                }
+                continue;
+            }
 
-            // Caso 3: comodín de recurso
+            // Caso 4: comodín de recurso
             if ($accion === '*') {
                 foreach ($allAcciones as $a) {
                     $resolved[] = "{$recurso}.{$a}";
