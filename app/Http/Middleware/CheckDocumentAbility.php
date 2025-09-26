@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\Plantillas;
 use Illuminate\Support\Facades\Log;
+use App\Services\PermissionBuilder;
 
 class CheckDocumentAbility
 {
@@ -17,29 +18,32 @@ class CheckDocumentAbility
      */
     public function handle(Request $request, Closure $next, $action): Response
     {
-        // Rvisamos si el usuario esta auntenticado
         if (!$request->user()) {
             return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
         }
 
-        $idPlantilla = null;
-        $plantillaName = $request->route('plantillaName');
+        $plantilla = null;
 
-        if (!$plantillaName) {
-            $idPlantilla = $request->route('id');
-        } else {
-            $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
-
-            // Nombre del model
-            $idPlantilla = $plantilla->_id;
+        if ($request->route('id')) {
+            $plantilla = Plantillas::find($request->route('id'));
+        } elseif ($request->route('plantillaName')) {
+            $plantilla = Plantillas::where('nombre_plantilla', $request->route('plantillaName'))->first();
         }
 
+        if (!$plantilla) {
+            return response()->json(['message' => 'Plantilla no encontrada'], Response::HTTP_NOT_FOUND);
+        }
 
-        Log::info('ID de plantilla obtenido: ' . $idPlantilla);
+        $requiredAbility = "documento:{$plantilla->_id}.{$action}";
 
-        $requiredAbility = "documento:{$idPlantilla}.{$action}";
+        if ($plantilla->creado_por === $request->user()->_id) {
+            return $next($request);
+        }
 
-        if (!$request->user()->tokenCan($requiredAbility)) {
+        $permissionBuilder = app(PermissionBuilder::class);
+        $abilities = $permissionBuilder->buildForUser($request->user());
+
+        if (!in_array($requiredAbility, $abilities)) {
             return response()->json(['message' => 'No autorizado'], Response::HTTP_FORBIDDEN);
         }
 
