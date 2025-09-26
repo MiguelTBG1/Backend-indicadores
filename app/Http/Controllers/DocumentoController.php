@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Plantillas;
 use App\Services\DynamicModelService;
 use MongoDB\BSON\UTCDateTime;
-
+use Exception;
 use function Laravel\Prompts\form;
 
 class DocumentoController extends Controller
@@ -19,14 +19,14 @@ class DocumentoController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function editableTemplateNames(Request $request)
+    public function redableTemplateNames(Request $request)
     {
         try {
             $user = $request->user();
 
             // Obtener todas las plantillas
             $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
-                return $user->can('viewEditableDocument', $plantilla);
+                return $user->can('viewReadableDocument', $plantilla);
             });
 
             // Verificar si hay plantillas
@@ -73,51 +73,33 @@ class DocumentoController extends Controller
         }
     }
 
-    public function redableTemplateNames(Request $request)
+    public function creableTemplateNames(Request $request)
     {
         try {
             $user = $request->user();
 
             // Obtener todas las plantillas
             $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
-                return $user->can('redableEditableDocument', $plantilla);
+                return $user->can('viewCreableDocument', $plantilla);
             });
 
-            // Verificar si hay plantillas
+         // Verificar si hay plantillas
             if ($plantillas->isEmpty()) {
                 throw new \Exception('No hay plantillas disponibles', 404);
             }
 
-            // Mapear plantillas y verificar si tienen documentos
-            $coleccionesConDocumentos = $plantillas->map(function ($plantilla) {
-                // Construir nombre de clase correctamente
-                $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
+            // Devolver la respuesta JSON
+            return response()->json($plantillas, 200);
+        } catch (Exception $e) {
 
-                // Contar los registros del modelo
-                $documentsCount = $modelClass::count();
+            // Registrar el error en el log
+            Log::error('Error en index: ' . $e->getMessage());
 
-                // Log opcional (solo para debug)
-                Log::debug("{$plantilla->nombre_modelo} tiene {$documentsCount} documentos");
-
-                // Verificar si hay documentos
-                if ($documentsCount > 0) {
-                    return [
-                        'id' => $plantilla->_id,
-                        'nombre_plantilla' => $plantilla->nombre_plantilla,
-                        'nombre_coleccion' => $plantilla->nombre_coleccion,
-                    ];
-                }
-
-                return null; // explícito
-            })
-                ->filter() // ← Elimina null, [], false, etc.
-                ->values(); // ← Reindexa el array (opcional, para JSON limpio)
-
-            // Retornamos el arreglo de colecciones con documentos
-            return response()->json($coleccionesConDocumentos);
-        } catch (\Exception $e) {
-            Log::error("Error en templateNames: " . $e->getMessage());
-            return response()->json(['error' => 'Error interno del servidor'], 500);
+            // Registrar el error completo
+            return response()->json([
+                'error' => 'Ocurrió un error: ' . $e->getMessage(),
+                'code' => $e->getCode()
+            ], $e->getCode() ?: 500);
         }
     }
 

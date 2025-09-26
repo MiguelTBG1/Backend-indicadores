@@ -32,6 +32,7 @@ class UserCollectionSeeder extends Seeder
         $plantillaAlumnos = '68bb162223bbc9264e05fca0';
         $comodinRecurso = Recurso::where('clave', '*')->first();
         $plantillaRecurso = Recurso::where('clave', 'plantillas')->first();
+        $documentoRecurso = Recurso::where('clave', 'documentos')->first();
         $comodinAccion = Accion::where('clave', '*')->first();
         $read = Accion::where('clave', 'read')->first();
         $update = Accion::where('clave', 'update')->first();
@@ -156,23 +157,36 @@ class UserCollectionSeeder extends Seeder
                         ],
                     ],
                     [
-                        'recurso' => 'plantilla:'.$plantillaPeriodos,
+                        'recurso' => $documentoRecurso->_id,
+                        'acciones' => [
+                            $comodinAccion -> _id
+                        ]
+                    ],
+                    [
+                        'recurso' => 'plantilla:' . $plantillaPeriodos,
                         'acciones' => [
                             $comodinAccion->_id,
                         ],
                     ],
                     [
-                        'recurso' => 'plantilla:'.$plantillaProgramaEducativo,
+                        'recurso' => 'plantilla:' . $plantillaProgramaEducativo,
                         'acciones' => [
                             $comodinAccion->_id,
                         ],
                     ],
                     [
-                        'recurso' => 'documento:'.$plantillaAlumnos,
+                        'recurso' => 'documento:' . $plantillaAlumnos,
                         'acciones' => [
-                            $update->_id,
+                            $read->_id,
+                            $create->_id,
                         ],
                     ],
+                    [
+                        'recurso' => 'documento:' . $plantillaProgramaEducativo,
+                        'acciones' => [
+                            $create->_id,
+                        ],
+                    ]
                 ],
             ],
         ]);

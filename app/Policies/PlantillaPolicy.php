@@ -134,9 +134,9 @@ class PlantillaPolicy
     }
 
     /**
-     * Determine wich documents are editable
+     * Determine wich documents are creable
      */
-    public function viewEditableDocument(User $user, Plantillas $plantilla): bool
+    public function viewCreableDocument(User $user, Plantillas $plantilla): bool
     {
         // El creador puede ver lo suyo
         if ($plantilla->creado_por === $user->_id) {
@@ -144,7 +144,7 @@ class PlantillaPolicy
         }
 
         // Usuario particular
-        if ($user->currentAccessToken()?->can("documento:{$plantilla->_id}.update")) {
+        if ($user->currentAccessToken()?->can("documento:{$plantilla->_id}.create")) {
             return true;
         }
 

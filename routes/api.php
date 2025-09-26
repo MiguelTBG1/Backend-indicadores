@@ -60,8 +60,8 @@ Route::middleware(['auth.sanctum'])->group(function () {
             Route::post('{id}', 'store')->middleware(['abilities:documentos.create'])->middleware('checkDocumentAbility:create');
             Route::post('{plantillaName}/{documentId}', 'update')->middleware(['abilities:documentos.update'])->middleware('checkDocumentAbility:update');
             Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos.delete'])->middleware('checkDocumentAbility:delete');
-            Route::get('plantillas', 'editableTemplateNames');
-            Route::get('plantillas-read', 'redableTemplateNames')->middleware(['abilities:documentos.read']);
+            Route::get('plantillas-creable', 'creableTemplateNames')->middleware(['abilities:documentos.create']);
+            Route::get('plantillas-redable', 'redableTemplateNames')->middleware(['abilities:documentos.read']);
         });
 
     /* EJES */
