@@ -9,6 +9,7 @@ use Laravel\Sanctum\PersonalAccessToken;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use App\Services\PermissionBuilder;
 
 /**
  * @group Authentification
@@ -31,7 +32,7 @@ class AuthController extends Controller
      * 
      * @response scenario="Datos de inicio de sesion incorrectos" status=401 {"message": "Credenciales invalidas"}
      */
-    public function login(Request $request)
+    public function login(Request $request, PermissionBuilder $builder)
     {
         try {
             // Validamos que recibieron los datos recibidos
@@ -52,8 +53,9 @@ class AuthController extends Controller
 
             // Parametros para generar el token
             $nombreToken = str_replace(' ', '_', $user->nombre) . "_access_token"; // Nombre del token
-            $permisos =  $user->getPermisos(); // Permisos del usuario
-            Log::debug("Permisos totales: " . json_encode($permisos));
+
+            $permisos = $builder->buildForUser($user);
+
             $tiempoVida = now()->addWeek(); // TIempo de vida del token
 
             // Generamos el token
@@ -63,6 +65,18 @@ class AuthController extends Controller
             $user->makeHidden(['apellido_materno', 'apellido_paterno', 'email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles', 'permisos']);
 
             //$permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
+
+            Log::info("Usuario ha iniciado sesión", [
+                'id' => $user->id,
+                'nombre' => $user->nombre,
+            ]);
+
+            Log::info("Permisos asignados", [
+                'usuario_id' => $user->id,
+                'permisos' => $permisos,
+            ]);
+
+
             // Respuesta exitosa
             return response()->json([
                 'message' => 'Login exitoso',

@@ -14,24 +14,29 @@ class AccionesSeeder extends Seeder
     {
         $Acciones = [
             [
-                'nombre' => '*',
-                'descripcion' => 'Todos los permisos',
+                'nombre' => 'Comodín',
+                'clave' => '*',
+                'descripcion' => 'Acceso a todas las acciones',
             ],
             [
-                'nombre' => 'crear',
+                'nombre' => 'Crear',
+                'clave' => 'create',
                 'descripcion' => 'Crear un nuevo registro',
             ],
             [
-                'nombre' => 'leer',
-                'descripcion' => 'Leer o consultar un registro',
+                'nombre' => 'Leer',
+                'clave' => 'read',
+                'descripcion' => 'Consultar registros existentes',
             ],
             [
-                'nombre' => 'actualizar',
-                'descripcion' => 'Actualizar un registro existente',
+                'nombre' => 'Actualizar',
+                'clave' => 'update',
+                'descripcion' => 'Modificar registros existentes',
             ],
             [
-                'nombre' => 'eliminar',
-                'descripcion' => 'Eliminar un registro',
+                'nombre' => 'Eliminar',
+                'clave' => 'delete',
+                'descripcion' => 'Eliminar registros',
             ],
         ];
 

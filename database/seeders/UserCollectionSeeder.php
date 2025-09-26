@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Accion;
+use App\Models\Plantillas;
+use App\Models\Recurso;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -23,7 +26,18 @@ class UserCollectionSeeder extends Seeder
         $analistaIndicador = Rol::where('nombre', 'Analista de indicadores')->first();
         $creadorDocumentos = Rol::where('nombre', 'Creador de documentos')->first();
 
-        // Super Usuario
+        // Plantillas
+        $plantillaPeriodos = '68b0938423ed6ec87508548c';
+        $plantillaProgramaEducativo = '68b1df5f34dafa1c910aa02c';
+        $plantillaAlumnos = '68bb162223bbc9264e05fca0';
+        $comodinRecurso = Recurso::where('clave', '*')->first();
+        $plantillaRecurso = Recurso::where('clave', 'plantillas')->first();
+        $comodinAccion = Accion::where('clave', '*')->first();
+        $read = Accion::where('clave', 'read')->first();
+        $update = Accion::where('clave', 'update')->first();
+        $delete = Accion::where('clave', 'delete')->first();
+        $create = Accion::where('clave', 'create')->first();
+
         User::create(
             [
                 'nombre' => 'Rodrigo Alexander',
@@ -119,6 +133,48 @@ class UserCollectionSeeder extends Seeder
             'ocupacion' => 'Documentalista',
             'escolaridad' => 'Licenciatura',
             'roles' => [$creadorDocumentos->_id],
+        ]);
+
+        // Usuario de prueba para permisos
+        User::create([
+            'nombre' => 'Prueba',
+            'apellido_paterno' => 'Ramírez',
+            'apellido_materno' => 'Torres',
+            'email' => 'prueba@test.com',
+            'password' => Hash::make('123456'),
+            'edad' => 29,
+            'genero' => 'Masculino',
+            'estado' => 'Activo',
+            'ocupacion' => 'Documentalista',
+            'escolaridad' => 'Licenciatura',
+            'permisos' => [
+                'allowed' => [
+                    [
+                        'recurso' => $plantillaRecurso->_id,
+                        'acciones' => [
+                            $comodinAccion->_id,
+                        ],
+                    ],
+                    [
+                        'recurso' => 'plantilla:'.$plantillaPeriodos,
+                        'acciones' => [
+                            $comodinAccion->_id,
+                        ],
+                    ],
+                    [
+                        'recurso' => 'plantilla:'.$plantillaProgramaEducativo,
+                        'acciones' => [
+                            $comodinAccion->_id,
+                        ],
+                    ],
+                    [
+                        'recurso' => 'documento:'.$plantillaAlumnos,
+                        'acciones' => [
+                            $update->_id,
+                        ],
+                    ],
+                ],
+            ],
         ]);
     }
 }

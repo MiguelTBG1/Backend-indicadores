@@ -11,9 +11,15 @@ use App\Models\Accion;
 use App\Models\Recurso;
 use Illuminate\Support\Facades\Log;
 
-class User extends Model
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Notifications\Notifiable;
+
+
+use MongoDB\Laravel\Auth\User as Authenticatable;
+
+class User extends Authenticatable 
 {
-    use HasApiTokens;
+    use HasApiTokens, Notifiable;
 
     protected $connection = 'mongodb';
 
@@ -119,7 +125,6 @@ class User extends Model
         }
 
         $allowedStr = array_unique(array_merge(...$allowedStr));
-        Log::debug($deniedStr);
         $deniedStr = array_unique(array_merge(...$deniedStr));
         $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
         // Aplanar el array si es necesario

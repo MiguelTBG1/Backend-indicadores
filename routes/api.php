@@ -1,21 +1,18 @@
 <?php
 
 use App\Http\Controllers\AccionesController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\EjesController;
+use App\Http\Controllers\IndicadoresController;
+use App\Http\Controllers\PlantillaController;
+use App\Http\Controllers\RecursosController;
+use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\RolesController;
+use App\Http\Controllers\UsersController;
+use App\Models\Indicadores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UsersController;
-use App\Http\Controllers\PlantillaController;
-use App\Http\Controllers\DocumentoController;
-use App\Http\Controllers\OperacionesController;
-use App\Http\Controllers\IndicadoresController;
-use GuzzleHttp\Middleware;
-use App\Http\Controllers\ReporteController;
-use App\Http\Controllers\EjesController;
-use App\Http\Controllers\RecursosController;
-use App\Http\Controllers\RolesController;
-use App\Models\Indicadores;
-use Database\Seeders\RolesSeeder;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
@@ -31,39 +28,40 @@ Route::middleware(['auth.sanctum'])->group(function () {
     Route::controller(IndicadoresController::class)
         ->prefix('indicadores')
         ->group(function () {
-            Route::get('/', 'index')->middleware(['abilities:indicadores_leer']);
-            Route::get('{id}', 'show')->middleware(['abilities:indicadores_leer']);
-            Route::post('/', 'store')->middleware(['abilities:indicadores_crear']);
-            Route::put('{id}', 'update')->middleware(['abilities:indicadores_actualizar']);
-            Route::delete('{id}', 'destroy')->middleware(['abilities:indicadores_eliminar']);
+            Route::get('/', 'index')->middleware(['abilities:indicadores.read']);
+            Route::get('{id}', 'show')->middleware(['abilities:indicadores.read']);
+            Route::post('/', 'store')->middleware(['abilities:indicadores.create']);
+            Route::put('{id}', 'update')->middleware(['abilities:indicadores.update']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:indicadores.delete']);
             Route::put('{id}/configuracion', 'updateConfig');
             Route::get('{id}/configuracion', 'getConfig');
-            Route::post('filterByDates',  'filterByDateRange');
-            Route::post('upload', 'upload')->middleware(['abilities:indicadores_crear']);
+            Route::post('filterByDates', 'filterByDateRange');
+            Route::post('upload', 'upload')->middleware(['abilities:indicadores.create']);
         });
 
     /* PLANTILLAS */
     Route::controller(PlantillaController::class)
         ->prefix('plantillas')
         ->group(function () {
-            Route::get('/', 'index')->middleware(['abilities:plantillas_leer']);
-            Route::get('{id}', 'show')->middleware(['abilities:plantillas_leer']);
-            Route::post('/',  'store')->middleware(['abilities:plantillas_crear']);
-            Route::put('{id}',  'update')->middleware(['abilities:plantillas_actualizar']);
-            Route::delete('{id}',  'destroy')->middleware(['abilities:plantillas_borrar']);
-            Route::get('{id}/secciones',  'getSecciones')->middleware((['abilities:plantillas_leer']));
+            Route::get('/', 'index')->middleware(['abilities:plantillas.read']);
+            Route::get('{id}', 'show')->middleware(['abilities:plantillas.read']);
+            Route::post('/', 'store')->middleware(['abilities:plantillas.create']);
+            Route::put('{id}', 'update')->middleware(['abilities:plantillas.update']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:plantillas.delete']);
+            Route::get('{id}/secciones', 'getSecciones')->middleware((['abilities:plantillas.read']));
         });
 
     /* DOCUMENTOS */
     Route::controller(DocumentoController::class)
         ->prefix('documentos')
         ->group(function () {
-            Route::get('{id}', 'index')->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos_leer']);
-            Route::get('{plantillaName}/{documentId}', 'show')->middleware(['abilities:documentos_leer']);
-            Route::post('{id}', 'store')->middleware(['abilities:documentos_crear']);
-            Route::post('{plantillaName}/{documentId}', 'update')->middleware(['abilities:documentos_actualizar']);
-            Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos_borrar']);
-            Route::get('plantillas', 'templateNames');
+            Route::get('{id}', 'index')->where('id', '[a-fA-F0-9]{24}')->middleware(['abilities:documentos.read']);
+            Route::get('{plantillaName}/{documentId}', 'show')->middleware(['abilities:documentos.read'])->middleware('checkDocumentAbility:read');
+            Route::post('{id}', 'store')->middleware(['abilities:documentos.create'])->middleware('checkDocumentAbility:create');
+            Route::post('{plantillaName}/{documentId}', 'update')->middleware(['abilities:documentos.update'])->middleware('checkDocumentAbility:update');
+            Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos.delete'])->middleware('checkDocumentAbility:delete');
+            Route::get('plantillas', 'editableTemplateNames');
+            Route::get('plantillas-read', 'redableTemplateNames')->middleware(['abilities:documentos.read']);
         });
 
     /* EJES */
@@ -88,26 +86,22 @@ Route::middleware(['auth.sanctum'])->group(function () {
             Route::put('{rolId}', 'update');
         });
 
-
     /* USUARIOS */
     Route::controller(UsersController::class)
         ->prefix('usuarios')
         ->group(function () {
-            Route::get('/', 'index');
-            Route::get('{id}', 'show');
-            Route::put('{id}', 'update');
-            Route::delete('{id}', 'destroy');
+            Route::get('/', 'index')->middleware(['abilities:usuarios.read']);
+            Route::post('/register', [UsersController::class, 'register'])->middleware(['abilities:usuarios.create']);
+            Route::get('{id}', 'show')->middleware(['abilities:usuarios.read']);
+            Route::put('{id}', 'update')->middleware(['abilities:usuarios.update']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:usuarios.delete']);
         });
-    Route::post('/register', [UsersController::class, 'register']);
+
+    Route::get('/acciones', [AccionesController::class, 'index'])->middleware(['abilities:acciones.read']);
+    Route::get('/recursos', [RecursosController::class, 'index'])->middleware(['abilities:recursos.read']);
+
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout']);
-
-
-    /* ACCIONES */
-    Route::get('/acciones', [AccionesController::class, 'index']);
-
-    /* RECURSOS */
-    Route::get('/recursos', [RecursosController::class, 'index']);
 });
 
 // Reporte PDF

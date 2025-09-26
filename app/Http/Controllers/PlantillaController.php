@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Plantillas;
+use App\Models\Recurso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -17,11 +18,17 @@ class PlantillaController extends Controller
      * @return \Illuminate\Http\JsonResponse
      *
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
+            $user = $request->user();
+
+            Log::debug($user);
+
             // Obtener todas las plantillas
-            $plantillas = Plantillas::all();
+            $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
+                return $user->can('view', $plantilla);
+            });
 
             // Verificar si hay plantillas
             if ($plantillas->isEmpty()) {
@@ -51,6 +58,9 @@ class PlantillaController extends Controller
     public function store(Request $request)
     {
         try {
+
+            $user = $request->user();
+
             // Validar la solicitud
             $validator = Validator::make($request->all(), [
                 'plantilla_name' => 'required|string|max:255|regex:/^[a-zA-ZÁÉÍÓÚÑáéíóúñ0-9_ -]+$/',
@@ -86,12 +96,22 @@ class PlantillaController extends Controller
             $secciones = $request->input('secciones');
 
             // Agregar la plantilla a la colección de Plantillas
+            // Verificar permisos antes de crear la plantilla
+            if (!$user->can('create', Plantillas::class)) {
+                Log::debug('El usuario {' . $user->nombre . '} no tiene permisos para crear plantillas');
+                throw new \Exception('No tienes permisos para crear plantillas', 403);
+            }
+
             $plantilla = Plantillas::create([
                 'nombre_plantilla' => $plantillaName,
                 'nombre_modelo' => $modelName,
                 'nombre_coleccion' => $collectionName,
                 'secciones' => $secciones,
+                'creado_por' => $user->_id
             ]);
+
+
+            Log::debug($plantilla->_id);
 
             // Verificar si la plantilla se creó correctamente
             if (!$plantilla) {
@@ -110,14 +130,6 @@ class PlantillaController extends Controller
             // Actualizamos el modelo dinámico
             DynamicModelService::generate($modelName, $relations);
 
-            // Registramos la coleccion del documento a crear
-            /*Recurso::create([
-                'clave' => $collectionName,
-                'nombre' => $plantillaName,
-                'tipo' => 'dinamico',
-                'grupo' => 'documentos',
-                'descripcion' => "Documentos de la plantilla {$plantillaName}"
-            ]);*/
 
             return response()->json([
                 'message' => 'Plantilla creada exitosamente',
@@ -205,6 +217,9 @@ class PlantillaController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            // Recuperamos el usuario actual
+            $user = $request->user();
+
             // Validar el ID
             if (!preg_match('/^[a-f\d]{24}$/i', $id)) {
                 throw new \Exception('El ID proporcionado no tiene un formato válido', 422);
@@ -236,6 +251,12 @@ class PlantillaController extends Controller
 
             if ($validator->fails()) {
                 throw new \Exception(json_encode($validator->errors()), 422);
+            }
+
+            // Validamos si el usuario puede actualizar la plantilla
+            if (!$user->can('update', $plantilla)) {
+                Log::debug('El usuario ' . $user->nombre . ' no puede actualizar la plantilla');
+                throw new \Exception('El usuario no puede actualizar la plantilla ');
             }
 
             $secciones = $request->input('secciones');
@@ -282,9 +303,12 @@ class PlantillaController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
+
+            // Recuperamos el usuario actual
+            $user = $request->user();
 
             // Validar el ID
             if (!preg_match('/^[a-f\d]{24}$/i', $id)) {
@@ -313,6 +337,9 @@ class PlantillaController extends Controller
                 throw new \Exception('No se puede eliminar la plantilla porque tiene datos asociados', 409);
             }
 
+            if(!$user->can('delete', $plantilla)) {
+                throw new \Exception('El usuario no puede eliminar la plantilla ');
+            }
             // Eliminar la plantilla de la colección de Plantillas
             if (!$plantilla->delete()) {
                 throw new \Exception('Error al eliminar la plantilla', 500);
