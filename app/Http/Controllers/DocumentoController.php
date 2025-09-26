@@ -238,6 +238,61 @@ class DocumentoController extends Controller
     }
 
     /**
+     * Función para obtener los nombres de las plantillas disponibles
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
+    public function templateNames()
+    {
+        try {
+            // Obtener todas las plantillas
+            $plantillas = Plantillas::all();
+
+            // Verificar si hay plantillas
+            if ($plantillas->isEmpty()) {
+                throw new \Exception('No hay plantillas disponibles', 404);
+            }
+
+            // Mapear plantillas y verificar si tienen documentos
+            $coleccionesConDocumentos = $plantillas->map(function ($plantilla) {
+                // Construir nombre de clase correctamente
+                $modelClass = "App\\DynamicModels\\{$plantilla->nombre_modelo}";
+
+                // Validar que la clase exista
+                if (!class_exists($modelClass)) {
+                    Log::warning("Modelo no encontrado: {$modelClass}");
+                    return null; // Valor consistente
+                }
+
+                // Contar los registros del modelo
+                $documentsCount = $modelClass::count();
+
+                // Log opcional (solo para debug)
+                Log::debug("{$plantilla->nombre_modelo} tiene {$documentsCount} documentos");
+
+                // Verificar si hay documentos
+                if ($documentsCount > 0) {
+                    return [
+                        'id' => $plantilla->_id,
+                        'nombre_plantilla' => $plantilla->nombre_plantilla,
+                        'nombre_coleccion' => $plantilla->nombre_coleccion,
+                    ];
+                }
+
+                return null; // explícito
+            })
+                ->filter() // ← Elimina null, [], false, etc.
+                ->values(); // ← Reindexa el array (opcional, para JSON limpio)
+
+            // Retornamos el arreglo de colecciones con documentos
+            return response()->json($coleccionesConDocumentos);
+        } catch (\Exception $e) {
+            Log::error("Error en templateNames: " . $e->getMessage());
+            return response()->json(['error' => 'Error interno del servidor'], 500);
+        }
+    }
+    
+    /**
      * Obtiene todos los documentos de una plantilla específica.
      * @param string $id ID de la plantilla.
      * @return \Illuminate\Http\JsonResponse Lista de documentos de la plantilla.
@@ -644,7 +699,7 @@ class DocumentoController extends Controller
 
                     // Llamamos la función recursiva
                     $data[$index][$key] = $this->recusiveSecciones($field, $arrayObjectRelations, $fieldsWithModel);
-
+                    Log::debug($data[$index][$key]);
                     //Verificamos que sea una id
                 } else if (preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
 

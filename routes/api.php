@@ -62,6 +62,9 @@ Route::middleware(['auth.sanctum'])->group(function () {
             Route::delete('{plantillaName}/{documentId}', 'destroy')->middleware(['abilities:documentos.delete'])->middleware('checkDocumentAbility:delete');
             Route::get('plantillas-creable', 'creableTemplateNames')->middleware(['abilities:documentos.create']);
             Route::get('plantillas-redable', 'redableTemplateNames')->middleware(['abilities:documentos.read']);
+
+            // PARA REPORTEADOR, NO ESTA PROTEGIDA
+            Route::get('plantillas', 'templateNames');
         });
 
     /* EJES */
