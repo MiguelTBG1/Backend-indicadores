@@ -10,7 +10,6 @@ use App\Models\Plantillas;
 use App\Services\DynamicModelService;
 use MongoDB\BSON\UTCDateTime;
 use Exception;
-use function Laravel\Prompts\form;
 
 class DocumentoController extends Controller
 {
@@ -68,7 +67,12 @@ class DocumentoController extends Controller
             // Retornamos el arreglo de colecciones con documentos
             return response()->json($coleccionesConDocumentos);
         } catch (\Exception $e) {
-            Log::error("Error en templateNames: " . $e->getMessage());
+            Log::error('Error en templateNames:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             return response()->json(['error' => 'Error interno del servidor'], 500);
         }
     }
@@ -93,7 +97,12 @@ class DocumentoController extends Controller
         } catch (Exception $e) {
 
             // Registrar el error en el log
-            Log::error('Error en index: ' . $e->getMessage());
+            Log::error('Error en index:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             // Registrar el error completo
             return response()->json([
@@ -209,7 +218,8 @@ class DocumentoController extends Controller
                         // Agregamos la id al arreglo de relaciones
                         $relations[strtolower($modelRelation) . '_ids'] = $field;
 
-                    } elseif (is_array($field)) {
+                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
+                    } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                         // Llamamos la función recursiva
                         $documentData[$indexSeccion]['fields'][$keyField] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
                     }
@@ -287,11 +297,16 @@ class DocumentoController extends Controller
             // Retornamos el arreglo de colecciones con documentos
             return response()->json($coleccionesConDocumentos);
         } catch (\Exception $e) {
-            Log::error("Error en templateNames: " . $e->getMessage());
+            Log::error('Error al templateNames:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             return response()->json(['error' => 'Error interno del servidor'], 500);
         }
     }
-    
+
     /**
      * Obtiene todos los documentos de una plantilla específica.
      * @param string $id ID de la plantilla.
@@ -370,13 +385,13 @@ class DocumentoController extends Controller
                     // Recorremos los campos de las secciones de manera recursiva
                     foreach ($seccion['fields'] as $key => $field) {
 
-                        if (is_array($field)) {
+                        if (is_array($field) && !empty($field) && !is_string($field[0])) {
 
                             // Llamamos la función recursiva
                             $documentsArray[$indexDocument]['secciones'][$indexSeccion]['fields'][$key] = $this->recusiveSecciones($field, $arrayObjectRelations, $fieldsWithModel);
 
                             //Verificamos que sea una id
-                        } else if (preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+                        } else if (!is_array($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
                             // nombre de la funcion
                             $modelRelation = $fieldsWithModel[$key]['modelo'];
 
@@ -423,6 +438,10 @@ class DocumentoController extends Controller
     public function destroy($plantillaName, $documentId)
     {
         try {
+            // Verifica si la id del documento es válida
+            if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
+                throw new \Exception('ID de documento no válido');
+            }
 
             // Buscar plantilla por nombre
             $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
@@ -463,7 +482,7 @@ class DocumentoController extends Controller
             }
 
             // Eliminamos el documento con su ID
-            $modelClass::delete($documentId);
+            $modelClass::where('id', $documentId)->delete();
 
 
             return response()->json([
@@ -471,7 +490,12 @@ class DocumentoController extends Controller
             ]);
         } catch (\Exception $e) {
             // Registrar el error en el log
-            Log::error("Error al eliminar documento: " . $e->getMessage());
+            Log::error('Error al eliminar documento:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             // Registrar el error completo
             return response()->json(['message' => 'Error al eliminar documento', 'error' => $e->getMessage()], 500);
@@ -581,7 +605,8 @@ class DocumentoController extends Controller
                         // Agregamos la id al arreglo de relaciones
                         $relations[strtolower($modelRelation) . '_ids'] = $field;
 
-                    } elseif (is_array($field)) {
+                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
+                    } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                         // Llamamos la función recursiva
                         $updateData[$index]['fields'][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
                     }
@@ -601,7 +626,12 @@ class DocumentoController extends Controller
             return response()->json(['message' => 'Documento actualizado con éxito']);
         } catch (\Exception $e) {
             // Registrar el error en el log
-            Log::error("Error en la actualización del documento: " . $e->getMessage());
+            Log::error('Error en la actualización del documento:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             // Registrar el error completo
             return response()->json(['message' => 'Error en la actualización del documento', 'error' => $e->getMessage()], 500);
@@ -635,7 +665,12 @@ class DocumentoController extends Controller
             return response()->json($document);
         } catch (\Exception $e) {
             // Registrar el error en el log
-            Log::error("Error al obtener el documento: " . $e->getMessage());
+            Log::error('Error al obtener el documento:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             // Registrar el error completo
             return response()->json(['message' => 'Error al obtener el documento', 'error' => $e->getMessage()], 500);
@@ -668,7 +703,8 @@ class DocumentoController extends Controller
                     // Agregamos la id al arreglo de relaciones
                     $relations[strtolower($modelRelation) . '_ids'][] = $field;
 
-                } else if (is_array($field)) {
+                // Validamos que sea un array, tenga datos y que el primer valor no sea un string
+                } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                     // Llamamos la función recursiva
                     $data[$index][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
                 }
@@ -695,13 +731,13 @@ class DocumentoController extends Controller
         foreach ($data as $index => $value) {
             foreach ($value as $key => $field) {
                 // Validamos si es un array y que no este vacio
-                if (is_array($field) && !empty($field)) {
+                if (is_array($field) && !empty($field) && !is_string($field[0])) {
 
                     // Llamamos la función recursiva
                     $data[$index][$key] = $this->recusiveSecciones($field, $arrayObjectRelations, $fieldsWithModel);
                     Log::debug($data[$index][$key]);
                     //Verificamos que sea una id
-                } else if (preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+                } else if (!is_array($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
 
                     // nombre del modelo
                     $modelRelation = $fieldsWithModel[$key]['modelo'];
