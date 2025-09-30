@@ -105,6 +105,16 @@ Route::middleware(['auth.sanctum'])->group(function () {
 
     // LOGOUT
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::controller(ReporteController::class)
+    ->prefix('reportes')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('{id}', 'show');
+        Route::put('{id}', 'update');
+        Route::delete('{id}', 'destroy');
+    });
 });
 
 // Reporte PDF

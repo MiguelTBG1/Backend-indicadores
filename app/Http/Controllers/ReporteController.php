@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ReporteResource;
 use App\Models\Reporte;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Barryvdh\DomPDF\Facade\Pdf; // Importa la fachada de PDF
 use Symfony\Component\HttpFoundation\Response;
-
 
 /**
  * @group Reporte
@@ -15,63 +16,222 @@ use Symfony\Component\HttpFoundation\Response;
 class ReporteController extends Controller
 {
     /**
-     * 
+     * Lista todos los reportes.
      */
     public function index()
     {
         $reportes = Reporte::all();
-        return response()->json($reportes);
+
+        return (new ReporteResource($reportes))
+            ->additional(['status' => 'success', 'message' => 'Reportes obtenidos correctamente'])
+            ->response()
+            ->setStatusCode(Response::HTTP_OK);
     }
 
     /**
-     * Store a newly created report.
+     * Almacena un nuevo reporte.
      */
     public function store(Request $request)
     {
-
-        // Recuperamos al usuario actual
-        $user = $request->user();
-
-        // Validamos la solicitud
         $validator = Validator::make($request->all(), [
-            'titulo'                => 'required|string|max:255',
-            'coleccionNombre'       => 'required|string|max:255',
-            'coleccionId'           => 'required|string|max:255',
-            'camposSeleccionados'   => 'required|array',
-            'filtrosAplicados'      => 'nullable|array',
+            'titulo' => 'required|string|max:255',
+            'coleccionNombre' => 'required|string|max:255',
+            'coleccionId' => 'required|string|max:255',
+            'camposSeleccionados' => 'required|array',
+            'filtrosAplicados' => 'nullable|array',
             'criteriosOrdenamiento' => 'nullable|array',
-            'cantidadDocumentos'    => 'nullable|integer|min:1',
-            'incluirFecha'          => 'nullable|boolean',
+            'cantidadDocumentos' => 'nullable|integer|min:1',
+            'incluirFecha' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
-            throw new \Exception(json_encode($validator->errors()), Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $nombrePlantilla = $request->input('titulo');
+        $titulo = $request->input('titulo');
 
-        // Revisamos que no exista un reporte igual
-        if (Reporte::where('titulo', $nombrePlantilla)->exists()) {
-            throw new \Exception('La plantilla ya existe', Response::HTTP_CONFLICT);
+        if (Reporte::where('titulo', $titulo)->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'La plantilla ya existe',
+            ], Response::HTTP_CONFLICT);
         }
 
-        // Generamos el reporte
-        $reporteGenerado = Reporte::create([
-            'titulo' => $nombrePlantilla,
-            'coleccionNombre'       => $request->input('coleccionNombre'),
-            'coleccionId'           => $request->input('coleccionId'),
-            'camposSeleccionados'   => $request->input('camposSeleccionados'),
-            'filtrosAplicados'      => $request->input('filtrosAplicados'),
-            'criteriosOrdenamiento' => $request->input('criteriosOrdenamiento'),
-            'cantidadDocumentos'    => $request->input('cantidadDocumentos'),
-            'incluirFecha'          => $request->input('incluirFecha'),
+        try {
+            $reporte = Reporte::create([
+                'titulo' => $titulo,
+                'coleccionNombre' => $request->input('coleccionNombre'),
+                'coleccionId' => $request->input('coleccionId'),
+                'camposSeleccionados' => $request->input('camposSeleccionados'),
+                'filtrosAplicados' => $request->input('filtrosAplicados'),
+                'criteriosOrdenamiento' => $request->input('criteriosOrdenamiento'),
+                'cantidadDocumentos' => $request->input('cantidadDocumentos'),
+                'incluirFecha' => $request->input('incluirFecha'),
+                // 'fechaGeneracion' => now()->toIso8601String(), // opcional
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Reporte generado exitosamente',
+                'data' => $reporte,
+            ], Response::HTTP_CREATED);
+        } catch (\Throwable $e) {
+            Log::error('Error al crear reporte: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error en el servidor al crear el reporte',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Muestra un reporte específico por _id.
+     *
+     * @param  string  $id
+     */
+    public function show($id)
+    {
+        try {
+            // findOrFail usa la clave primaria definida en el modelo (_id)
+            $reporte = Reporte::findOrFail($id);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $reporte,
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Reporte no encontrado',
+            ], Response::HTTP_NOT_FOUND);
+        } catch (\Throwable $e) {
+            Log::error('Error al obtener reporte: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error en el servidor',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Actualiza un reporte existente (busca por _id).
+     *
+     * @param  string  $id
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $reporte = Reporte::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Reporte no encontrado',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'titulo' => 'sometimes|required|string|max:255',
+            'coleccionNombre' => 'sometimes|required|string|max:255',
+            'coleccionId' => 'sometimes|required|string|max:255',
+            'camposSeleccionados' => 'sometimes|required|array',
+            'filtrosAplicados' => 'nullable|array',
+            'criteriosOrdenamiento' => 'nullable|array',
+            'cantidadDocumentos' => 'nullable|integer|min:1',
+            'incluirFecha' => 'nullable|boolean',
         ]);
 
-        return response()->json([
-            'message' => 'Reporte generado exitosamente',
-            'status' => 'success',
-            'reporte' => $reporteGenerado
-        ], Response::HTTP_OK);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        // Comprobar conflicto de título si se actualiza
+        if ($request->filled('titulo')) {
+            $nuevoTitulo = $request->input('titulo');
+
+            $exists = Reporte::where('titulo', $nuevoTitulo)
+                ->where('_id', '!=', $reporte->_id)
+                ->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Ya existe otro reporte con ese título',
+                ], Response::HTTP_CONFLICT);
+            }
+        }
+
+        try {
+            $reporte->fill($request->only([
+                'titulo',
+                'coleccionNombre',
+                'coleccionId',
+                'camposSeleccionados',
+                'filtrosAplicados',
+                'criteriosOrdenamiento',
+                'cantidadDocumentos',
+                'incluirFecha',
+            ]));
+
+            $reporte->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Reporte actualizado correctamente',
+                'data' => $reporte,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $e) {
+            Log::error('Error al actualizar reporte: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error en el servidor al actualizar el reporte',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Elimina un reporte por _id.
+     *
+     * @param  string  $id
+     */
+    public function destroy($id)
+    {
+        try {
+            $reporte = Reporte::findOrFail($id);
+            $reporte->delete();
+
+            return response()->json(null, Response::HTTP_NO_CONTENT);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Reporte no encontrado',
+            ], Response::HTTP_NOT_FOUND);
+        } catch (\Throwable $e) {
+            Log::error('Error al eliminar reporte: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error en el servidor al eliminar el reporte',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /*public function generatePdf()
