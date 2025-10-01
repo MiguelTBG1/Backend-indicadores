@@ -14,7 +14,7 @@ class GraficasSeeder extends Seeder
     public function run(): void
     {
         Grafica::create([
-            'Titulo' => 'Grafica de Areas',
+            'titulo' => 'Grafica de Areas',
             'series' => [
                 [
                     'name' => 'series1',
@@ -25,7 +25,7 @@ class GraficasSeeder extends Seeder
                     'data' => [11, 32, 45, 32, 34]
                 ]
             ],
-            'charOptions' => [
+            'chartOptions' => [
                 'chart' => [
                     'height' => 350,
                     'type' => 'area'

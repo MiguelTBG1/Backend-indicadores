@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Grafica;
+
 class GraficaController extends Controller
 {
     public function index()
@@ -13,8 +15,14 @@ class GraficaController extends Controller
 
     public function show($id)
     {
+        Log::debug('Buscando grafica con ID: ' . $id);
         $grafica = Grafica::find($id);
-
-        return response()->json($grafica);
+        Log::debug('Grafica encontrada: ', ['grafica' => $grafica]);
+        return response()->json(
+            [
+                'message' => 'Grafica obtenida correctamente',
+                'data' => $grafica
+            ]
+        );
     }
 }
