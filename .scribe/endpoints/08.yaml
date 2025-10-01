@@ -1,17 +1,21 @@
-name: Recursos
-description: ''
+name: Gráficas
+description: |-
+
+  Endpoints relacionados con la gestión de gráficas.
 endpoints:
   -
     httpMethods:
       - GET
-    uri: api/recursos
+    uri: api/graficas
     metadata:
-      groupName: Recursos
-      groupDescription: ''
+      groupName: Gráficas
+      groupDescription: |-
+
+        Endpoints relacionados con la gestión de gráficas.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Retorna todos los recursos registrados en el sistema'
-      description: ''
+      title: 'Listar todas las gráficas.'
+      description: 'Retorna una lista de todas las gráficas disponibles.'
       authenticated: true
       custom: []
     headers:
@@ -20,6 +24,62 @@ endpoints:
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/graficas/{id}'
+    metadata:
+      groupName: Gráficas
+      groupDescription: |-
+
+        Endpoints relacionados con la gestión de gráficas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Mostrar una gráfica específica.'
+      description: 'Retorna la información completa de una gráfica identificada por su ID.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'requerido El ID de la gráfica que se desea obtener. Ejemplo: 5'
+        required: false
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
