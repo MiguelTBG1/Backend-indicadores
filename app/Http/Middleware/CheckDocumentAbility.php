@@ -25,9 +25,10 @@ class CheckDocumentAbility
         $plantilla = null;
 
         if ($request->route('id')) {
+
             $plantilla = Plantillas::find($request->route('id'));
         } elseif ($request->route('plantillaName')) {
-            $plantilla = Plantillas::where('nombre_plantilla', $request->route('plantillaName'))->first();
+            $plantilla = Plantillas::where('nombre_coleccion', $request->route('plantillaName'))->first();
         }
 
         if (!$plantilla) {
