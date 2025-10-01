@@ -277,33 +277,44 @@ class IndicadoresController extends Controller
         ]);
 
         foreach ($arrayConfig['campo'] as $index => $campo) {
-            // Verificamos si es la ultima posición para saltarlo
-            if (count($arrayConfig['campo']) == $index + 1) {
-                continue;
-            }
-
             // Filtramos el arraglo
-            $arrayFilter = array_slice($arrayConfig['campo'], 0, -1);
+            $arrayFilter = array_slice($arrayConfig['campo'], 0, $index + 1);
 
             // Obtenemos el prefijo del campo
-            $prefijo = count(array_slice($arrayFilter, 0, $index + 1)) > 1 ? "{implode('.', array_slice($arrayFilter, 0, $index + 1 ))}." : '';
+            $slice = array_slice($arrayFilter, 0, -1);
+            $prefijo = count($slice) > 0
+                ? implode('.', $slice) . '.'
+                : '';
 
-            // Obtenemos el ultimo campos
-            $ultimoCampo = end($arrayFilter);
-
-            // Agregamos el campo al pipeline
-            $pipeline[] = ['$unwind' => '$secciones.fields.' . $prefijo  . $ultimoCampo];
+            Log::info('filtro: ', [
+                'arrayFilter : ' => $arrayFilter,
+                'slice: ' => $slice,
+                'Prefijo: ' => $prefijo
+            ]);
 
             // Llamamos la funcion para formar las condicones
             $condiciones = isset($arrayConfig['condicion']) && !empty($arrayConfig['condicion'] && isset($arrayConfig['condicion'][$index]))
                 ? $this->getCondiciones('secciones.fields.' . $prefijo, $arrayConfig['condicion'][$index])
                 : null;
 
-            Log::info($condiciones);
+            Log::info('Condiciones', [
+                ' : ' => $condiciones
+            ]);
 
             if (!is_null($condiciones) && !empty($condiciones)) {
                 $pipeline[] = ['$match' => $condiciones];
             }
+
+            // Verificamos si es la ultima posición para saltarlo
+            if (count($arrayConfig['campo']) == $index + 1) {
+                continue;
+            }
+
+            // Obtenemos el ultimo campos
+            $ultimoCampo = end($arrayFilter);
+
+            // Agregamos el campo al pipeline
+            $pipeline[] = ['$unwind' => '$secciones.fields.' . $prefijo  . $ultimoCampo];
         }
 
         // Agrupamos por el campo de la configuración
@@ -358,7 +369,7 @@ class IndicadoresController extends Controller
         // Recorremos el arreglo de condiciones
         foreach ($arrayCondiciones as $condicion) {
 
-            if (empty($condicion)){
+            if (empty($condicion)) {
                 continue;
             }
 
@@ -366,14 +377,14 @@ class IndicadoresController extends Controller
             $valueCondition = null;
 
             // Validamos si valor es tipo numerico valido
-            if (filter_var($condicion['valor'], FILTER_VALIDATE_INT)){
+            if (filter_var($condicion['valor'], FILTER_VALIDATE_INT)) {
                 Log::info($this->convertOperator($condicion['operador']));
                 $valueCondition['$or'] = [
-                    [ $prefijo . $condicion['campo'] => [ $this->convertOperator($condicion['operador']) => $condicion['valor']]],
-                    [ $prefijo . $condicion['campo'] => [ $this->convertOperator($condicion['operador']) => (int) $condicion['valor']]],
+                    [$prefijo . $condicion['campo'] => [$this->convertOperator($condicion['operador']) => $condicion['valor']]],
+                    [$prefijo . $condicion['campo'] => [$this->convertOperator($condicion['operador']) => (int) $condicion['valor']]],
                 ];
-            }else{
-                $valueCondition = [ $prefijo . $condicion['campo'] => [ $this->convertOperator($condicion['operador']) => $condicion['valor']]];
+            } else {
+                $valueCondition = [$prefijo . $condicion['campo'] => [$this->convertOperator($condicion['operador']) => $condicion['valor']]];
             }
 
 

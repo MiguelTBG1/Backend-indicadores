@@ -444,7 +444,7 @@ class DocumentoController extends Controller
             }
 
             // Buscar plantilla por nombre
-            $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
+            $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
 
             // Nombre del model
             $nameModel = $plantilla->nombre_modelo;
@@ -513,6 +513,11 @@ class DocumentoController extends Controller
 
             // Buscar plantilla por nombre
             $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
+
+            // Validar si la plantilla existe
+            if (!$plantilla){
+                throw new \Exception('Plantilla no encontrada');
+            }
 
             // Nombre del model
             $nameModel = $plantilla->nombre_modelo;
