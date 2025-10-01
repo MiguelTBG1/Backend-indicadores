@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             ProgramaEducativoSeeder::class,
             // DocumentosSeeder::class,
             AlumnosSeeder::class,
+            GraficasSeeder::class
         ]);
     }
 }

@@ -115,6 +115,13 @@ Route::middleware(['auth.sanctum'])->group(function () {
         Route::put('{id}', 'update');
         Route::delete('{id}', 'destroy');
     });
+
+    Route::controller(GraficaController::class)
+    ->prefix('graficas')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('{id}', 'show');
+    }
 });
 
 // Reporte PDF
