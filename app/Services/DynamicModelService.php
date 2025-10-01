@@ -60,8 +60,8 @@ class DynamicModelService
     public static function remove(string $modelName): bool
     {
         $paths = [
-            app_path("Models/{$modelName}.php"),
-            app_path("Models/Base/{$modelName}Base.php"), // si usas herencia
+            app_path("DynamicModels/{$modelName}.php"),
+            app_path("DynamicModels/Base/{$modelName}Base.php"), // si usas herencia
         ];
 
         $deleted = false;

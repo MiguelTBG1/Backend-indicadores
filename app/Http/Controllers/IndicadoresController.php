@@ -77,7 +77,12 @@ class IndicadoresController extends Controller
             ], Response::HTTP_OK);
         } catch (Exception $e) {
             // Retornamos mensaje de error
-            Log::error('Error al obtener los indicadores: ' . $e->getMessage());
+            Log::error('Error al obtener los indicadores:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'message' => 'Error del sistema al obtener los indicadores',
                 'error' => $e->getMessage()
@@ -180,7 +185,12 @@ class IndicadoresController extends Controller
             ], Response::HTTP_OK);
         } catch (Exception $e) {
             // Retornamos mensaje de error
-            Log::error('Error al obtener el indicador: ' . $e->getMessage());
+            Log::error('Error al obtener el indicador:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'message' => 'Error del sistema al obtener el indicador',
                 'error' => $e->getMessage()
@@ -195,7 +205,6 @@ class IndicadoresController extends Controller
      */
     private function calculateNumerador($configuracion)
     {
-        log::info('0');
 
         // Validamos que la operación sea una de las permitidas
         $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
@@ -246,7 +255,7 @@ class IndicadoresController extends Controller
             return 0;
         }
 
-        // Obtenemos el arreglo de campos y operacion
+        // Obtenemos el arreglo de campos, operacion y condiciones
         $arrayConfig = [];
         $this->recursiveConfig($configuracion, $arrayConfig);
 
@@ -263,33 +272,51 @@ class IndicadoresController extends Controller
         // Filtramos las secciones por la sección definida en la configuración
         $pipeline[] = ['$match' => ['secciones.nombre' => $configuracion['secciones']]];
 
+        Log::info('array', [
+            ': ' => $arrayConfig['campo'],
+        ]);
 
         foreach ($arrayConfig['campo'] as $index => $campo) {
-            // Verificamos si es la ultima pisición para saltarlo
+            // Verificamos si es la ultima posición para saltarlo
             if (count($arrayConfig['campo']) == $index + 1) {
                 continue;
             }
-            // Filtramos el arraglo
-            $arrayFilter = array_slice($arrayConfig['campo'], 0, $index + 1);
 
-            // Concatenamos los campos
-            $campoConcat = implode('.', $arrayFilter);
+            // Filtramos el arraglo
+            $arrayFilter = array_slice($arrayConfig['campo'], 0, -1);
+
+            // Obtenemos el prefijo del campo
+            $prefijo = count(array_slice($arrayFilter, 0, $index + 1)) > 1 ? "{implode('.', array_slice($arrayFilter, 0, $index + 1 ))}." : '';
+
+            // Obtenemos el ultimo campos
+            $ultimoCampo = end($arrayFilter);
 
             // Agregamos el campo al pipeline
-            $pipeline[] = ['$unwind' => '$secciones.fields.' . $campoConcat];
+            $pipeline[] = ['$unwind' => '$secciones.fields.' . $prefijo  . $ultimoCampo];
+
+            // Llamamos la funcion para formar las condicones
+            $condiciones = isset($arrayConfig['condicion']) && !empty($arrayConfig['condicion'] && isset($arrayConfig['condicion'][$index]))
+                ? $this->getCondiciones('secciones.fields.' . $prefijo, $arrayConfig['condicion'][$index])
+                : null;
+
+            Log::info($condiciones);
+
+            if (!is_null($condiciones) && !empty($condiciones)) {
+                $pipeline[] = ['$match' => $condiciones];
+            }
         }
 
         // Agrupamos por el campo de la configuración
         $this->recursiveGroup($pipeline, $arrayConfig);
 
-        Log::info('pipeline', $pipeline);
+        Log::info('pipeline', [
+            ': ' => json_encode($pipeline, JSON_PRETTY_PRINT)
+        ]);
 
-        // 👇 Aquí ya no necesitas $db->selectCollection()
         $cursor = $modelClass::raw(function ($collection) use ($pipeline) {
             return $collection->aggregate($pipeline);
         });
 
-        // Convertir a array (si lo necesitas)
         $resultados = iterator_to_array($cursor);
 
         Log::info('Cursor obtenido de la agregación', $resultados);
@@ -300,6 +327,60 @@ class IndicadoresController extends Controller
 
         // Retornamos el resultado
         return $resultados[0]['resultado'] ?? 0;
+
+        return 0;
+    }
+
+    /**
+     * Función para obtener el arreglos de campos y operaciones
+     * @param array $configuracion Configuración del indicador
+     * @param array &$arrayConfig Arreglo de campos, operaciones y condiciones
+     */
+    private function recursiveConfig($configuracion, &$arrayConfig)
+    {
+        // agregamos el campo y la operación
+        $arrayConfig['campo'][] = $configuracion['campo'] ?? null;
+        $arrayConfig['operacion'][] = $configuracion['operacion'] ?? null;
+        $arrayConfig['condicion'][] = isset($configuracion['condicion']) ? $configuracion['condicion'] : null;
+
+        // Verificamos si tiene subconfiguracion
+        if (isset($configuracion['subConfiguracion']) && !empty($configuracion['subConfiguracion'])) {
+            $this->recursiveConfig($configuracion['subConfiguracion'], $arrayConfig);
+        }
+    }
+
+    private function getCondiciones($prefijo, $arrayCondiciones)
+    {
+
+        // Creamos el arraglo de condiciones
+        $condiciones = [];
+
+        // Recorremos el arreglo de condiciones
+        foreach ($arrayCondiciones as $condicion) {
+
+            if (empty($condicion)){
+                continue;
+            }
+
+            // Creamos el valor que contendra la condición
+            $valueCondition = null;
+
+            // Validamos si valor es tipo numerico valido
+            if (filter_var($condicion['valor'], FILTER_VALIDATE_INT)){
+                Log::info($this->convertOperator($condicion['operador']));
+                $valueCondition['$or'] = [
+                    [ $prefijo . $condicion['campo'] => [ $this->convertOperator($condicion['operador']) => $condicion['valor']]],
+                    [ $prefijo . $condicion['campo'] => [ $this->convertOperator($condicion['operador']) => (int) $condicion['valor']]],
+                ];
+            }else{
+                $valueCondition = [ $prefijo . $condicion['campo'] => [ $this->convertOperator($condicion['operador']) => $condicion['valor']]];
+            }
+
+
+            $condiciones['$and'][] = $valueCondition;
+        }
+
+        return $condiciones;
     }
 
     /**
@@ -307,93 +388,84 @@ class IndicadoresController extends Controller
      * @param array $configuracion Configuración del indicador
      * @param array &$arrayConfig Arreglo de campos y operaciones
      */
-    private function recursiveConfig($configuracion, &$arrayConfig)
-    {
-        // agregamos el campo y la operación
-        $arrayConfig['campo'][] = $configuracion['campo'];
-        $arrayConfig['operacion'][] = $configuracion['operacion'];
-
-        // Verificamos si tiene subconfiguracion
-        if (isset($configuracion['subConfiguracion'])) {
-            $this->recursiveConfig($configuracion['subConfiguracion'], $arrayConfig);
-        }
-    }
-
-    /**
-     * Función para crear y agregar los $group al pipeline de agregación
-     * @param array &$pipeline Pipeline de agregación
-     * @param array $arrayConfig Arreglo de campos y operaciones
-     */
     private function recursiveGroup(&$pipeline, $arrayConfig)
     {
 
         // Obtenemos el arreglo de campos y operacion
         $array = $arrayConfig['campo'];
         $arrayOperacion = $arrayConfig['operacion'];
+        $arrayCount = count($array);
 
-        // Determinamos el nombre del resultado
-        $resultName = count($array) >= 2
-            ? "resultado_{$array[count($array) - 2]}"
-            : "resultado";
+        // Recorremos el arreglo de campos y operaciones
+        for ($i = 0; $i < $arrayCount; $i++) {
+            Log::info('Arreglos: ', [
+                'array' => $array,
+                'arrayOperacion' => $arrayOperacion
+            ]);
 
-        // Determinamos el valor del resultado
-        $resultContent = $this->convertOperation($arrayOperacion[0], '$secciones.fields.' . implode('.', $array));
-
-        // Agregamos el primer $group
-        $pipeline[] = [
-            '$group' => [
-                '_id' => array_merge(
-                    ['doc' => '$_id'],
-                    $this->recursiveCampo(array_slice($array, 0, -1))
-                ),
-                $resultName => $resultContent
-            ]
-        ];
-
-        // Elinamos el último campo y operación
-        array_pop($arrayOperacion);
-        array_pop($array);
-
-        foreach ($array as $index => $campo) {
-            // Tomamos todos los campos excepto el último
-            $camposParaGroup = array_slice($array, 0, -1);
-
-            // Mapeamos los campos para el _id
-            $mapCampos = array_map(function ($campo) {
-                return [$campo => $campo];
-            }, $camposParaGroup);
-
-            // Aplanamos el array de arrays en un solo array asociativo
             $idFields = [];
-            foreach ($mapCampos as $item) {
-                $idFields[key($item)] = current($item);
+
+            if ($i > 0) {
+                // Tomamos todos los campos excepto el último
+                $camposParaGroup = array_slice($array, 0, -1);
+
+                // Mapeamos los campos para el _id
+                $mapCampos = array_map(function ($campo) {
+                    return [$campo => $campo];
+                }, $camposParaGroup);
+
+                // Aplanamos el array de arrays en un solo array asociativo
+
+                foreach ($mapCampos as $item) {
+                    $idFields[key($item)] = current($item);
+                }
+
+                // Agregamos 'doc' => '$_id.doc'
+                $idFields = count($array) >= 2
+                    ? array_merge(['doc' => '$_id.doc'], $idFields)
+                    : null;
             }
 
-            // Agregamos 'doc' => '$_id.doc'
-            $idFields = count($array) >= 2
-                ? array_merge(['doc' => '$_id.doc'], $idFields)
-                : null;
-
-            // Determinamos el campo para el nombre de resultado (penúltimo o segundo)
-            $campoResultado = count($array) >= 2
-                ? "resultado_{$array[count($array) - 2]}"
-                : "resultado";
-
-            // Determinamos el nombre de resultado
-            $resultado =   count($array) >= 2
-                ? $array[count($array) - 1]
-                : ($array[1] ?? $array[0]);
+            // Determinamos el nombre del resultado
+            $resultName = end($arrayOperacion) == 'distinto'
+                ?  'distinto'
+                : (count($array) >= 2
+                    ? "resultado_{$array[count($array) - 2]}"
+                    :  "resultado");
 
             // Determinamos el valor del resultado
-            $resultContent = $this->convertOperation($arrayOperacion[0], '$resultado_' . $resultado);
+            $resultContent = $i > 0
+                ? $resultContent = $this->convertOperation($arrayOperacion[0], '$resultado_' . (count($array) >= 2 ? $array[count($array) - 1] : ($array[1] ?? $array[0])))
+                : $this->convertOperation(end($arrayOperacion), '$secciones.fields.' . implode('.', $array));
 
-            // Construimos el stage de agregación
+            $idContent = empty($idFields)
+                ? (count($array) >= 2
+                    ? array_merge(['doc' => '$_id'], $this->recursiveCampo(array_slice($array, 0, -1)))
+                    : null)
+                : $idFields;
+
+            // Agregamos el primer $group
             $pipeline[] = [
                 '$group' => [
-                    '_id' => $idFields,
-                    $campoResultado => $resultContent // o la lógica que necesites
+                    '_id' => $idContent,
+                    $resultName => $resultContent
                 ]
             ];
+
+            if (end($arrayOperacion) == 'distinto') {
+
+                $resultName = count($array) >= 2
+                    ? "resultado_{$array[count($array) - 2]}"
+                    : "resultado";
+
+                // Agregamos el segundo $group
+                $pipeline[] = [
+                    '$project' => [
+                        '_id' => 0,
+                        $resultName => ['$size' => '$distinto']
+                    ]
+                ];
+            }
 
             // Eliminamos el último campo y operación
             array_pop($array);
@@ -414,6 +486,20 @@ class IndicadoresController extends Controller
             'promedio' => ['$avg' => $operacionContent],
             'maximo' => ['$max' => $operacionContent],
             'minimo' => ['$min' => $operacionContent],
+            'distinto' => ['$addToSet' => $operacionContent],
+            default => 0
+        };
+    }
+
+    private function convertOperator($operador)
+    {
+        return match ($operador) {
+            'igual' => '$eq',
+            'mayor' => '$gt',
+            'menor' => '$lt',
+            'diferente' => '$ne',
+            'mayor_igual' => '$gte',
+            'menor_igual' => '$lte',
         };
     }
 
@@ -510,7 +596,12 @@ class IndicadoresController extends Controller
         } catch (Exception $e) {
             // Manejo de errores
             // Logueamos el error
-            Log::error('Error al crear el indicador: ' . $e->getMessage());
+            Log::error('Error al crear el indicador:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             // Retornamos el mensaje de error
             return response()->json([
                 'success' => false,
@@ -615,7 +706,12 @@ class IndicadoresController extends Controller
             return response()->json(['message' => 'Datos guardados correctamente en MongoDB']);
         } catch (Exception $e) {
             // Manejo de errores
-            Log::error('Error al cargar el archivo Excel: ' . $e->getMessage());
+            Log::error('Error al cargar el archivo Excel:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             // Retornamos el mensaje de error
             return response()->json([
@@ -746,7 +842,12 @@ class IndicadoresController extends Controller
         } catch (Exception $e) {
             // Manejamos el error
             // Logueamos el error
-            Log::error('Error al actualizar el indicador: ' . $e->getMessage());
+            Log::error('Error al actualizar el indicador:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error al actualizar el indicador',
@@ -773,7 +874,7 @@ class IndicadoresController extends Controller
             }
 
             // Validamos que la operación sea una de las permitidas
-            $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo'];
+            $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
 
             // Operadores permitidos para las condiciones
             $operadoresValidos = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
@@ -788,12 +889,6 @@ class IndicadoresController extends Controller
                 'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
                 'condicion.*.valor' => 'required_with:condicion|string',
                 'subConfiguracion' => 'sometimes|array',
-                'subConfiguracion.operacion' => 'required_with:subConfiguracion|string|in:' . implode(',', $operacionesPermitidas),
-                'subConfiguracion.campo' => 'required_if:subConfiguracion.operacion, in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
-                'subConfiguracion.condicion' => 'sometimes|array',
-                'subConfiguracion.condicion.*.campo' => 'required_with:subConfiguracion.condicion|string',
-                'subConfiguracion.condicion.*.operador' => 'required_with:subConfiguracion.condicion|string|in:' . implode(',', $operadoresValidos),
-                'subConfiguracion.condicion.*.valor' => 'required_with:subConfiguracion.condicion|string',
             ]);
 
             if ($validator->fails()) {
@@ -811,6 +906,13 @@ class IndicadoresController extends Controller
                 'indicador_actualizado' => $indicador
             ], Response::HTTP_OK);
         } catch (Exception $e) {
+            // Logueamos el error
+            Log::error('Error al actualizar o guardar la configuración del indicador:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             // Retornamos el mensaje de error
             return response()->json([
                 'message' => 'Error guardar la configuración del indicador',
