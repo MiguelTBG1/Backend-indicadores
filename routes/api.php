@@ -10,6 +10,8 @@ use App\Http\Controllers\RecursosController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\GraficaController;
+
 use App\Models\Indicadores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -121,7 +123,7 @@ Route::middleware(['auth.sanctum'])->group(function () {
     ->group(function () {
         Route::get('/', 'index');
         Route::get('{id}', 'show');
-    }
+    });
 });
 
 // Reporte PDF
