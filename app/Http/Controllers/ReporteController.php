@@ -24,8 +24,8 @@ class ReporteController extends Controller
 
         return response()->success(
             'Reportes obtenidos correctamente',
-             ReporteResource::collection($reportes)
-            );
+            ReporteResource::collection($reportes)
+        );
     }
 
     /**
@@ -55,10 +55,7 @@ class ReporteController extends Controller
         $titulo = $request->input('titulo');
 
         if (Reporte::where('titulo', $titulo)->exists()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'La plantilla ya existe',
-            ], Response::HTTP_CONFLICT);
+            return response()->fail('La plantilla ya existe');
         }
 
         try {
@@ -74,20 +71,15 @@ class ReporteController extends Controller
                 // 'fechaGeneracion' => now()->toIso8601String(), // opcional
             ]);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Reporte generado exitosamente',
-                'data' => $reporte,
-            ], Response::HTTP_CREATED);
+
+            return response()->created('Reporte generado exitosamente');
+
         } catch (\Throwable $e) {
             Log::error('Error al crear reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error en el servidor al crear el reporte',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->error('Error en el servidor al crear el reporte');
         }
     }
 
@@ -102,24 +94,20 @@ class ReporteController extends Controller
             // findOrFail usa la clave primaria definida en el modelo (_id)
             $reporte = Reporte::findOrFail($id);
 
-            return response()->json([
-                'status' => 'success',
-                'data' => $reporte,
-            ], Response::HTTP_OK);
+            return response()->success('Reporte encontrado exitosamente', new ReporteResource($reporte));
+
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Reporte no encontrado',
-            ], Response::HTTP_NOT_FOUND);
+            
+            Log::warning("Reporte con ID {$id} no encontrado: " . $e->getMessage());
+
+            return response()->fail('Reporte no encontrado', null, Response::HTTP_NOT_FOUND);
         } catch (\Throwable $e) {
+
             Log::error('Error al obtener reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error en el servidor',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->error('Error en el servidor al obtener el reporte');
         }
     }
 
@@ -132,11 +120,9 @@ class ReporteController extends Controller
     {
         try {
             $reporte = Reporte::findOrFail($id);
+
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Reporte no encontrado',
-            ], Response::HTTP_NOT_FOUND);
+            return response()->fail('Reporte no encontrado', null, Response::HTTP_NOT_FOUND);
         }
 
         $validator = Validator::make($request->all(), [
@@ -151,11 +137,7 @@ class ReporteController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Datos inválidos',
-                'errors' => $validator->errors(),
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return response()->validationError($validator->errors());
         }
 
         // Comprobar conflicto de título si se actualiza
@@ -167,10 +149,7 @@ class ReporteController extends Controller
                 ->exists();
 
             if ($exists) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Ya existe otro reporte con ese título',
-                ], Response::HTTP_CONFLICT);
+                return response()->fail('Ya existe otro reporte con ese titulo', null, Response::HTTP_CONFLICT);
             }
         }
 
@@ -188,20 +167,13 @@ class ReporteController extends Controller
 
             $reporte->save();
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Reporte actualizado correctamente',
-                'data' => $reporte,
-            ], Response::HTTP_OK);
+            return response()->updated('Reporte actualizado correctamente', new ReporteResource($reporte));
         } catch (\Throwable $e) {
             Log::error('Error al actualizar reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error en el servidor al actualizar el reporte',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->error('Error en el servidor al actualizar el reporte');
         }
     }
 
@@ -215,22 +187,17 @@ class ReporteController extends Controller
         try {
             $reporte = Reporte::findOrFail($id);
             $reporte->delete();
+            
+            return response()->deleted('Reporte eliminado correctamente');
 
-            return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Reporte no encontrado',
-            ], Response::HTTP_NOT_FOUND);
+             return response()->fail('Reporte no encontrado', null, Response::HTTP_NOT_FOUND);
         } catch (\Throwable $e) {
             Log::error('Error al eliminar reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error en el servidor al eliminar el reporte',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->error('Error en el servidor al eliminar el reporte');
         }
     }
 
