@@ -87,7 +87,7 @@ class DocumentoController extends Controller
                 return $user->can('viewCreableDocument', $plantilla);
             });
 
-         // Verificar si hay plantillas
+            // Verificar si hay plantillas
             if ($plantillas->isEmpty()) {
                 throw new \Exception('No hay plantillas disponibles', 404);
             }
@@ -203,8 +203,11 @@ class DocumentoController extends Controller
             foreach ($documentData as $indexSeccion => $seccion) {
                 foreach ($seccion['fields'] as $keyField => $field) {
 
+                    // Validamos que sea un valor numerico
+                    if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT) ){
                     // Verificar que sea string y se pueda convertir a fecha
-                    if (is_string($field) && strtotime($field)) {
+                        $documentData[$indexSeccion]['fields'][$keyField] = (int) $field;
+                    } elseif (is_string($field) && strtotime($field)) {
                         $timestamp = strtotime($field);
                         if ($timestamp !== false) {
                             $documentData[$indexSeccion]['fields'][$keyField] =  new UTCDateTime($timestamp * 1000);
@@ -218,7 +221,7 @@ class DocumentoController extends Controller
                         // Agregamos la id al arreglo de relaciones
                         $relations[strtolower($modelRelation) . '_ids'] = $field;
 
-                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
+                        // Validamos que sea un array, tenga datos y que el primer valor no sea un string
                     } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                         // Llamamos la función recursiva
                         $documentData[$indexSeccion]['fields'][$keyField] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
@@ -229,7 +232,8 @@ class DocumentoController extends Controller
             $modelClass::create(
                 array_merge([
                     'secciones' => $documentData,
-                ], $relations));
+                ], $relations)
+            );
 
 
             return response()->json(['message' => 'Documento guardado con éxito'], 201);
@@ -515,7 +519,7 @@ class DocumentoController extends Controller
             $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
 
             // Validar si la plantilla existe
-            if (!$plantilla){
+            if (!$plantilla) {
                 throw new \Exception('Plantilla no encontrada');
             }
 
@@ -595,13 +599,16 @@ class DocumentoController extends Controller
             foreach ($updateData as $index => $seccion) {
                 foreach ($seccion['fields'] as $key => $field) {
 
-                    // Verificar que sea string y se pueda convertir a fecha
-                    if (is_string($field) && strtotime($field)) {
+                    // Validamos que sea un valor numerico
+                    if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
+                        // Verificar que sea string y se pueda convertir a fecha
+                        $updateData[$index]['fields'][$key] = (int) $field;
+                    } elseif (is_string($field) && strtotime($field)) {
                         $timestamp = strtotime($field);
                         if ($timestamp !== false) {
                             $updateData[$index]['fields'][$key] =  new UTCDateTime($timestamp * 1000);
                         }
-                    // Verificamos si es una id
+                        // Verificamos si es una id
                     } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
 
                         // nombre de la funcion
@@ -610,7 +617,7 @@ class DocumentoController extends Controller
                         // Agregamos la id al arreglo de relaciones
                         $relations[strtolower($modelRelation) . '_ids'] = $field;
 
-                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
+                        // Validamos que sea un array, tenga datos y que el primer valor no sea un string
                     } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                         // Llamamos la función recursiva
                         $updateData[$index]['fields'][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
@@ -618,7 +625,7 @@ class DocumentoController extends Controller
                 }
             }
 
-            Log::info('relaciones',[
+            Log::info('relaciones', [
                 ':' => $relations
             ]);
 
@@ -692,8 +699,11 @@ class DocumentoController extends Controller
         // Recorremos el arraglo
         foreach ($data as $index => $value) {
             foreach ($value as $key => $field) {
-                // Verificar si es un string y se puede convertir a fecha
-                if (is_string($field) && strtotime($field)) {
+                // Validamos que sea un valor numerico
+                if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
+                    // Verificar que sea string y se pueda convertir a fecha
+                    $data[$index][$key] = (int) $field;
+                } elseif (is_string($field) && strtotime($field)) {
                     // Convertir a UTCDateTime
                     $timestamp = strtotime($field);
                     if ($timestamp !== false) {
@@ -708,7 +718,7 @@ class DocumentoController extends Controller
                     // Agregamos la id al arreglo de relaciones
                     $relations[strtolower($modelRelation) . '_ids'][] = $field;
 
-                // Validamos que sea un array, tenga datos y que el primer valor no sea un string
+                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
                 } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                     // Llamamos la función recursiva
                     $data[$index][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
