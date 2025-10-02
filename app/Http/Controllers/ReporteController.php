@@ -22,10 +22,10 @@ class ReporteController extends Controller
     {
         $reportes = Reporte::all();
 
-        return (new ReporteResource($reportes))
-            ->additional(['status' => 'success', 'message' => 'Reportes obtenidos correctamente'])
-            ->response()
-            ->setStatusCode(Response::HTTP_OK);
+        return response()->success(
+            'Reportes obtenidos correctamente',
+             ReporteResource::collection($reportes)
+            );
     }
 
     /**
@@ -80,7 +80,7 @@ class ReporteController extends Controller
                 'data' => $reporte,
             ], Response::HTTP_CREATED);
         } catch (\Throwable $e) {
-            Log::error('Error al crear reporte: '.$e->getMessage(), [
+            Log::error('Error al crear reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -112,7 +112,7 @@ class ReporteController extends Controller
                 'message' => 'Reporte no encontrado',
             ], Response::HTTP_NOT_FOUND);
         } catch (\Throwable $e) {
-            Log::error('Error al obtener reporte: '.$e->getMessage(), [
+            Log::error('Error al obtener reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -194,7 +194,7 @@ class ReporteController extends Controller
                 'data' => $reporte,
             ], Response::HTTP_OK);
         } catch (\Throwable $e) {
-            Log::error('Error al actualizar reporte: '.$e->getMessage(), [
+            Log::error('Error al actualizar reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
@@ -223,7 +223,7 @@ class ReporteController extends Controller
                 'message' => 'Reporte no encontrado',
             ], Response::HTTP_NOT_FOUND);
         } catch (\Throwable $e) {
-            Log::error('Error al eliminar reporte: '.$e->getMessage(), [
+            Log::error('Error al eliminar reporte: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
 
