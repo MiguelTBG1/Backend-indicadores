@@ -571,6 +571,269 @@ class PlantillasCollectionSeeder extends Seeder
             ],
         ]);
 
+        // Plantilla de docentes
+        Plantillas::create([
+            '_id' => new ObjectId('68e006604982da929b0adda3'),
+            'nombre_plantilla' => 'Docentes',
+            'nombre_modelo' => 'Docentes',
+            'nombre_coleccion' => 'Docentes_data',
+            'creado_por' => $usuario2->_id,
+            'secciones' => [
+                [
+                    'nombre' => 'Participación en Proyectos de Investigación',
+                    'fields' => [
+                        [
+                            'name' => 'Proyectos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre del proyecto', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha de inicio', 'type' => 'date', 'required' => false],
+                                ['name' => 'Fecha de finalizacion', 'type' => 'date', 'required' => false],
+                                ['name' => 'Director del proyecto', 'type' => 'string', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Proyectos dirigidos',
+                    'fields' => [
+                        [
+                            'name' => 'Proyectos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre del proyecto', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha de inicio', 'type' => 'date', 'required' => false],
+                                ['name' => 'Fecha de finalizacion', 'type' => 'date', 'required' => false],
+                                [
+                                    'name' => 'Cuenta con financiamiento',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'options' => ['Si', 'No'],
+                                ],
+                                ['name' => 'Entidad que financia', 'type' => 'string', 'required' => false],
+                                ['name' => 'Monto de financiamiento', 'type' => 'number', 'required' => false],
+                                ['name' => 'Constancia del registro del proyecto', 'type' => 'file', 'required' => false],
+                                [
+                                    'name' => 'Alumnos participantes',
+                                    'type' => 'subform',
+                                    'required' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => 'Alumno',
+                                            'type' => 'select',
+                                            'required' => false,
+                                            'dataSource' => [
+                                                'plantillaId' => '68bb162223bbc9264e05fca0',
+                                                'plantillaNombre' => 'Alumnos',
+                                                'seccion' => 'Información General',
+                                                'campoMostrar' => 'Nombre Completo',
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Asesoramiento de equipos en concursos',
+                    'fields' => [
+                        [
+                            'name' => 'Concursos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Evento en el que participa', 'type' => 'string', 'required' => false],
+                                [
+                                    'name' => 'Alumnos participantes',
+                                    'type' => 'subform',
+                                    'required' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => 'Alumno',
+                                            'type' => 'select',
+                                            'required' => false,
+                                            'dataSource' => [
+                                                'plantillaId' => '68bb162223bbc9264e05fca0',
+                                                'plantillaNombre' => 'Alumnos',
+                                                'seccion' => 'Información General',
+                                                'campoMostrar' => 'Nombre Completo',
+                                            ],
+                                        ],
+                                        ['name' => 'Nombre o tipo del reconocimento recibido', 'type' => 'string', 'required' => false],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Reconocimientos',
+                    'fields' => [
+                        [
+                            'name' => 'PRODEP',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Fecha de inicio de validez', 'type' => 'date', 'required' => false],
+                                ['name' => 'Fecha final de validez', 'type' => 'date', 'required' => false],
+                                ['name' => 'Entidad que lo otorga', 'type' => 'string', 'required' => false],
+                            ],
+                        ],
+                        [
+                            'name' => 'SNII',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Fecha de inicio de validez', 'type' => 'date', 'required' => false],
+                                ['name' => 'Fecha final de validez', 'type' => 'date', 'required' => false],
+                                ['name' => 'Entidad que lo otorga', 'type' => 'string', 'required' => false],
+                                ['name' => 'Nivel', 'type' => 'string', 'required' => false],
+                            ],
+                        ],
+                        [
+                            'name' => 'SEI',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Fecha de inicio de validez', 'type' => 'date', 'required' => false],
+                                ['name' => 'Fecha final de validez', 'type' => 'date', 'required' => false],
+                                ['name' => 'Entidad que lo otorga', 'type' => 'string', 'required' => false],
+                                ['name' => 'Nivel', 'type' => 'string', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Conferencias impartidas',
+                    'fields' => [
+                        [
+                            'name' => 'Conferencias',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre de la conferencia', 'type' => 'string', 'required' => false],
+                                ['name' => 'Nombre de la institución', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha', 'type' => 'date', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Ponencias realizadas',
+                    'fields' => [
+                        [
+                            'name' => 'Ponencias',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre de la ponencia', 'type' => 'string', 'required' => false],
+                                ['name' => 'Institucion', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha', 'type' => 'date', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Cursos',
+                    'fields' => [
+                        [
+                            'name' => 'Cursos tomados',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre del curso', 'type' => 'string', 'required' => false],
+                                ['name' => 'Institucion', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha', 'type' => 'string', 'required' => false],
+                            ],
+                        ],
+                        [
+                            'name' => 'Cursos impartidos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre del curso', 'type' => 'string', 'required' => false],
+                                ['name' => 'Institucion', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha', 'type' => 'string', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Participacion en congresos',
+                    'fields' => [
+                        [
+                            'name' => 'Congresos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre del congreso', 'type' => 'string', 'required' => false],
+                                ['name' => 'Institucion que lo organiza', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha', 'type' => 'date', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Eventos organizados',
+                    'fields' => [
+                        [
+                            'name' => 'Eventos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre del evento', 'type' => 'string', 'required' => false],
+                                ['name' => 'Comision realizada', 'type' => 'string', 'required' => false],
+                                ['name' => 'Institucion', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha', 'type' => 'date', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Cuerpos academicos registrados en PRODEP al que pertenecen',
+                    'fields' => [
+                        [
+                            'name' => 'Cuepors academicos',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre del cuerpo academico', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha de registro', 'type' => 'date', 'required' => false],
+                                ['name' => 'Fecha de terminación', 'type' => 'date', 'required' => false],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'nombre' => 'Redes de investigación al que pertenecen',
+                    'fields' => [
+                        [
+                            'name' => 'Redes de investigacion',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Nombre de la red', 'type' => 'string', 'required' => false],
+                                ['name' => 'Fecha de registro', 'type' => 'date', 'required' => false],
+                                ['name' => 'Fecha de vigencia', 'type' => 'date', 'required' => false],
+                                [
+                                    'name' => 'Instituciones integrantes',
+                                    'type' => 'subform',
+                                    'required' => false,
+                                    'subcampos' => [
+                                        ['name' => 'Nombre', 'type' => 'string', 'required' => false],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+
         try {
             // Eliminamos los modelos existentes
             DynamicModelService::removeModels();
@@ -597,7 +860,7 @@ class PlantillasCollectionSeeder extends Seeder
                     'relaciones' => $relations,
                 ]);
                 // Verificar si el archivo del modelo fue creado
-                $modelPath = app_path('Models/'.$modelName.'.php');
+                $modelPath = app_path('Models/' . $modelName . '.php');
 
                 // Actualizamos el modelo dinámico
                 DynamicModelService::generate($modelName, $relations);
