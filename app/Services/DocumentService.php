@@ -73,7 +73,8 @@ class DocumentService
         // Creamos el pipeline de agregación
         $pipeline = [];
 
-        if ( isset($configuracion['campoFechaFiltro']) && !empty($configuracion['campoFechaFiltro'])){
+        // Filtro de fechas para cuendo el campo de fecha del filtro está en otra sección
+        if ( isset($configuracion['campoFechaFiltro']) && !empty($configuracion['campoFechaFiltro']) && $configuracion['campoFechaFiltro'][0] != $configuracion['secciones']){
 
             $seccion = array_shift($configuracion['campoFechaFiltro']);
 
@@ -110,6 +111,14 @@ class DocumentService
             $prefijo = count($slice) > 0
                 ? implode('.', $slice) . '.'
                 : '';
+
+            // Agregamos el filtro por fecha si existe en el $arrayConfig
+            if (isset($arrayConfig['filtro']) && !empty($arrayConfig['filtro']) && $arrayConfig['filtro'][0] == $index) {
+                $arrayConfig['condicion'][$index] = [
+                    [ 'campo' => $arrayConfig['filtro'][1], 'operador' => 'mayor_igual', 'valor' => $arrayConfig['filtro'][2]],
+                    [ 'campo' => $arrayConfig['filtro'][1], 'operador' => 'menor_igual', 'valor' => $arrayConfig['filtro'][3]]
+                ];
+            }
 
             // Llamamos la funcion para formar las condicones
             $condiciones = isset($arrayConfig['condicion']) && !empty($arrayConfig['condicion'] && isset($arrayConfig['condicion'][$index]))
@@ -170,6 +179,10 @@ class DocumentService
         $arrayConfig['operacion'][] = $configuracion['operacion'] ?? null;
         $arrayConfig['condicion'][] = isset($configuracion['condicion']) ? $configuracion['condicion'] : null;
 
+        if ( isset($configuracion['campoFechaFiltro']) && !empty($configuracion['campoFechaFiltro']) && ($configuracion['campoFechaFiltro'][0] == $configuracion['secciones']) && !isset($arrayConfig['filtro'])){
+            array_shift($configuracion['campoFechaFiltro']);
+            $arrayConfig['filtro'] = [count($configuracion['campoFechaFiltro']) - 1, end($configuracion['campoFechaFiltro']), $configuracion['fecha_inicio'], $configuracion['fecha_fin']];
+        }
         // Verificamos si tiene subconfiguracion
         if (isset($configuracion['subConfiguracion']) && !empty($configuracion['subConfiguracion'])) {
             self::recursiveConfig($configuracion['subConfiguracion'], $arrayConfig);
@@ -199,7 +212,7 @@ class DocumentService
             $valueCondition = null;
 
             // Validamos si valor es tipo numerico valido
-            if (filter_var($condicion['valor'], FILTER_VALIDATE_INT)) {
+            if (filter_var($condicion['valor'], FILTER_VALIDATE_INT) && strtotime($condicion['valor'])) {
                 $valueCondition['$or'] = [
                     [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => $condicion['valor']]],
                     [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => (int) $condicion['valor']]],
