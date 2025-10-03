@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 
 class PlantillasCollectionSeeder extends Seeder
 {
@@ -360,6 +361,7 @@ class PlantillasCollectionSeeder extends Seeder
                     'fields' => [
                         ['name' => 'Nombre Completo', 'type' => 'string', 'required' => true],
                         ['name' => 'Género', 'type' => 'select', 'required' => true, 'options' => ['Masculino', 'Femenino']],
+                        ['name' => 'Fecha de inscripcion', 'type' => 'date', 'required' => false],
                         [
                             'name' => 'Programa educativo',
                             'type' => 'select',
@@ -614,7 +616,6 @@ class PlantillasCollectionSeeder extends Seeder
                                 ],
                                 ['name' => 'Entidad que financia', 'type' => 'string', 'required' => false],
                                 ['name' => 'Monto de financiamiento', 'type' => 'number', 'required' => false],
-                                ['name' => 'Constancia del registro del proyecto', 'type' => 'file', 'required' => false],
                                 [
                                     'name' => 'Alumnos participantes',
                                     'type' => 'subform',

@@ -7,6 +7,7 @@ use App\DynamicModels\Periodos;
 use App\DynamicModels\Profesores;
 use App\DynamicModels\ProgramaEducativo;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use MongoDB\BSON\UTCDateTime;
 
 class AlumnosFactory extends Factory
 {
@@ -15,16 +16,16 @@ class AlumnosFactory extends Factory
     public function definition(): array
     {
         // Cargar los IDs reales de otras colecciones
-        $programas = ProgramaEducativo::all()->map(fn ($doc) => (string) $doc->_id)->toArray();
-        $periodos = Periodos::all()->map(fn ($doc) => (string) $doc->_id)->toArray();
-        $asesores = Profesores::all()->map(fn ($doc) => (string) $doc->_id)->toArray();
+        $programas = ProgramaEducativo::all()->map(fn($doc) => (string) $doc->_id)->toArray();
+        $periodos = Periodos::all()->map(fn($doc) => (string) $doc->_id)->toArray();
+        $asesores = Profesores::all()->map(fn($doc) => (string) $doc->_id)->toArray();
 
         // Arreglos para guardar los IDs usados
         $periodosUsados = [];
         $asesoresUsados = [];
 
         $programaEducativo = ! empty($programas) ? $this->faker->randomElement($programas) : null;
-
+        $fechas = ['06-08-2025','14-01-2025','06-08-2024','14-01-2024'];
         return [
             'secciones' => [
                 // Información General (siempre presente)
@@ -33,6 +34,7 @@ class AlumnosFactory extends Factory
                     'fields' => [
                         'Nombre Completo' => $this->faker->name(),
                         'Género' => $this->faker->randomElement(['Masculino', 'Femenino']),
+                        'Fecha de inscripcion' => new UTCDateTime(strtotime($this->faker->randomElement($fechas))  * 1000),
                         'Programa educativo' => $programaEducativo,
                         'Número de control' => $this->faker->numerify('########'),
                     ],
