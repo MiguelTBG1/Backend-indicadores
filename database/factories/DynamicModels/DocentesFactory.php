@@ -48,7 +48,7 @@ class DocentesFactory extends Factory
                 [
                     'nombre' => 'Proyectos dirigidos',
                     'fields' => [
-                        'Proyectos' => collect(range(1, $this->faker->numberBetween(0, 3)))->map(function () {
+                        'Proyectos dirigidos' => collect(range(1, $this->faker->numberBetween(0, 3)))->map(function () {
                             return [
                                 'Nombre del proyecto' => $this->faker->sentence(3),
                             ];

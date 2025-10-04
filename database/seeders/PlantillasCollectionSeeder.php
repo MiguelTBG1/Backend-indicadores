@@ -601,7 +601,7 @@ class PlantillasCollectionSeeder extends Seeder
                     'nombre' => 'Proyectos dirigidos',
                     'fields' => [
                         [
-                            'name' => 'Proyectos',
+                            'name' => 'Proyectos dirigidos',
                             'type' => 'subform',
                             'required' => false,
                             'subcampos' => [
