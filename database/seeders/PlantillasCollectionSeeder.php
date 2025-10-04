@@ -648,7 +648,7 @@ class PlantillasCollectionSeeder extends Seeder
                             'subcampos' => [
                                 ['name' => 'Evento en el que participa', 'type' => 'string', 'required' => false],
                                 [
-                                    'name' => 'Alumnos participantes',
+                                    'name' => 'Alumnos participantes 2',
                                     'type' => 'subform',
                                     'required' => false,
                                     'subcampos' => [
@@ -663,7 +663,7 @@ class PlantillasCollectionSeeder extends Seeder
                                                 'campoMostrar' => 'Nombre Completo',
                                             ],
                                         ],
-                                        ['name' => 'Nombre o tipo del reconocimento recibido', 'type' => 'string', 'required' => false],
+                                        ['name' => 'Nombre o tipo del reconocimiento recibido', 'type' => 'string', 'required' => false],
                                     ],
                                 ],
                             ],
@@ -797,7 +797,7 @@ class PlantillasCollectionSeeder extends Seeder
                     'nombre' => 'Cuerpos academicos registrados en PRODEP al que pertenecen',
                     'fields' => [
                         [
-                            'name' => 'Cuepors academicos',
+                            'name' => 'Cuerpos academicos',
                             'type' => 'subform',
                             'required' => false,
                             'subcampos' => [
