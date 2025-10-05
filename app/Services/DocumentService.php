@@ -6,88 +6,122 @@ use App\Models\Plantillas;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Services\DynamicModelService;
-
+use Exception;
 
 class DocumentService
 {
     /**
-     * Calcula el numerador de un indicador
-     * @param array $configuracion Configuración del indicador
-     * @return int El valor del numerador
+     * Calcula el valor de una configuración (indicador, serie, etc.)
      */
-    public static function calculateNumerador($configuracion)
+    public function calculate(array $configuracion): int
     {
-        // Validamos que la operación sea una de las permitidas
-        $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
+        $configuracion = $this->normalizeConfig($configuracion);
 
-        // Normalizamos a minúsculas
-        $configuracion['operacion'] = strtolower($configuracion['operacion']);
-
-        // Operadores permitidos para las condiciones
-        $operadoresValidos = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
-
-        // Validamos la configuracion
-        $validator = Validator::make($configuracion, [
-            'coleccion' => 'required|string',
-            'operacion' => 'required|string|in:' . implode(',', $operacionesPermitidas),
-            'campo' => 'required_if:operacion,in:' . implode(',', array_diff($operacionesPermitidas, ['contar'])) . '|string|nullable',
-            'condicion' => 'sometimes|array',
-            'condicion.*.campo' => 'required_with:condicion|string',
-            'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadoresValidos),
-            'condicion.*.valor' => 'required_with:condicion|string',
-            'subConfiguracion' => 'sometimes|array',
-        ]);
-
+        $validator = $this->validateConfig($configuracion);
         if ($validator->fails()) {
             Log::error('Configuración no válida: ' . $validator->errors()->first());
             return 0;
         }
 
-        //Buscamos la plantilla
-        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first() ?? null;
+        // Buscamos la plantilla
+        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first();
 
-        // Validamos si se encontro el nombre del modelo
         if (!$plantilla) {
-            throw new \Exception('No se encontró la plantilla ', 404);
+            throw new Exception('No se encontró la plantilla', 404);
         }
 
-        // Obtenemos el nombre del modelo
-        $modelName = $plantilla->nombre_modelo ?? null;
+        $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
 
-        // creamos la clase del modelo
-        $modelClass = DynamicModelService::createModelClass($modelName);
+        $pipeline = $this->buildPipeline($configuracion);
 
-        // Obtener todos los registros del modelo
-        $documents = $modelClass::all();
+        Log::info('Pipeline construido', ['pipeline' => $pipeline]);
 
-        // Validamos que existan registros
-        if (!$documents) {
-            Log::error('No se encontraron registros en: ' . $configuracion['coleccion']);
-            return 0;
+        $cursor = $modelClass::raw(fn($collection) => $collection->aggregate($pipeline));
+        $resultados = iterator_to_array($cursor);
+
+        Log::info('Resultado del cálculo', $resultados);
+
+        return $resultados[0]['resultado'] ?? 0;
+    }
+
+    /**
+     * Calcula múltiples configuraciones
+     */
+    public function calculateMultiple(array $configs): array
+    {
+        $resultados = [];
+
+        foreach ($configs as $cfg) {
+            try {
+                $valor = $this->calculate($cfg);
+                $resultados[] = [
+                    'label' => $cfg['label'] ?? $cfg['coleccion'],
+                    'valor' => $valor,
+                ];
+            } catch (Exception $e) {
+                Log::error("Error calculando serie {$cfg['label']}: {$e->getMessage()}");
+                $resultados[] = [
+                    'label' => $cfg['label'] ?? $cfg['coleccion'],
+                    'valor' => 0,
+                ];
+            }
         }
 
-        // Obtenemos el arreglo de campos, operacion y condiciones
+        return $resultados;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                          MÉTODOS PRIVADOS AUXILIARES                       */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+     * Normaliza la configuracion recibida
+     */
+    private function normalizeConfig(array $config): array
+    {
+        $config['operacion'] = strtolower($config['operacion'] ?? '');
+        return $config;
+    }
+
+    /**
+     * Valida que la configuracion este bien definida
+     */
+    private function validateConfig(array $config)
+    {
+        $operaciones = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
+        $operadores = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
+
+        return Validator::make($config, [
+            'coleccion' => 'required|string',
+            'operacion' => 'required|string|in:' . implode(',', $operaciones),
+            'campo' => 'required_if:operacion,in:' . implode(',', array_diff($operaciones, ['contar'])) . '|string|nullable',
+            'condicion' => 'sometimes|array',
+            'condicion.*.campo' => 'required_with:condicion|string',
+            'condicion.*.operador' => 'required_with:condicion|string|in:' . implode(',', $operadores),
+            'condicion.*.valor' => 'required_with:condicion|string',
+            'subConfiguracion' => 'sometimes|array',
+        ]);
+    }
+
+    private function buildPipeline(array $config): array
+    {
         $arrayConfig = [];
-        self::recursiveConfig($configuracion, $arrayConfig);
+        self::recursiveConfig($config, $arrayConfig);
 
-        // Creamos el pipeline de agregación
         $pipeline = [];
 
-        // Filtro de fechas para cuendo el campo de fecha del filtro está en otra sección
-        if ( isset($configuracion['campoFechaFiltro']) && !empty($configuracion['campoFechaFiltro']) && $configuracion['campoFechaFiltro'][0] != $configuracion['secciones']){
-
-            $seccion = array_shift($configuracion['campoFechaFiltro']);
-
-            $campo = implode('.', $configuracion['campoFechaFiltro']);
-
+        // --- la lógica que ya tenías ---
+        if (isset($config['campoFechaFiltro']) && !empty($config['campoFechaFiltro']) && $config['campoFechaFiltro'][0] != $config['secciones']) {
+            $seccion = array_shift($config['campoFechaFiltro']);
+            $campo = implode('.', $config['campoFechaFiltro']);
             $pipeline[] = [
                 '$match' => [
                     'secciones' => [
                         '$elemMatch' => [
                             'nombre' => $seccion,
                             'fields.' . $campo => [
-                                '$gte' => $configuracion['fecha_inicio'],
-                                '$lte' => $configuracion['fecha_fin']
+                                '$gte' => $config['fecha_inicio'],
+                                '$lte' => $config['fecha_fin']
                             ]
                         ]
                     ]
@@ -95,77 +129,43 @@ class DocumentService
             ];
         }
 
-        // Expandimos secciones
         $pipeline[] = ['$unwind' => '$secciones'];
-
-        // Filtramos las secciones por la sección definida en la configuración
-        $pipeline[] = ['$match' => ['secciones.nombre' => $configuracion['secciones']]];
+        $pipeline[] = ['$match' => ['secciones.nombre' => $config['secciones']]];
 
         foreach ($arrayConfig['campo'] as $index => $campo) {
-
-            // Filtramos el arraglo
             $arrayFilter = array_slice($arrayConfig['campo'], 0, $index + 1);
-
-            // Obtenemos el prefijo del campo
             $slice = array_slice($arrayFilter, 0, -1);
-            $prefijo = count($slice) > 0
-                ? implode('.', $slice) . '.'
-                : '';
+            $prefijo = count($slice) > 0 ? implode('.', $slice) . '.' : '';
 
-            // Agregamos el filtro por fecha si existe en el $arrayConfig
             if (isset($arrayConfig['filtro']) && !empty($arrayConfig['filtro']) && $arrayConfig['filtro'][0] == $index) {
                 $arrayConfig['condicion'][$index] = [
-                    [ 'campo' => $arrayConfig['filtro'][1], 'operador' => 'mayor_igual', 'valor' => $arrayConfig['filtro'][2]],
-                    [ 'campo' => $arrayConfig['filtro'][1], 'operador' => 'menor_igual', 'valor' => $arrayConfig['filtro'][3]]
+                    ['campo' => $arrayConfig['filtro'][1], 'operador' => 'mayor_igual', 'valor' => $arrayConfig['filtro'][2]],
+                    ['campo' => $arrayConfig['filtro'][1], 'operador' => 'menor_igual', 'valor' => $arrayConfig['filtro'][3]]
                 ];
             }
 
-            // Llamamos la funcion para formar las condicones
             $condiciones = isset($arrayConfig['condicion']) && !empty($arrayConfig['condicion'] && isset($arrayConfig['condicion'][$index]))
                 ? self::getCondiciones('secciones.fields.' . $prefijo, $arrayConfig['condicion'][$index])
                 : null;
 
-            // Validamos que $condiciones no sea nulo y que no este vacio
             if (!is_null($condiciones) && !empty($condiciones)) {
                 $pipeline[] = ['$match' => $condiciones];
             }
 
-            // Verificamos si es la ultima posición para saltarlo
             if (count($arrayConfig['campo']) == $index + 1) {
                 continue;
             }
 
-            // Obtenemos el ultimo campos
             $ultimoCampo = end($arrayFilter);
-
-            // Agregamos el campo al pipeline
             $pipeline[] = ['$unwind' => '$secciones.fields.' . $prefijo  . $ultimoCampo];
         }
 
-        // Agrupamos por el campo de la configuración
         self::recursiveGroup($pipeline, $arrayConfig);
 
-        Log::info('pipeline', [
-            ': ' => json_encode($pipeline, JSON_PRETTY_PRINT)
-        ]);
-
-        $cursor = $modelClass::raw(function ($collection) use ($pipeline) {
-            return $collection->aggregate($pipeline);
-        });
-
-        $resultados = iterator_to_array($cursor);
-
-        Log::info('Cursor obtenido de la agregación', $resultados);
-
-        if (empty($resultados)) {
-            return 0;
-        }
-
-        // Retornamos el resultado
-        return $resultados[0]['resultado'] ?? 0;
-
-        return 0;
+        return $pipeline;
     }
+
+    /* ------------------------- tus funciones actuales ------------------------- */
 
     /**
      * Función para obtener el arreglos de campos y operaciones
@@ -173,13 +173,12 @@ class DocumentService
      * @param array &$arrayConfig Arreglo de campos, operaciones y condiciones
      */
     private static function recursiveConfig($configuracion, &$arrayConfig)
-    {
-        // agregamos el campo, la operación y la condición
+    { // agregamos el campo, la operación y la condición
         $arrayConfig['campo'][] = $configuracion['campo'] ?? null;
         $arrayConfig['operacion'][] = $configuracion['operacion'] ?? null;
         $arrayConfig['condicion'][] = isset($configuracion['condicion']) ? $configuracion['condicion'] : null;
 
-        if ( isset($configuracion['campoFechaFiltro']) && !empty($configuracion['campoFechaFiltro']) && ($configuracion['campoFechaFiltro'][0] == $configuracion['secciones']) && !isset($arrayConfig['filtro'])){
+        if (isset($configuracion['campoFechaFiltro']) && !empty($configuracion['campoFechaFiltro']) && ($configuracion['campoFechaFiltro'][0] == $configuracion['secciones']) && !isset($arrayConfig['filtro'])) {
             array_shift($configuracion['campoFechaFiltro']);
             $arrayConfig['filtro'] = [count($configuracion['campoFechaFiltro']) - 1, end($configuracion['campoFechaFiltro']), $configuracion['fecha_inicio'], $configuracion['fecha_fin']];
         }
@@ -196,7 +195,6 @@ class DocumentService
      */
     private static function getCondiciones($prefijo, $arrayCondiciones)
     {
-
         // Creamos el arraglo de condiciones
         $condiciones = [];
 
@@ -217,7 +215,7 @@ class DocumentService
                     [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => $condicion['valor']]],
                     [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => (int) $condicion['valor']]],
                 ];
-            // En caso contrario lo tomamos como string
+                // En caso contrario lo tomamos como string
             } else {
                 $valueCondition = [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => $condicion['valor']]];
             }
@@ -236,9 +234,7 @@ class DocumentService
      * @param array &$arrayConfig Arreglo de campos y operaciones
      */
     private static function recursiveGroup(&$pipeline, $arrayConfig)
-    {
-
-        // Obtenemos el arreglo de campos y operacion
+    { // Obtenemos el arreglo de campos y operacion
         $array = $arrayConfig['campo'];
         $arrayOperacion = $arrayConfig['operacion'];
 

@@ -64,7 +64,7 @@ class IndicadoresController extends Controller
             // Verificamos si tiene el campo de configuración y calculamos el numerador
             /*foreach ($indicadores as $indicador) {
                 if (isset($indicador->configuracion)) {
-                    $indicador->numerador = $this->calculateNumerador($indicador->configuracion);
+                    $indicador->numerador = $this->calculate($indicador->configuracion);
                 }
             }*/
 
@@ -136,10 +136,11 @@ class IndicadoresController extends Controller
 
             // Procesamos la configuración
             $resultado = $resultado->map(function ($indicador) use ($inicioDate, $finDate) {
+                $documentService = new DocumentService();
                 if (isset($indicador['configuracion'])) {
                     $indicador['configuracion']['fecha_inicio'] = $inicioDate;
                     $indicador['configuracion']['fecha_fin'] = $finDate;
-                    $indicador['numerador'] = DocumentService::calculateNumerador($indicador['configuracion']);
+                    $indicador['numerador'] = $documentService->calculate($indicador['configuracion']);
                 }
                 return $indicador;
             });
@@ -157,7 +158,6 @@ class IndicadoresController extends Controller
                 'line'    => $e->getLine(),
                 'trace'   => $e->getTraceAsString(),
             ]);
-            return 0;
             return response()->json([
                 'message' => 'Error del sistema al obtener los indicadores',
                 'error' => $e->getMessage()
