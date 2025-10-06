@@ -177,7 +177,7 @@ class DocumentService
 
         $pipeline = [];
 
-        if (isset($config['campoFechaFiltro']) && !empty($config['campoFechaFiltro']) && $config['campoFechaFiltro'][0] != $config['secciones']) {
+        if (isset($config['campoFechaFiltro']) && !empty($config['campoFechaFiltro'])) {
             $seccion = array_shift($config['campoFechaFiltro']);
             $campo = implode('.', $config['campoFechaFiltro']);
             $pipeline[] = [
@@ -242,10 +242,6 @@ class DocumentService
         $arrayConfig['operacion'][] = $configuracion['operacion'] ?? null;
         $arrayConfig['condicion'][] = isset($configuracion['condicion']) ? $configuracion['condicion'] : null;
 
-        if (isset($configuracion['campoFechaFiltro']) && !empty($configuracion['campoFechaFiltro']) && ($configuracion['campoFechaFiltro'][0] == $configuracion['secciones']) && !isset($arrayConfig['filtro'])) {
-            array_shift($configuracion['campoFechaFiltro']);
-            $arrayConfig['filtro'] = [count($configuracion['campoFechaFiltro']) - 1, end($configuracion['campoFechaFiltro']), $configuracion['fecha_inicio'], $configuracion['fecha_fin']];
-        }
         // Verificamos si tiene subconfiguracion
         if (isset($configuracion['subConfiguracion']) && !empty($configuracion['subConfiguracion'])) {
             self::recursiveConfig($configuracion['subConfiguracion'], $arrayConfig);
