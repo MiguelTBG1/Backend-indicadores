@@ -56,5 +56,69 @@ class GraficasSeeder extends Seeder
             ],
             'descripcion' => 'Esta es una grafica de areas'
         ]);
+
+        Grafica::create([
+            'titulo' => 'Porcentaje de alumnos hombres y mujeres.',
+            'series' => [
+                [
+                    'name' => 'Hombres',
+                    "configuracion" => [
+                        "coleccion" => "Alumnos_data",
+                        "operacion" => "porcentaje",
+                        "secciones" => "Información General",
+                        "campo" => "Género",
+                        "campoFechaFiltro" => [
+                            "Información General",
+                            "Fecha de inscripcion"
+                        ],
+                        "condicion" => [
+                            [
+                                "campo" => "Género",
+                                "operador" => "igual",
+                                "valor" => "Masculino"
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    'name' => 'Mujeres',
+                    "configuracion" => [
+                        "coleccion" => "Alumnos_data",
+                        "operacion" => "porcentaje",
+                        "secciones" => "Información General",
+                        "campo" => "Género",
+                        "campoFechaFiltro" => [
+                            "Información General",
+                            "Fecha de inscripcion"
+                        ],
+                        "condicion" => [
+                            [
+                                "campo" => "Género",
+                                "operador" => "igual",
+                                "valor" => "Femenino"
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            "rangos" => [
+                ["inicio" => "01-01-2024", "fin" => "31-12-2024", "label" => "2024"],
+                ["inicio" => "01-01-2025", "fin" => "31-12-2025", "label" => "2025"],
+            ],
+            'chartOptions' => [
+                'chart' => [
+                    'height' => 350,
+                    'type' => 'bar'
+                ],
+                'dataLabels' => [
+                    'enabled' => false
+                ],
+                'stroke' => [
+                    'show' => true,
+                    'width' => 2
+                ]
+            ],
+            'descripcion' => 'Esta es una grafica de areas'
+        ]);
     }
 }
