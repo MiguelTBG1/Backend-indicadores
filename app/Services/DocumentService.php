@@ -32,11 +32,17 @@ class DocumentService
 
         $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
 
+        if (($configuracion['operacion'] ?? '') === 'porcentaje') {
+            return $this->calculatePercentage($configuracion, $modelClass);
+        }
+
         $pipeline = $this->buildPipeline($configuracion);
 
         Log::info('Pipeline construido', ['pipeline' => $pipeline]);
 
         $cursor = $modelClass::raw(fn($collection) => $collection->aggregate($pipeline));
+
+
         $resultados = iterator_to_array($cursor);
 
         Log::info('Resultado del cálculo', $resultados);
@@ -70,6 +76,67 @@ class DocumentService
         return $resultados;
     }
 
+    /**
+     * Calcula porcentaje: (numerador / denominador) * 100
+     * Asume que 'condicion' en $config define el numerador.
+     * Si quieres condiciones compartidas, usa 'condicionCompartida' (opcional).
+     *
+     * @param array $configuracion
+     * @param string $modelClass
+     * @return float|int
+     */
+    private function calculatePercentage(array $configuracion, $modelClass)
+    {
+        // 1) Construir config base: condiciones que apliquen a ambos.
+        $configBase = $configuracion;
+        // Si existe condicionCompartida la usamos como base; sino asumimos que
+        // configBase no tiene la condicion del numerador (la quitamos más abajo).
+        $condicionCompartida = $configuracion['condicionCompartida'] ?? null;
+
+        if ($condicionCompartida) {
+            $configBase['condicion'] = $condicionCompartida;
+        } else {
+            // quitamos condicion (asumimos que la condicion actual es la del numerador)
+            unset($configBase['condicion']);
+            unset($configBase['subConfiguracion']); // opcional: quitar subconfiguracion del numerador si existe
+        }
+
+        // Aseguramos operación contar para denominador
+        $configDenominador = $configBase;
+        $configDenominador['operacion'] = 'contar';
+
+        // 2) Config para numerador: usamos la configuración original, pero garantizamos contar
+        $configNumerador = $configuracion;
+        $configNumerador['operacion'] = 'contar';
+
+        // 3) Ejecutamos ambas agregaciones (dos llamadas)
+        $pipelineDen = $this->buildPipeline($configDenominador);
+        $pipelineNum = $this->buildPipeline($configNumerador);
+
+        Log::info('Pipeline porcentaje - denominador', ['pipeline' => $pipelineDen]);
+        Log::info('Pipeline porcentaje - numerador', ['pipeline' => $pipelineNum]);
+
+        $cursorDen = $modelClass::raw(fn($collection) => $collection->aggregate($pipelineDen));
+        $cursorNum = $modelClass::raw(fn($collection) => $collection->aggregate($pipelineNum));
+
+        $resDen = iterator_to_array($cursorDen);
+        $resNum = iterator_to_array($cursorNum);
+
+        $den = $resDen[0]['resultado'] ?? 0;
+        $num = $resNum[0]['resultado'] ?? 0;
+
+        if ($den == 0) {
+            Log::warning('Denominador 0 al calcular porcentaje', ['config' => $configuracion]);
+            return 0;
+        }
+
+        $porcentaje = ($num / $den) * 100;
+
+        // Redondeo opcional a 2 decimales
+        return round($porcentaje, 2);
+    }
+
+
     /* -------------------------------------------------------------------------- */
     /*                          MÉTODOS PRIVADOS AUXILIARES                       */
     /* -------------------------------------------------------------------------- */
@@ -88,7 +155,7 @@ class DocumentService
      */
     private function validateConfig(array $config)
     {
-        $operaciones = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
+        $operaciones = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto', 'porcentaje'];
         $operadores = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
 
         return Validator::make($config, [
@@ -110,7 +177,6 @@ class DocumentService
 
         $pipeline = [];
 
-        // --- la lógica que ya tenías ---
         if (isset($config['campoFechaFiltro']) && !empty($config['campoFechaFiltro']) && $config['campoFechaFiltro'][0] != $config['secciones']) {
             $seccion = array_shift($config['campoFechaFiltro']);
             $campo = implode('.', $config['campoFechaFiltro']);
@@ -164,8 +230,6 @@ class DocumentService
 
         return $pipeline;
     }
-
-    /* ------------------------- tus funciones actuales ------------------------- */
 
     /**
      * Función para obtener el arreglos de campos y operaciones
