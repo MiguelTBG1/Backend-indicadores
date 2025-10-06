@@ -541,7 +541,7 @@ class IndicadoresController extends Controller
             }
 
             // Validamos que la operación sea una de las permitidas
-            $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto'];
+            $operacionesPermitidas = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto', 'porcentaje'];
 
             // Operadores permitidos para las condiciones
             $operadoresValidos = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
