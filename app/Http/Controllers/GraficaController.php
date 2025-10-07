@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\Grafica;
+use App\Services\DocumentService;
+use Illuminate\Support\Carbon;
+use MongoDB\BSON\UTCDateTime;
 
 /**
  * @group Gráficas
@@ -33,9 +36,65 @@ class GraficaController extends Controller
      * */
     public function show($id)
     {
-        Log::debug('Buscando grafica con ID: ' . $id);
         $grafica = Grafica::find($id);
-        Log::debug('Grafica encontrada: ', ['grafica' => $grafica]);
+
+        if (!$grafica) {
+            return response()->json(['message' => 'Gráfica no encontrada'], 404);
+        }
+
+        // Instanciamos el servicio para generar graficas
+        $documentService = new DocumentService();
+
+
+        // Procesamos cada serie de la grafica
+        $seriesProcesadas = [];
+        foreach ($grafica->series as $serie) {
+            $data = [];
+
+            foreach ($grafica->rangos as $rango) {
+
+            $inicioTimestamp = strtotime(Carbon::createFromFormat('d-m-Y', $rango['inicio'])->format('Y-m-d')) * 1000;
+            $finTimestamp = strtotime(Carbon::createFromFormat('d-m-Y', $rango['fin'])->format('Y-m-d')) * 1000;
+
+            $fechaInicio = new UTCDateTime($inicioTimestamp);
+            $fechaFin = new UTCDateTime($finTimestamp);
+
+                // Clonamos la configuración y agregamos las fechas del rango
+                $configRango = $serie['configuracion'];
+                $configRango['fecha_inicio'] = $fechaInicio;
+                $configRango['fecha_fin'] = $fechaFin;
+
+                // Calculamos el valor usando DocumentService
+                $valor = $documentService->calculate($configRango);
+                $data[] = $valor;
+            }
+
+
+            $seriesProcesadas[] = [
+                'name' => $serie['name'],
+                'data' => $data,
+                'configuracion' => $serie['configuracion'], // opcional para frontend
+            ];
+        }
+
+        // Generamos categorías del eje X
+        $xaxis = [
+            'categories' => array_map(fn($r) => $r['label'], $grafica->rangos)
+        ];
+
+        // Retornamos el objeto listo para ApexCharts
+        $graficaFinal = [
+            'titulo' => $grafica->titulo,
+            'series' => $seriesProcesadas,
+            'chartOptions' => array_merge($grafica->chartOptions ?? [], ['xaxis' => $xaxis]),
+            'descripcion' => $grafica->descripcion,
+        ];
+
+        return response()->json([
+            'message' => 'Gráfica obtenida correctamente',
+            'data' => $graficaFinal
+        ]);
+
         return response()->json(
             [
                 'message' => 'Grafica obtenida correctamente',
