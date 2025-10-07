@@ -48,8 +48,8 @@ class GraficaController extends Controller
     {
         $grafica = Grafica::find($id);
 
-        if (! $grafica) {
-            return response()->json(['message' => 'Gráfica no encontrada'], 404);
+        if (!$grafica) {
+            return response()->fail('Gráfica no encontrada', null, 'grafica', 404);
         }
 
         // Instanciamos el servicio para generar graficas
@@ -81,7 +81,7 @@ class GraficaController extends Controller
             $seriesProcesadas[] = [
                 'name' => $serie['name'],
                 'data' => $data,
-                'configuracion' => $serie['configuracion'], // opcional para frontend
+                'configuracion' => $serie['configuracion'], 
             ];
         }
 
@@ -98,17 +98,7 @@ class GraficaController extends Controller
             'descripcion' => $grafica->descripcion,
         ];
 
-        return response()->json([
-            'message' => 'Gráfica obtenida correctamente',
-            'data' => $graficaFinal,
-        ]);
-
-        return response()->json(
-            [
-                'message' => 'Grafica obtenida correctamente',
-                'data' => $grafica,
-            ]
-        );
+        return response()->success('Gráfica obtenida correctamente', $graficaFinal, 'grafica');
     }
 
     public function store(StoreGraficaRequest $request)
