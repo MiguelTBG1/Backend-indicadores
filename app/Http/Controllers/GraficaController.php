@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use App\Http\Requests\Grafica\StoreGraficaRequest;
+use App\Http\Requests\Grafica\UpdateGraficaRequest;
+use App\Http\Resources\GraficaResource;
 use App\Models\Grafica;
 use App\Services\DocumentService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use MongoDB\BSON\UTCDateTime;
 
 /**
@@ -24,7 +26,15 @@ class GraficaController extends Controller
      * */
     public function index()
     {
-        return response()->json(['message' => 'GraficaController index method']);
+        try {
+            $graficas = Grafica::select('id', 'titulo', 'descripcion')->get();
+
+            return response()->success('Listado de gráficas obtenido correctamente', GraficaResource::collection($graficas));
+        } catch (\Exception $e) {
+            Log::error('Error al listar gráficas: '.$e->getMessage());
+
+            return response()->error('Error al obtener el listado de gráficas', $e->getMessage());
+        }
     }
 
     /**
@@ -38,13 +48,12 @@ class GraficaController extends Controller
     {
         $grafica = Grafica::find($id);
 
-        if (!$grafica) {
+        if (! $grafica) {
             return response()->json(['message' => 'Gráfica no encontrada'], 404);
         }
 
         // Instanciamos el servicio para generar graficas
-        $documentService = new DocumentService();
-
+        $documentService = new DocumentService;
 
         // Procesamos cada serie de la grafica
         $seriesProcesadas = [];
@@ -53,11 +62,11 @@ class GraficaController extends Controller
 
             foreach ($grafica->rangos as $rango) {
 
-            $inicioTimestamp = strtotime(Carbon::createFromFormat('d-m-Y', $rango['inicio'])->format('Y-m-d')) * 1000;
-            $finTimestamp = strtotime(Carbon::createFromFormat('d-m-Y', $rango['fin'])->format('Y-m-d')) * 1000;
+                $inicioTimestamp = strtotime(Carbon::createFromFormat('d-m-Y', $rango['inicio'])->format('Y-m-d')) * 1000;
+                $finTimestamp = strtotime(Carbon::createFromFormat('d-m-Y', $rango['fin'])->format('Y-m-d')) * 1000;
 
-            $fechaInicio = new UTCDateTime($inicioTimestamp);
-            $fechaFin = new UTCDateTime($finTimestamp);
+                $fechaInicio = new UTCDateTime($inicioTimestamp);
+                $fechaFin = new UTCDateTime($finTimestamp);
 
                 // Clonamos la configuración y agregamos las fechas del rango
                 $configRango = $serie['configuracion'];
@@ -69,7 +78,6 @@ class GraficaController extends Controller
                 $data[] = $valor;
             }
 
-
             $seriesProcesadas[] = [
                 'name' => $serie['name'],
                 'data' => $data,
@@ -79,7 +87,7 @@ class GraficaController extends Controller
 
         // Generamos categorías del eje X
         $xaxis = [
-            'categories' => array_map(fn($r) => $r['label'], $grafica->rangos)
+            'categories' => array_map(fn ($r) => $r['label'], $grafica->rangos),
         ];
 
         // Retornamos el objeto listo para ApexCharts
@@ -92,14 +100,65 @@ class GraficaController extends Controller
 
         return response()->json([
             'message' => 'Gráfica obtenida correctamente',
-            'data' => $graficaFinal
+            'data' => $graficaFinal,
         ]);
 
         return response()->json(
             [
                 'message' => 'Grafica obtenida correctamente',
-                'data' => $grafica
+                'data' => $grafica,
             ]
         );
+    }
+
+    public function store(StoreGraficaRequest $request)
+    {
+        try {
+            $grafica = Grafica::create($request->validated());
+
+            return response()->created('Gráfica creada correctamente', new GraficaResource($grafica));
+        } catch (\Exception $e) {
+            Log::error('Error al crear gráfica: '.$e->getMessage());
+
+            return response()->error('Error al crear la gráfica', $e->getMessage());
+        }
+    }
+
+    public function update(UpdateGraficaRequest $request, $id)
+    {
+        $grafica = Grafica::find($id);
+
+        if (! $grafica) {
+            return response()->fail('Gráfica no encontrada', null, 'grafica', 404);
+        }
+
+        try {
+            $grafica->update($request->validated());
+
+            return response()->updated('Gráfica actualizada correctamente', new GraficaResource($grafica));
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar gráfica: '.$e->getMessage());
+
+            return response()->error('Error al actualizar la gráfica', $e->getMessage());
+        }
+    }
+
+    public function destroy($id)
+    {
+        $grafica = Grafica::find($id);
+
+        if (! $grafica) {
+            return response()->fail('Gráfica no encontrada', null, 'grafica', 404);
+        }
+
+        try {
+            $grafica->delete();
+
+            return response()->deleted('Gráfica eliminada correctamente');
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar gráfica: '.$e->getMessage());
+
+            return response()->error('Error al eliminar la gráfica', $e->getMessage());
+        }
     }
 }
