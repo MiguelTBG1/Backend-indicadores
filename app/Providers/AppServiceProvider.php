@@ -52,11 +52,11 @@ class AppServiceProvider extends ServiceProvider
          * 
          * Usar para cualquier caso de exito
         */
-        Response::macro('success', function (string $message, $data = null, int $status = HttpResponse::HTTP_OK) {
+        Response::macro('success', function (string $message, $data = null, string $resource = 'data', int $status = HttpResponse::HTTP_OK) {
             return Response::json([
                 'status'  => 'success',
                 'message' => $message,
-                'data'    => $data,
+                $resource => $data,
             ], $status);
         });
 
@@ -65,11 +65,11 @@ class AppServiceProvider extends ServiceProvider
          * 
          * Usar cuando se tenga que cancelar una operacion
          */
-        Response::macro('fail', function (string $message, $data = null, int $status = HttpResponse::HTTP_BAD_REQUEST) {
+        Response::macro('fail', function (string $message, $data = null, string $resource = 'data', int $status = HttpResponse::HTTP_BAD_REQUEST) {
             return Response::json([
                 'status'  => 'fail',
                 'message' => $message,
-                'data'    => $data,
+                $resource    => $data,
             ], $status);
         });
 
@@ -78,11 +78,11 @@ class AppServiceProvider extends ServiceProvider
          * 
          * Usar para errores inesperados (try-catch, excepciones, etc)
          */
-        Response::macro('error', function (string $message, $data = null, int $status = HttpResponse::HTTP_INTERNAL_SERVER_ERROR) {
+        Response::macro('error', function (string $message, $data = null, string $resource = 'data', int $status = HttpResponse::HTTP_INTERNAL_SERVER_ERROR) {
             return Response::json([
                 'status'  => 'error',
                 'message' => $message,
-                'data'    => $data,
+                $resource => $data,
             ], $status);
         });
 
@@ -91,8 +91,8 @@ class AppServiceProvider extends ServiceProvider
          * 
          * Usar para respuestas 
          */
-        Response::macro('created', fn ($message, $data = null) => response()->success($message, $data, HttpResponse::HTTP_CREATED));
-        Response::macro('updated', fn ($message, $data = null) => response()->success($message, $data, HttpResponse::HTTP_OK));
+        Response::macro('created', fn ($message, $data = null, string $resource = 'data',) => response()->success($message, $data, $resource, HttpResponse::HTTP_CREATED));
+        Response::macro('updated', fn ($message, $data = null, string $resource = 'data') => response()->success($message, $data, $resource, HttpResponse::HTTP_OK));
         Response::macro('deleted', fn ($message) => response()->success($message, null, HttpResponse::HTTP_OK));
 
         /**
@@ -100,8 +100,8 @@ class AppServiceProvider extends ServiceProvider
          * 
          * Usar cuando la validacion falle
          */
-        Response::macro('validationError', function ($errors, string $message = 'Error de validación') {
-            return response()->fail($message, $errors, HttpResponse::HTTP_UNPROCESSABLE_ENTITY);
+        Response::macro('validationError', function ($errors, string $message = 'Error de validación', string $resource = 'data') {
+            return response()->fail($message, $errors, HttpResponse::HTTP_UNPROCESSABLE_ENTITY, $resource);
         });
     }
 }
