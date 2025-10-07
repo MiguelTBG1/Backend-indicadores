@@ -1,15 +1,29 @@
 <?php
 
-namespace Illuminate\Support\Facades {
+namespace Illuminate\Contracts\Routing {
+
+    use Illuminate\Http\JsonResponse;
 
     /**
-     * @method static \Illuminate\Http\JsonResponse success(string $message, $data = null, string $resource = 'data', int $status = 200)
-     * @method static \Illuminate\Http\JsonResponse fail(string $message, $data = null, string $resource = 'data', int $status = 400)
-     * @method static \Illuminate\Http\JsonResponse error(string $message, $data = null, string $resource = 'data', int $status = 500)
-     * @method static \Illuminate\Http\JsonResponse created(string $message, $data = null, string $resource = 'data')
-     * @method static \Illuminate\Http\JsonResponse updated(string $message, $data = null, string $resource = 'data')
-     * @method static \Illuminate\Http\JsonResponse deleted(string $message)
-     * @method static \Illuminate\Http\JsonResponse validationError($errors, string $message = 'Error de validación', string $resource = 'data')
+     * @method JsonResponse success(string $message, $data = null, string $resource = 'data', int $status = 200)
+     * @method JsonResponse fail(string $message, $data = null, string $resource = 'data', int $status = 400)
+     * @method JsonResponse error(string $message, $data = null, string $resource = 'data', int $status = 500)
+     * @method JsonResponse created(string $message, $data = null, string $resource = 'data')
+     * @method JsonResponse updated(string $message, $data = null, string $resource = 'data')
+     * @method JsonResponse deleted(string $message)
+     * @method JsonResponse validationError($errors, string $message = 'Error de validación', string $resource = 'data')
      */
-    class Response {}
+    interface ResponseFactory {}
+}
+
+namespace {
+
+    use Illuminate\Contracts\Routing\ResponseFactory;
+
+    /**
+     * Devuelve una instancia extendida de ResponseFactory con métodos macro personalizados.
+     *
+     * @return ResponseFactory
+     */
+    function response() {}
 }
