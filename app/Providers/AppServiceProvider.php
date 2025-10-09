@@ -4,12 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
-use App\Models\PersonalAccessToken;
 use App\Models\Plantillas;
 use App\Models\Documentos;
 use App\Policies\PlantillaPolicy;
 use App\Policies\DocumentoPolicy;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Support\Facades\Gate;
 
 use Illuminate\Support\Facades\Response;
@@ -30,8 +28,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
-
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             return config('app.frontend_url') . "/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
         });

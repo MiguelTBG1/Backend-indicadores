@@ -73,6 +73,4 @@ return [
     'middleware' => [
         'authenticate_session' => false,
     ],
-
-    'personal_access_token_model' => App\Models\PersonalAccessToken::class,
 ];
