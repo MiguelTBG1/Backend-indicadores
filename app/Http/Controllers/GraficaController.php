@@ -29,7 +29,7 @@ class GraficaController extends Controller
         try {
             $graficas = Grafica::select('id', 'titulo', 'descripcion')->get();
 
-            return response()->success('Listado de gráficas obtenido correctamente', GraficaResource::collection($graficas));
+            return response()->success('Listado de gráficas obtenido correctamente', GraficaResource::collection($graficas), 'graficas');
         } catch (\Exception $e) {
             Log::error('Error al listar gráficas: '.$e->getMessage());
 
@@ -49,7 +49,7 @@ class GraficaController extends Controller
         $grafica = Grafica::find($id);
 
         if (!$grafica) {
-            return response()->fail('Gráfica no encontrada', null, 'grafica', 404);
+            return response()->fail('Gráfica no encontrada', null, 'graficas', 404);
         }
 
         // Instanciamos el servicio para generar graficas
@@ -98,7 +98,7 @@ class GraficaController extends Controller
             'descripcion' => $grafica->descripcion,
         ];
 
-        return response()->success('Gráfica obtenida correctamente', $graficaFinal, 'grafica');
+        return response()->success('Gráfica obtenida correctamente', $graficaFinal, 'graficas');
     }
 
     public function store(StoreGraficaRequest $request)
@@ -106,7 +106,7 @@ class GraficaController extends Controller
         try {
             $grafica = Grafica::create($request->validated());
 
-            return response()->created('Gráfica creada correctamente', new GraficaResource($grafica));
+            return response()->created('Gráfica creada correctamente', new GraficaResource($grafica), 'graficas');
         } catch (\Exception $e) {
             Log::error('Error al crear gráfica: '.$e->getMessage());
 
