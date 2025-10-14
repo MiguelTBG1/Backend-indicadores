@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use function PHPUnit\Framework\isArray;
 use App\Models\Plantillas;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -110,9 +109,9 @@ class DynamicModelService
     private static function getRelationsRecursive(array $fields, array &$relations, Bool $subForm = false)
     {
         foreach ($fields as $index => $field) {
-            if ($field['type'] === 'subform' && isset($field['subcampos']) && isArray($field['subcampos'])) {
+            if ($field['type'] === 'subform' && isset($field['subcampos']) && is_Array($field['subcampos'])) {
                 self::getRelationsRecursive($field['subcampos'], $relations, true);
-            } elseif ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
+            } elseif ($field['type'] === 'select' && isset($field['dataSource']) && is_Array($field['dataSource'])) {
                 // Guardamos dataSource
                 $optionsSource = $field['dataSource'];
 
