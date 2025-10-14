@@ -13,49 +13,6 @@ class GraficasSeeder extends Seeder
      */
     public function run(): void
     {
-        Grafica::create([
-            'titulo' => 'Grafica de Areas',
-            'series' => [
-                [
-                    'name' => 'series1',
-                    'data' => [31, 40, 28, 51, 42, 109, 100]
-                ],
-                [
-                    'name' => 'series2',
-                    'data' => [11, 32, 45, 32, 34]
-                ]
-            ],
-            'chartOptions' => [
-                'chart' => [
-                    'height' => 350,
-                    'type' => 'area'
-                ],
-                'dataLabels' => [
-                    'enabled' => false
-                ],
-                'stroke' => [
-                    'curve' => 'smooth'
-                ],
-                'xaxis' => [
-                    'type' => 'datetime',
-                    'categories' => [
-                        '2018-09-19T00:00:00.000Z',
-                        '2018-09-19T01:30:00.000Z',
-                        '2018-09-19T02:30:00.000Z',
-                        '2018-09-19T03:30:00.000Z',
-                        '2018-09-19T04:30:00.000Z',
-                        '2018-09-19T05:30:00.000Z',
-                        '2018-09-19T06:30:00.000Z'
-                    ]
-                ],
-                'tooltip' => [
-                    'x' => [
-                        'format' => 'dd/MM/yy HH:mm'
-                    ]
-                ]
-            ],
-            'descripcion' => 'Esta es una grafica de areas'
-        ]);
 
         Grafica::create([
             'titulo' => 'Porcentaje de alumnos hombres y mujeres.',
@@ -128,7 +85,58 @@ class GraficasSeeder extends Seeder
                     'width' => 2
                 ]
             ],
-            'descripcion' => 'Esta es una grafica de areas'
+            'descripcion' => 'Muestra el procentaje de alumnos hombres y mujeres inscritos en diferentes periodos.',
+        ]);
+
+        Grafica::create([
+            'titulo' => 'Numero de alumnos inscritos a travez del tiempo',
+            'series' => [
+                [
+                    'name' => 'Numero de alumnos',
+                    "configuracion" => [
+                        "coleccion" => "Alumnos_data",
+                        "operacion" => "contar",
+                        "secciones" => "Información General",
+                        "campo" => null,
+                        "campoFechaFiltro" =>  [
+                            "Información General",
+                            "Fecha de inscripcion"
+                        ],
+                        "condicion" =>  []
+                    ]
+                ]
+            ],
+            "rangos" => [
+                // 2024
+                ["inicio" => "14-01-2024", "fin" => "06-08-2024", "label" => "Enero–Junio 2024"],
+                ["inicio" => "14-08-2024", "fin" => "14-01-2025", "label" => "Agosto–Diciembre 2024"],
+
+                // 2025
+                ["inicio" => "14-01-2025", "fin" => "06-08-2025", "label" => "Enero–Junio 2025"],
+                ["inicio" => "14-08-2025", "fin" => "14-01-2026", "label" => "Agosto–Diciembre 2025"],
+
+                // 2026
+                ["inicio" => "14-01-2026", "fin" => "06-08-2026", "label" => "Enero–Junio 2026"],
+                ["inicio" => "14-08-2026", "fin" => "14-01-2027", "label" => "Agosto–Diciembre 2026"],
+            ],
+
+            'chartOptions' => [
+                'chart' => [
+                    'height' => 350,
+                    'type' => 'line'
+                ],
+                'dataLabels' => [
+                    'enabled' => false
+                ],
+                'stroke' => [
+                    'show' => true,
+                    'width' => 2
+                ],
+                'markers' => [
+                    'size' => 6
+                ]
+            ],
+            'descripcion' => 'Muestra el procentaje de alumnos hombres y mujeres inscritos en diferentes periodos.',
         ]);
     }
 }
