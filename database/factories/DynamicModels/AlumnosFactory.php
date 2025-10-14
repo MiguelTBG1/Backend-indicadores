@@ -25,7 +25,31 @@ class AlumnosFactory extends Factory
         $asesoresUsados = [];
 
         $programaEducativo = ! empty($programas) ? $this->faker->randomElement($programas) : null;
-        $fechas = ['06-08-2025','14-01-2025','06-08-2024','14-01-2024'];
+        $semestres = [
+            // Año 2024
+            ['inicio' => '14-01-2024', 'fin' => '06-08-2024'], // Enero-Junio 2024
+            ['inicio' => '14-08-2024', 'fin' => '14-01-2025'], // Agosto-Dic 2024
+
+            // Año 2025
+            ['inicio' => '14-01-2025', 'fin' => '06-08-2025'], // Enero-Junio 2025
+            ['inicio' => '14-08-2025', 'fin' => '14-01-2026'], // Agosto-Dic 2025
+
+            // Año 2026
+            ['inicio' => '14-01-2026', 'fin' => '06-08-2026'], // Enero-Junio 2026
+            ['inicio' => '14-08-2026', 'fin' => '14-01-2027'], // Agosto-Dic 2026
+        ];
+
+
+        // Elegimos un semestre aleatorio
+        $semestre = $this->faker->randomElement($semestres);
+
+        // Generamos una fecha aleatoria dentro del rango de ese semestre
+        $fechaAleatoria = $this->faker->dateTimeBetween(
+            $semestre['inicio'],
+            $semestre['fin']
+        );
+
+
         return [
             'secciones' => [
                 // Información General (siempre presente)
@@ -34,7 +58,7 @@ class AlumnosFactory extends Factory
                     'fields' => [
                         'Nombre Completo' => $this->faker->name(),
                         'Género' => $this->faker->randomElement(['Masculino', 'Femenino']),
-                        'Fecha de inscripcion' => new UTCDateTime(strtotime($this->faker->randomElement($fechas))  * 1000),
+                        'Fecha de inscripcion' => new UTCDateTime($fechaAleatoria->getTimestamp() * 1000),
                         'Programa educativo' => $programaEducativo,
                         'Número de control' => $this->faker->numerify('########'),
                     ],

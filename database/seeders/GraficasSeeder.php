@@ -102,9 +102,19 @@ class GraficasSeeder extends Seeder
                 ]
             ],
             "rangos" => [
-                ["inicio" => "01-01-2024", "fin" => "31-12-2024", "label" => "2024"],
-                ["inicio" => "01-01-2025", "fin" => "31-12-2025", "label" => "2025"],
+                // 2024
+                ["inicio" => "14-01-2024", "fin" => "06-08-2024", "label" => "Enero–Junio 2024"],
+                ["inicio" => "14-08-2024", "fin" => "14-01-2025", "label" => "Agosto–Diciembre 2024"],
+
+                // 2025
+                ["inicio" => "14-01-2025", "fin" => "06-08-2025", "label" => "Enero–Junio 2025"],
+                ["inicio" => "14-08-2025", "fin" => "14-01-2026", "label" => "Agosto–Diciembre 2025"],
+
+                // 2026
+                ["inicio" => "14-01-2026", "fin" => "06-08-2026", "label" => "Enero–Junio 2026"],
+                ["inicio" => "14-08-2026", "fin" => "14-01-2027", "label" => "Agosto–Diciembre 2026"],
             ],
+
             'chartOptions' => [
                 'chart' => [
                     'height' => 350,
