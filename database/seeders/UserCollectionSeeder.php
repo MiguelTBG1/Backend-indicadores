@@ -9,6 +9,8 @@ use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Models\PersonalAccessToken;
+use App\Services\PermissionBuilder;
 
 class UserCollectionSeeder extends Seeder
 {
@@ -39,7 +41,7 @@ class UserCollectionSeeder extends Seeder
         $delete = Accion::where('clave', 'delete')->first();
         $create = Accion::where('clave', 'create')->first();
 
-        User::create(
+        $admin = User::create(
             [
                 'nombre' => 'Rodrigo Alexander',
                 'apellido_paterno' => 'Can Cime',
@@ -54,6 +56,25 @@ class UserCollectionSeeder extends Seeder
                 'roles' => [$super_usuario->_id],
             ]
         );
+
+        $builder = app(PermissionBuilder::class);
+        $abilities = $builder->buildForUser($admin);
+
+        // Definimos el token de texto fijo (lo que usarás en tu página estática)
+        $plainToken = 'token_pruebas';
+        $hashedToken = hash('sha256', $plainToken);
+
+        // Creamos el token manualmente (sin caducidad)
+        PersonalAccessToken::create([
+            'name' => 'Rodrigo_Alexander_access_token',
+            'tokenable_id' => $admin->_id,
+            'tokenable_type' => User::class,
+            'token' => $hashedToken,
+            'abilities' => $abilities,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'expires_at' => null,
+        ]);
 
         // Coordinador academico
         User::create(
@@ -159,7 +180,7 @@ class UserCollectionSeeder extends Seeder
                     [
                         'recurso' => $documentoRecurso->_id,
                         'acciones' => [
-                            $comodinAccion -> _id
+                            $comodinAccion->_id
                         ]
                     ],
                     [

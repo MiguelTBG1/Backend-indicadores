@@ -10,6 +10,7 @@ use App\Services\DocumentService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use MongoDB\BSON\UTCDateTime;
+use Illuminate\Http\Response;
 
 /**
  * @group Gráficas
@@ -49,7 +50,7 @@ class GraficaController extends Controller
         $grafica = Grafica::find($id);
 
         if (!$grafica) {
-            return response()->fail('Gráfica no encontrada', null, 'graficas', 404);
+            return response()->fail('Gráfica no encontrada', null, 'graficas', Response::HTTP_NOT_FOUND);
         }
 
         // Instanciamos el servicio para generar graficas
@@ -57,7 +58,15 @@ class GraficaController extends Controller
 
         // Procesamos cada serie de la grafica
         $seriesProcesadas = [];
+
+        // Recorremos todas las series
         foreach ($grafica->series as $serie) {
+            
+            // Verificamos que la serie tenga una configuración valida
+            if (!isset($serie['configuracion']) || empty($serie['configuracion'])) {
+                return response()->fail('Configuración inválida en una de las series', $grafica, 'graficas', Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
             $data = [];
 
             foreach ($grafica->rangos as $rango) {
