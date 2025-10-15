@@ -17,7 +17,7 @@ endpoints:
       authenticated: true
       custom: []
     headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Authorization: 'Bearer {TU_TOKEN}'
       Content-Type: application/json
       Accept: application/json
     urlParameters: []
@@ -41,7 +41,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      - 'Bearer token_pruebas'
     controller: null
     method: null
     route: null
@@ -60,7 +60,7 @@ endpoints:
       authenticated: true
       custom: []
     headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Authorization: 'Bearer {TU_TOKEN}'
       Content-Type: application/json
       Accept: application/json
     urlParameters: []
@@ -250,7 +250,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      - 'Bearer token_pruebas'
     controller: null
     method: null
     route: null
@@ -269,7 +269,7 @@ endpoints:
       authenticated: true
       custom: []
     headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Authorization: 'Bearer {TU_TOKEN}'
       Content-Type: application/json
       Accept: application/json
     urlParameters:
@@ -304,7 +304,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      - 'Bearer token_pruebas'
     controller: null
     method: null
     route: null
@@ -323,7 +323,7 @@ endpoints:
       authenticated: true
       custom: []
     headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Authorization: 'Bearer {TU_TOKEN}'
       Content-Type: application/json
       Accept: application/json
     urlParameters:
@@ -349,7 +349,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      - 'Bearer token_pruebas'
     controller: null
     method: null
     route: null
@@ -368,7 +368,7 @@ endpoints:
       authenticated: true
       custom: []
     headers:
-      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Authorization: 'Bearer {TU_TOKEN}'
       Content-Type: application/json
       Accept: application/json
     urlParameters:
@@ -394,7 +394,7 @@ endpoints:
     auth:
       - headers
       - Authorization
-      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+      - 'Bearer token_pruebas'
     controller: null
     method: null
     route: null
