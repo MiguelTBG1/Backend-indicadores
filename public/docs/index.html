@@ -531,10 +531,10 @@
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
                                              id="toc-item-graficas-POSTapi-graficas">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="POST api/graficas">
+                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Crea una nueva graica.">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
                                                    href="#graficas-POSTapi-graficas">
-                                                    POST api/graficas
+                                                    Crea una nueva graica.
                                                 </a>
                                             </div>
                                                                                     </div>
@@ -965,7 +965,7 @@
 
         </div>
         <div class="sl-flex sl-items-center sl-px-4 sl-py-3 sl-border-t">
-            Last updated: October 15, 2025 \n Last commit: 5c43d5e334ffa49eba14bd8f3b6fdfa562075beb
+            Last updated: October 15, 2025 \n Last commit: 069c58e406f1dd71477799422756c45778f0f14c
         </div>
 
         <div class="sl-flex sl-items-center sl-px-4 sl-py-3 sl-border-t">
@@ -5915,9 +5915,11 @@ fetch(url, {
                     <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
                                             <span class="sl-truncate sl-text-muted">integer</span>
                                     </div>
+                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
+                    <span class="sl-ml-2 sl-text-warning">required</span>
                                     </div>
                 <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>requerido El ID de la gráfica que se desea obtener. Ejemplo: 5</p>
+            <p>El ID de la gráfica que se desea obtener.</p>
         </div>
                                             <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
                 <span>Example:</span> <!-- <span> important for spacing -->
@@ -6052,7 +6054,7 @@ fetch(url, {
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
                     id="graficas-POSTapi-graficas">
-                    POST api/graficas
+                    Crea una nueva graica.
                 </h2>
             </div>
         </div>
@@ -6167,13 +6169,13 @@ fetch(url, {
                     <span class="sl-ml-2 sl-text-warning">required</span>
                                     </div>
                 <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>validation.max.</p>
+            <p>El título de la gráfica.</p>
         </div>
                                             <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        b
+                        architecto
                     </div>
                 </div>
             </div>
@@ -6190,7 +6192,12 @@ fetch(url, {
                     <div class="sl-font-mono sl-font-semibold sl-mr-2">descripcion</div>
                                             <span class="sl-truncate sl-text-muted">string</span>
                                     </div>
+                                    <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
+                    <span class="sl-ml-2 sl-text-warning">required</span>
                                     </div>
+                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
+            <p>La descripción de la gráfica.</p>
+        </div>
                                             <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
@@ -6210,10 +6217,21 @@ fetch(url, {
         <div class="sl-flex sl-items-center sl-max-w-full">
                                         <div class="sl-flex sl-items-baseline sl-text-base">
                     <div class="sl-font-mono sl-font-semibold sl-mr-2">chartOptions</div>
-                                            <span class="sl-truncate sl-text-muted">object</span>
+                                            <span class="sl-truncate sl-text-muted">string[]</span>
                                     </div>
                                     </div>
-                                    </div>
+                <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
+            <p>Configuraciones de la gráfica. Usa la estructura de ApexCharts.</p>
+        </div>
+                                            <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
+                <span>Example:</span> <!-- <span> important for spacing -->
+                <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
+                    <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
+                        [&quot;architecto&quot;]
+                    </div>
+                </div>
+            </div>
+            </div>
 </div>
 
             </div>
@@ -6434,8 +6452,11 @@ const headers = {
 };
 
 let body = {
-    "titulo": "b",
+    "titulo": "architecto",
     "descripcion": "architecto",
+    "chartOptions": [
+        "architecto"
+    ],
     "rangos": [
         {
             "inicio": "architecto",
@@ -9602,7 +9623,7 @@ fetch(url, {
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        true
+                        false
                     </div>
                 </div>
             </div>
@@ -9654,7 +9675,7 @@ let body = {
     "coleccionId": "g",
     "camposSeleccionados": [],
     "cantidadDocumentos": 16,
-    "incluirFecha": true
+    "incluirFecha": false
 };
 
 fetch(url, {

@@ -70,8 +70,8 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'requerido El ID de la gráfica que se desea obtener. Ejemplo: 5'
-        required: false
+        description: 'El ID de la gráfica que se desea obtener.'
+        required: true
         example: 16
         type: integer
         enumValues: []
@@ -115,7 +115,7 @@ endpoints:
         Endpoints relacionados con la gestión de gráficas.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'Crea una nueva graica.'
       description: ''
       authenticated: true
       custom: []
@@ -130,9 +130,9 @@ endpoints:
     bodyParameters:
       titulo:
         name: titulo
-        description: validation.max.
+        description: 'El título de la gráfica.'
         required: true
-        example: b
+        example: architecto
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -140,8 +140,8 @@ endpoints:
         custom: []
       descripcion:
         name: descripcion
-        description: ''
-        required: false
+        description: 'La descripción de la gráfica.'
+        required: true
         example: architecto
         type: string
         enumValues: []
@@ -150,10 +150,11 @@ endpoints:
         custom: []
       chartOptions:
         name: chartOptions
-        description: ''
+        description: 'Configuraciones de la gráfica. Usa la estructura de ApexCharts.'
         required: false
-        example: null
-        type: object
+        example:
+          - architecto
+        type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: true
@@ -231,8 +232,10 @@ endpoints:
         nullable: false
         custom: []
     cleanBodyParameters:
-      titulo: b
+      titulo: architecto
       descripcion: architecto
+      chartOptions:
+        - architecto
       rangos:
         -
           inicio: architecto

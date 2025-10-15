@@ -142,7 +142,7 @@ endpoints:
         name: incluirFecha
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -154,7 +154,7 @@ endpoints:
       coleccionId: g
       camposSeleccionados: []
       cantidadDocumentos: 16
-      incluirFecha: true
+      incluirFecha: false
     fileParameters: []
     responses: []
     responseFields: []

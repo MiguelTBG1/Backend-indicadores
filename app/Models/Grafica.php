@@ -16,6 +16,7 @@ class Grafica extends Model
         'titulo',
         'series',
         'chartOptions',
-        'descripcion'
+        'descripcion',
+        'rangos',
     ];
 }

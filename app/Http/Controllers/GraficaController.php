@@ -43,7 +43,7 @@ class GraficaController extends Controller
      *
      * Retorna la información completa de una gráfica identificada por su ID.
      *
-     * @urlParam id int requerido El ID de la gráfica que se desea obtener. Ejemplo: 5
+     * @urlParam id int required El ID de la gráfica que se desea obtener.
      * */
     public function show($id)
     {
@@ -110,6 +110,13 @@ class GraficaController extends Controller
         return response()->success('Gráfica obtenida correctamente', $graficaFinal, 'graficas');
     }
 
+    /**
+     * Crea una nueva graica.
+     * @bodyParam titulo string required El título de la gráfica.
+     * @bodyParam descripcion string required La descripción de la gráfica.
+     * @bodyParam chartOptions array Configuraciones de la gráfica. Usa la estructura de ApexCharts.
+     * @bodyParam rangos array required Los rangos de fechas para la gráfica.
+     */
     public function store(StoreGraficaRequest $request)
     {
         try {
