@@ -834,6 +834,49 @@ class PlantillasCollectionSeeder extends Seeder
             ],
         ]);
 
+        // Plantilla de materias
+        Plantillas::create([
+            'nombre_plantilla' => 'Materias',
+            'nombre_modelo' => 'Materias',
+            'nombre_coleccion' => 'Materias_data',
+            'creado_por' => $admin_user,
+            'secciones' => [
+                [
+                    'nombre' => 'Información General',
+                    'fields' => [
+                        ['name' => 'Nombre de la materia', 'type' => 'string', 'required' => true],
+                        [
+                            'name' => 'Docente que imparte la materia',
+                            'type' => 'select',
+                            'required' => false,
+                            'dataSource' => [
+                                'plantillaId' => '68b0a68006688a676a0e6a5d',
+                                'plantillaNombre' => 'Profesores',
+                                'seccion' => 'Información Personal',
+                                'campoMostrar' => 'Nombres',
+                            ],
+                        ],
+                        ['name' => 'Fecha de alta de materia', 'type' => 'date', 'required' => false],
+                        ['name' => 'Créditos', 'type' => 'number', 'required' => false],
+                        [
+                            'name' => 'calificaciones',
+                            'type' => 'subform',
+                            'required' => false,
+                            'subcampos' => [
+                                ['name' => 'Alumno', 'type' => 'select', 'required' => false, 'dataSource' => [
+                                    'plantillaId' => '68bb162223bbc9264e05fca0',
+                                    'plantillaNombre' => 'Alumnos',
+                                    'seccion' => 'Información General',
+                                    'campoMostrar' => 'Nombre Completo',
+                                ]],
+                                ['name' => 'Calificación', 'type' => 'number', 'required' => false],
+                            ]
+                        ]
+                    ],
+                ],
+            ]
+        ]);
+
 
         try {
             // Eliminamos los modelos existentes

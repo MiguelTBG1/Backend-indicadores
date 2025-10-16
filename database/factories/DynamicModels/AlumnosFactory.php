@@ -27,16 +27,16 @@ class AlumnosFactory extends Factory
         $programaEducativo = ! empty($programas) ? $this->faker->randomElement($programas) : null;
         $semestres = [
             // Año 2024
+            ['inicio' => '14-01-2023', 'fin' => '06-08-2023'], // Enero-Junio 2023
+            ['inicio' => '14-08-2023', 'fin' => '14-01-2024'], // Agosto-Dic 2023
+
+            // Año 2025
             ['inicio' => '14-01-2024', 'fin' => '06-08-2024'], // Enero-Junio 2024
             ['inicio' => '14-08-2024', 'fin' => '14-01-2025'], // Agosto-Dic 2024
 
-            // Año 2025
+            // Año 2026
             ['inicio' => '14-01-2025', 'fin' => '06-08-2025'], // Enero-Junio 2025
             ['inicio' => '14-08-2025', 'fin' => '14-01-2026'], // Agosto-Dic 2025
-
-            // Año 2026
-            ['inicio' => '14-01-2026', 'fin' => '06-08-2026'], // Enero-Junio 2026
-            ['inicio' => '14-08-2026', 'fin' => '14-01-2027'], // Agosto-Dic 2026
         ];
 
 
