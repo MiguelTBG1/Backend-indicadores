@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\DynamicModels\Materias;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -29,7 +31,8 @@ class DatabaseSeeder extends Seeder
             // DocumentosSeeder::class,
             AlumnosSeeder::class,
             GraficasSeeder::class,
-            DocentesSeeder::class
+            DocentesSeeder::class,
+            MateriasSeeder::class,
         ]);
     }
 }

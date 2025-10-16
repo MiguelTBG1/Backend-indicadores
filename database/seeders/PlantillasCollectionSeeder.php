@@ -836,10 +836,11 @@ class PlantillasCollectionSeeder extends Seeder
 
         // Plantilla de materias
         Plantillas::create([
+            '_id' => new ObjectId('68f13488dc37379c5d0587b1'),
             'nombre_plantilla' => 'Materias',
             'nombre_modelo' => 'Materias',
             'nombre_coleccion' => 'Materias_data',
-            'creado_por' => $admin_user,
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Información General',
