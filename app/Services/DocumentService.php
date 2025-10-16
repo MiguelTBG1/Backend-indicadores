@@ -228,6 +228,8 @@ class DocumentService
 
         self::recursiveGroup($pipeline, $arrayConfig);
 
+        Log::info(json_encode($pipeline, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
         return $pipeline;
     }
 
@@ -270,7 +272,7 @@ class DocumentService
             $valueCondition = null;
 
             // Validamos si valor es tipo numerico valido
-            if (filter_var($condicion['valor'], FILTER_VALIDATE_INT) && strtotime($condicion['valor'])) {
+            if (filter_var($condicion['valor'], FILTER_VALIDATE_INT) && !strtotime($condicion['valor'])) {
                 $valueCondition['$or'] = [
                     [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => $condicion['valor']]],
                     [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => (int) $condicion['valor']]],
@@ -279,6 +281,8 @@ class DocumentService
             } else {
                 $valueCondition = [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => $condicion['valor']]];
             }
+
+            Log::info('Condicion', $valueCondition);
 
             // Agregamos la condición al arreglo de condiciones
             $condiciones['$and'][] = $valueCondition;
