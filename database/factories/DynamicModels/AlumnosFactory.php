@@ -47,7 +47,7 @@ class AlumnosFactory extends Factory
         $fechaAleatoria = $this->faker->dateTimeBetween(
             $semestre['inicio'],
             $semestre['fin']
-        );
+        )->format('d-m-Y');
 
 
         return [
@@ -58,7 +58,7 @@ class AlumnosFactory extends Factory
                     'fields' => [
                         'Nombre Completo' => $this->faker->name(),
                         'Género' => $this->faker->randomElement(['Masculino', 'Femenino']),
-                        'Fecha de inscripcion' => new UTCDateTime($fechaAleatoria->getTimestamp() * 1000),
+                        'Fecha de inscripcion' => new UTCDateTime(strtotime($fechaAleatoria)  * 1000),
                         'Programa educativo' => $programaEducativo,
                         'Número de control' => $this->faker->numerify('########'),
                     ],

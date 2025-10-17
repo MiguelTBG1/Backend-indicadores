@@ -6,6 +6,7 @@ use App\DynamicModels\Alumnos;
 use App\DynamicModels\Materias;
 use App\DynamicModels\Profesores;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 use MongoDB\BSON\UTCDateTime;
 
 class MateriasSeeder extends Seeder
@@ -76,7 +77,9 @@ class MateriasSeeder extends Seeder
                         : $this->faker->numberBetween(50, 69),
                 ])->toArray();
 
-                $fechaAltaUTC = new UTCDateTime(strtotime($semestre['inicio']) * 1000);
+                $fecha = \DateTime::createFromFormat('d-m-Y', $semestre)->format('d-m-Y');
+
+                $fechaAltaUTC = new UTCDateTime(strtotime($fecha) * 1000);
 
                 return [
                     'Fecha de alta' => $fechaAltaUTC,
