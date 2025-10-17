@@ -845,36 +845,64 @@ class PlantillasCollectionSeeder extends Seeder
                 [
                     'nombre' => 'Información General',
                     'fields' => [
-                        ['name' => 'Nombre de la materia', 'type' => 'string', 'required' => true],
                         [
-                            'name' => 'Docente que imparte la materia',
-                            'type' => 'select',
-                            'required' => false,
-                            'dataSource' => [
-                                'plantillaId' => '68b0a68006688a676a0e6a5d',
-                                'plantillaNombre' => 'Profesores',
-                                'seccion' => 'Información Personal',
-                                'campoMostrar' => 'Nombres',
-                            ],
+                            'name' => 'Nombre de la materia',
+                            'type' => 'string',
+                            'required' => true
                         ],
-                        ['name' => 'Fecha de alta de materia', 'type' => 'date', 'required' => false],
-                        ['name' => 'Créditos', 'type' => 'number', 'required' => false],
                         [
-                            'name' => 'calificaciones',
+                            'name' => 'Créditos',
+                            'type' => 'number',
+                            'required' => false
+                        ],
+                        [
+                            'name' => 'Periodos habilitados',
                             'type' => 'subform',
                             'required' => false,
                             'subcampos' => [
-                                ['name' => 'Alumno', 'type' => 'select', 'required' => false, 'dataSource' => [
-                                    'plantillaId' => '68bb162223bbc9264e05fca0',
-                                    'plantillaNombre' => 'Alumnos',
-                                    'seccion' => 'Información General',
-                                    'campoMostrar' => 'Nombre Completo',
-                                ]],
-                                ['name' => 'Calificación', 'type' => 'number', 'required' => false],
+                                [
+                                    'name' => 'Fecha de alta',
+                                    'type' => 'date',
+                                    'required' => false
+                                ],
+                                [
+                                    'name' => 'Docente que imparte',
+                                    'type' => 'select',
+                                    'required' => false,
+                                    'dataSource' => [
+                                        'plantillaId' => '68b0a68006688a676a0e6a5d',
+                                        'plantillaNombre' => 'Profesores',
+                                        'seccion' => 'Información Personal',
+                                        'campoMostrar' => 'Nombres'
+                                    ]
+                                ],
+                                [
+                                    'name' => 'Alumnos en la materia',
+                                    'type' => 'subform',
+                                    'required' => false,
+                                    'subcampos' => [
+                                        [
+                                            'name' => 'Alumno',
+                                            'type' => 'select',
+                                            'required' => false,
+                                            'dataSource' => [
+                                                'plantillaId' => '68bb162223bbc9264e05fca0',
+                                                'plantillaNombre' => 'Alumnos',
+                                                'seccion' => 'Información General',
+                                                'campoMostrar' => 'Nombre Completo'
+                                            ]
+                                        ],
+                                        [
+                                            'name' => 'Calificacion',
+                                            'type' => 'number',
+                                            'required' => false
+                                        ]
+                                    ]
+                                ]
                             ]
                         ]
-                    ],
-                ],
+                    ]
+                ]
             ]
         ]);
 
