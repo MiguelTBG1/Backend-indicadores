@@ -375,7 +375,7 @@ class PlantillaController extends Controller
     function traverseFields(array $fields)
     {
         foreach ($fields as $index => $field) {
-            if ($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource'])) {
+            if (($field['type'] === 'select' && isset($field['dataSource']) && isArray($field['dataSource']))) {
                 // Guardamos dataSource
                 $dataSource = $field['dataSource'];
 

@@ -111,9 +111,9 @@ class DynamicModelService
         foreach ($fields as $index => $field) {
             if ($field['type'] === 'subform' && isset($field['subcampos']) && is_Array($field['subcampos'])) {
                 self::getRelationsRecursive($field['subcampos'], $relations, true);
-            } elseif ($field['type'] === 'select' && isset($field['dataSource']) && is_Array($field['dataSource'])) {
-                // Guardamos dataSource
-                $optionsSource = $field['dataSource'];
+            } elseif (($field['type'] === 'select' && isset($field['dataSource']) && is_Array($field['dataSource'])) || ($field['type'] === 'tabla' && isset($field['tableConfig']) && is_Array($field['tableConfig']))) {
+                // Guardamos dataSource y tableConfig
+                $optionsSource = $field['dataSource'] ?? $field['tableConfig'];
 
                 //Buscamos el nombre del modelo
                 $relatedModel = Plantillas::find($optionsSource['plantillaId'])->nombre_modelo ?? null;
@@ -121,6 +121,10 @@ class DynamicModelService
                 // Validamos si se encontro el modelo
                 if (!$relatedModel) {
                     throw new \Exception('No se encontró la plantilla para el campo select: ' . $field['name'], 404);
+                }
+
+                if (isset($field['tableConfig'])){
+                    $subForm = true;
                 }
 
                 // Agregamos la relación al array de relaciones

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Log;
-use App\Services\DocumentService;
+use App\Services\IndicadorService;
 use DateTime;
 use PhpParser\Comment\Doc;
 
@@ -136,11 +136,11 @@ class IndicadoresController extends Controller
 
             // Procesamos la configuración
             $resultado = $resultado->map(function ($indicador) use ($inicioDate, $finDate) {
-                $documentService = new DocumentService();
+
                 if (isset($indicador['configuracion'])) {
                     $indicador['configuracion']['fecha_inicio'] = $inicioDate;
                     $indicador['configuracion']['fecha_fin'] = $finDate;
-                    $indicador['numerador'] = $documentService->calculate($indicador['configuracion']);
+                    $indicador['numerador'] = IndicadorService::calculate($indicador['configuracion']);
                 }
                 return $indicador;
             });

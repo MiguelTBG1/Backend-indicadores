@@ -6,7 +6,7 @@ use App\Http\Requests\Grafica\StoreGraficaRequest;
 use App\Http\Requests\Grafica\UpdateGraficaRequest;
 use App\Http\Resources\GraficaResource;
 use App\Models\Grafica;
-use App\Services\DocumentService;
+use App\Services\IndicadorService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use MongoDB\BSON\UTCDateTime;
@@ -54,14 +54,14 @@ class GraficaController extends Controller
         }
 
         // Instanciamos el servicio para generar graficas
-        $documentService = new DocumentService;
+        $indicadorService = new IndicadorService();
 
         // Procesamos cada serie de la grafica
         $seriesProcesadas = [];
 
         // Recorremos todas las series
         foreach ($grafica->series as $serie) {
-            
+
             // Verificamos que la serie tenga una configuración valida
             if (!isset($serie['configuracion']) || empty($serie['configuracion'])) {
                 return response()->fail('Configuración inválida en una de las series', $grafica, 'graficas', Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -82,15 +82,15 @@ class GraficaController extends Controller
                 $configRango['fecha_inicio'] = $fechaInicio;
                 $configRango['fecha_fin'] = $fechaFin;
 
-                // Calculamos el valor usando DocumentService
-                $valor = $documentService->calculate($configRango);
+                // Calculamos el valor usando IndicadorService
+                $valor = $indicadorService->calculate($configRango);
                 $data[] = $valor;
             }
 
             $seriesProcesadas[] = [
                 'name' => $serie['name'],
                 'data' => $data,
-                'configuracion' => $serie['configuracion'], 
+                'configuracion' => $serie['configuracion'],
             ];
         }
 
