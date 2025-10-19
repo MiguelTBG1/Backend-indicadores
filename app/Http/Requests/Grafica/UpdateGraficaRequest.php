@@ -32,6 +32,7 @@ class UpdateGraficaRequest extends FormRequest
             'series' => 'nullable|array',
             'series.*.name' => 'required_with:series|string',
             'series.*.configuracion' => 'required_with:series|array',
+            'tipoRango' => 'nullable|string'
         ];
     }
 }

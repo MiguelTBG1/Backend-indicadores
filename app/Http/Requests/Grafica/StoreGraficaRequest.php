@@ -33,6 +33,7 @@ class StoreGraficaRequest extends FormRequest
             'series' => 'required|array|min:1',
             'series.*.name' => 'required|string',
             'series.*.configuracion' => 'required|array',
+            'tipoRango' => 'required|string'
         ];
     }
 }

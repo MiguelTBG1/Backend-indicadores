@@ -18,5 +18,6 @@ class Grafica extends Model
         'chartOptions',
         'descripcion',
         'rangos',
+        'tipoRango'
     ];
 }

@@ -105,6 +105,7 @@ class GraficaController extends Controller
             'series' => $seriesProcesadas,
             'chartOptions' => array_merge($grafica->chartOptions ?? [], ['xaxis' => $xaxis]),
             'descripcion' => $grafica->descripcion,
+            'tipoRango' => $grafica->tipoRango,
         ];
 
         return response()->success('Gráfica obtenida correctamente', $graficaFinal, 'graficas');
