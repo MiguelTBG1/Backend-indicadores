@@ -7,10 +7,10 @@ use App\Http\Requests\Grafica\UpdateGraficaRequest;
 use App\Http\Resources\GraficaResource;
 use App\Models\Grafica;
 use App\Services\IndicadorService;
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use MongoDB\BSON\UTCDateTime;
-use Illuminate\Http\Response;
 
 /**
  * @group Gráficas
@@ -49,12 +49,12 @@ class GraficaController extends Controller
     {
         $grafica = Grafica::find($id);
 
-        if (!$grafica) {
+        if (! $grafica) {
             return response()->fail('Gráfica no encontrada', null, 'graficas', Response::HTTP_NOT_FOUND);
         }
 
         // Instanciamos el servicio para generar graficas
-        $indicadorService = new IndicadorService();
+        $indicadorService = new IndicadorService;
 
         // Procesamos cada serie de la grafica
         $seriesProcesadas = [];
@@ -63,7 +63,7 @@ class GraficaController extends Controller
         foreach ($grafica->series as $serie) {
 
             // Verificamos que la serie tenga una configuración valida
-            if (!isset($serie['configuracion']) || empty($serie['configuracion'])) {
+            if (! isset($serie['configuracion']) || empty($serie['configuracion'])) {
                 return response()->fail('Configuración inválida en una de las series', $grafica, 'graficas', Response::HTTP_UNPROCESSABLE_ENTITY);
             }
 
@@ -103,9 +103,10 @@ class GraficaController extends Controller
         $graficaFinal = [
             'titulo' => $grafica->titulo,
             'series' => $seriesProcesadas,
+            'rangos' => $grafica->rangos,
+            'tipoRango' => $grafica->tipoRango,
             'chartOptions' => array_merge($grafica->chartOptions ?? [], ['xaxis' => $xaxis]),
             'descripcion' => $grafica->descripcion,
-            'tipoRango' => $grafica->tipoRango,
         ];
 
         return response()->success('Gráfica obtenida correctamente', $graficaFinal, 'graficas');
@@ -113,6 +114,7 @@ class GraficaController extends Controller
 
     /**
      * Crea una nueva graica.
+     *
      * @bodyParam titulo string required El título de la gráfica.
      * @bodyParam descripcion string required La descripción de la gráfica.
      * @bodyParam chartOptions array Configuraciones de la gráfica. Usa la estructura de ApexCharts.
