@@ -86,6 +86,7 @@ class GraficasSeeder extends Seeder
                 ]
             ],
             'descripcion' => 'Muestra el procentaje de alumnos hombres y mujeres inscritos en diferentes periodos.',
+            'tipoRango' => 'libre'
         ]);
 
         Grafica::create([
@@ -137,6 +138,7 @@ class GraficasSeeder extends Seeder
                 ]
             ],
             'descripcion' => 'Muestra el procentaje de alumnos hombres y mujeres inscritos en diferentes periodos.',
+            'tipoRango' => 'libre'
         ]);
     }
 }
