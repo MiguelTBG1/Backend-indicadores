@@ -638,4 +638,24 @@ class DocumentoController extends Controller
             $relations[$field][] = $id;
         }
     }
+
+    public function extractFieldsWithModel($fields, &$fieldsWithModel)
+    {
+        foreach ($fields as $indexField => $field)
+        {
+            //Verificamos que tenga dataSource o tableConfig
+            if (isset($field['dataSource']) || isset($field['tableConfig']))
+            {
+                // Guardamos el dataSource o el tableConfig
+                $dataSource = isset($field['dataSource']) ? $field['dataSource'] : $field['tableConfig'];
+                // Obtenemos el nombre del modelo
+                $modelName = Plantillas::find($dataSource['plantillaId'])->nombre_modelo ?? null; $dataSource['modelo'] = $modelName;
+                // Agregamos el campo con su modelo
+                $fieldsWithModel[$field['name']] = $dataSource;
+            } else if ($field['type'] == 'subform') {
+                // Llamamos la funcion recursiva
+                $this->extractFieldsWithModel($field['subcampos'], $fieldsWithModel);
+            }
+        }
+    }
 }
