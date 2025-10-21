@@ -11,6 +11,7 @@ use App\Services\DynamicModelService;
 use App\Services\DocumentService;
 use MongoDB\BSON\UTCDateTime;
 use Exception;
+use PhpParser\Comment\Doc;
 
 class DocumentoController extends Controller
 {
@@ -244,133 +245,92 @@ class DocumentoController extends Controller
      */
     public function store(Request $request, $id)
     {
-        // Verifica si la id de la plantilla es válida
-        if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
-            throw new \Exception('ID de plantilla no válido');
-        }
+        try {
 
-        // Obtener el nombre de la plantilla
-        $plantilla = Plantillas::find($id);
+            Log::info('documentData' . json_encode($request->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        // Verifica si la plantilla existe
-        if (!$plantilla) {
-            throw new \Exception('Plantilla no encontrada');
-        }
+            // Verifica si la id de la plantilla es válida
+            DocumentService::validateObjectId($id);
 
-        // Validar los datos de entrada
-        $validatos = Validator::make($request->all(), [
-            'document_data' => 'required|array',
-        ]);
+            // Obtener el nombre de la plantilla
+            $plantilla = Plantillas::find($id);
 
-        // Verifica si la validación falla
-        if ($validatos->fails()) {
-            throw new \Exception($validatos->errors()->first());
-        }
-
-        // Obtener el nombre de la plantilla y el arreglo de datos del documento
-        $plantillaName = $plantilla->nombre_plantilla;
-        $documentData = $request->input('document_data');
-
-        // Procesar archivos si están presentes
-        if ($request->hasFile('files')) {
-            // Obtener los archivos subidos
-            $files = $request->file('files');
-            $uploadedFiles = [];
-
-            // ciclo para subir los archivos
-            foreach ($files as $key => $file) {
-                // Verifica si el archivo es válido
-                if (!$file->isValid()) {
-                    throw new \Exception('Archivo no válido: ' . $file->getClientOriginalName());
-                }
-
-                // Verifica el tamaño del archivo
-                if ($file->getSize() > 20480) { // 20 MB
-                    throw new \Exception('El archivo ' . $file->getClientOriginalName() . ' excede el tamaño máximo permitido.');
-                }
-
-                // Almacena el archivo y guarda la ruta en el arreglo
-                $filePath = $file->store("uploads/{$plantillaName}", 'public');
-                $uploadedFiles[] = $filePath;
+            // Verifica si la plantilla existe
+            if (!$plantilla) {
+                throw new \Exception('Plantilla no encontrada');
             }
 
-            $documentData['Recurso Digital'] = $uploadedFiles;
-        }
+            // Obtener el nombre de la plantilla y el arreglo de datos del documento
+            $plantillaName = $plantilla->nombre_plantilla;
+            $documentData = $request->input('document_data');
 
-        //Buscamos el nombre del modelo
-        $modelName = $plantilla->nombre_modelo ?? null;
+            // Procesar archivos si están presentes
+            if ($request->hasFile('files')) {
+                // Obtener los archivos subidos
+                $files = $request->file('files');
 
-        // creamos la clase del modelo
-        $modelClass = DynamicModelService::createModelClass($modelName);
-
-        // Obtenemos las secciones de la plantilla
-        $secciones = $plantilla->secciones;
-
-        // Creamos el arreglo para guardar el campo y su modelo relacionado
-        $fieldsWithModel = [];
-
-        // Recorremos las secciones
-        foreach ($secciones as $index => $seccion) {
-            // Llamamos la funcion recursiva
-            $this->extractFieldsWithModel($seccion['fields'], $fieldsWithModel);
-        };
-
-        // Creamos el arreglo para obtener los campos de las relaciones
-        $relations = [];
-
-        // Obtenemos las secciones y lo formateamos a un json valido
-        $documentData = json_decode($documentData['secciones'], true);
-
-        // Buscar los campos que tengan un valor en formato de fecha
-        foreach ($documentData as $indexSeccion => $seccion) {
-            foreach ($seccion['fields'] as $keyField => $field) {
-
-                // Validamos que sea un valor numerico
-                if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
-                    // Verificar que sea string y se pueda convertir a fecha
-                    $documentData[$indexSeccion]['fields'][$keyField] = (int) $field;
-                } elseif (is_string($field) && strtotime($field)) {
-                    $timestamp = strtotime($field);
-                    if ($timestamp !== false) {
-                        $documentData[$indexSeccion]['fields'][$keyField] =  new UTCDateTime($timestamp * 1000);
-                    }
-                    // Verificamos si es una id
-                } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
-
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$keyField]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    $relations[strtolower($modelRelation) . '_ids'] = $field;
-
-                    // Validamos si el campo es una tabla
-                } elseif (is_array($field) && !empty($field) && is_string($field[0]) && preg_match('/^[0-9a-fA-F]{24}$/', $field[0])) {
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$keyField]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    $this->recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
-
-                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
-                } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
-                    // Llamamos la función recursiva
-                    $documentData[$indexSeccion]['fields'][$keyField] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
-                }
+                $documentData['Recurso_Digital'] = DocumentService::processFile($files, $plantillaName);
             }
+
+            //Buscamos el nombre del modelo
+            $modelName = $plantilla->nombre_modelo ?? null;
+
+            // creamos la clase del modelo
+            $modelClass = DynamicModelService::createModelClass($modelName);
+
+            // Obtenemos los campos de la plantilla y su modelo relacionado
+            $fieldsWithModel = DocumentService::getFieldsWithModels($plantilla);
+
+            // Decodificamos el campo 'secciones' si es un string JSON
+            if (is_string($documentData['secciones'])) {
+                $documentData['secciones'] = json_decode($documentData['secciones'], true);
+            }
+
+            //Log::info('documentData' . json_encode($documentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+            [$relations, $documentData['secciones']] = DocumentService::processSeccionesStore($documentData['secciones'], $fieldsWithModel);
+
+            $modelClass::create(
+                array_merge([
+                    'secciones' => $documentData['secciones'],
+                    'Recurso_Digital' => $documentData['Recurso_Digital'] ?? []
+                ], $relations)
+            );
+
+            return response()->json(['message' => 'Documento guardado con éxito'], 201);
+        } catch (\Exception $e) {
+            Log::error('Error en store:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+
+            // Respuesta uniforme en JSON
+            return response()->json([
+                'message' => 'Error en store.',
+                'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
+            ], 500);
         }
-
-        $modelClass::create(
-            array_merge([
-                'secciones' => $documentData,
-            ], $relations)
-        );
-
-
-        return response()->json(['message' => 'Documento guardado con éxito'], 201);
     }
 
     public function destroy($plantillaName, $documentId)
     {
+        try {
+        } catch (\Exception $e) {
+            Log::error('Error en store:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+
+            // Respuesta uniforme en JSON
+            return response()->json([
+                'message' => 'Error en store.',
+                'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
+            ], 500);
+        }
         // Verifica si la id del documento es válida
         if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
             throw new \Exception('ID de documento no válido');
@@ -425,139 +385,91 @@ class DocumentoController extends Controller
 
     public function update(Request $request, $plantillaName, $documentId)
     {
+        try {
+            // Verifica si la id del documento es válida
+            DocumentService::validateObjectId($documentId);
 
-        // Verifica si la id del documento es válida
-        if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
-            throw new \Exception('ID de documento no válido');
-        }
+            // Buscar plantilla por nombre
+            $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
 
-        // Buscar plantilla por nombre
-        $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
-
-        // Validar si la plantilla existe
-        if (!$plantilla) {
-            throw new \Exception('Plantilla no encontrada');
-        }
-
-        // Nombre del model
-        $nameModel = $plantilla->nombre_modelo;
-
-        // Creamos la clase del modelo
-        $modelClass = DynamicModelService::createModelClass($nameModel);
-
-        // Obtenemos el documento
-        $document = $modelClass::find($documentId)->toArray();
-
-        // Verifica si el documento existe
-        if (!$document) {
-            throw new \Exception('Documento no encontrado');
-        }
-
-        // Validar los datos de entrada
-        $validatos = Validator::make($request->all(), [
-            'document_data' => 'required|array',
-        ]);
-
-        // Verifica si la validación falla
-        if ($validatos->fails()) {
-            throw new \Exception($validatos->errors()->first());
-        }
-
-        // Convertir el array recibido a un formato JSON válido
-        $updateData = $request->input('document_data');
-
-        // Obtener archivos actuales desde `existing_files` si se envían
-        $archivosActuales = $request->input('existing_files', []);
-
-        // Manejo de eliminación de archivos
-        if ($request->has('delete_files') && isset($document['Recurso Digital'])) {
-            foreach ($request->input('delete_files') as $filePath) {
-                if (Storage::disk('public')->exists($filePath)) {
-                    Storage::disk('public')->delete($filePath);
-                    Log::info("Archivo eliminado: $filePath");
-                }
-
-                $archivosActuales = array_values(array_diff($archivosActuales, [$filePath]));
+            // Validar si la plantilla existe
+            if (!$plantilla) {
+                throw new \Exception('Plantilla no encontrada');
             }
-        }
 
-        // Manejo de nuevos archivos subidos
-        if ($request->hasFile('files')) {
-            $files = $request->file('files');
-            foreach ($files as $file) {
-                $filePath = $file->store('uploads', 'public');
+            // Creamos la clase del modelo
+            $nameModel = $plantilla->nombre_modelo;
+            $modelClass = DynamicModelService::createModelClass($nameModel);
 
-                // Asegurarse de no agregar archivos duplicados
-                if (!in_array($filePath, $archivosActuales)) {
-                    $archivosActuales[] = $filePath; // Agregar ruta de archivo al array si no existe ya
-                }
+            // Obtenemos el documento
+            $document = $modelClass::find($documentId)->toArray();
+
+            // Verifica si el documento existe
+            if (!$document) {
+                throw new \Exception('Documento no encontrado');
             }
-        }
 
-        $updateData = $updateData['secciones'];
+            // Convertir el array recibido a un formato JSON válido
+            $updateData = $request->input('document_data');
 
-        // Obtenemos las secciones de la plantilla
-        $secciones = $plantilla->secciones;
+            // Obtener archivos actuales desde `existing_files` si se envían
+            $archivosActuales = DocumentService::removeFile($request->input('delete_files') ?? [], $document['Recurso_Digital'] ?? [], $request->file('files') ?? []);
 
-        // Creamos el arreglo para guardar el campo y su modelo relacionado
-        $fieldsWithModel = [];
+            // Creamos el arreglo para guardar el campo y su modelo relacionado
+            $fieldsWithModel = DocumentService::getFieldsWithModels($plantilla);
 
-        // Recorremos las secciones
-        foreach ($secciones as $index => $seccion) {
-            // Llamamos la funcion recursiva
-            $this->extractFieldsWithModel($seccion['fields'], $fieldsWithModel);
-        };
-
-        // Creamos el arreglo para obtener los campos de las relaciones
-        $relations = [];
-
-        // Buscar los campos que tengan un valor en formato de fecha
-        foreach ($updateData as $index => $seccion) {
-            foreach ($seccion['fields'] as $key => $field) {
-
-                // Validamos que sea un valor numerico
-                if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
-                    // Verificar que sea string y se pueda convertir a fecha
-                    $updateData[$index]['fields'][$key] = (int) $field;
-                } elseif (is_string($field) && strtotime($field)) {
-                    $timestamp = strtotime($field);
-                    if ($timestamp !== false) {
-                        $updateData[$index]['fields'][$key] =  new UTCDateTime($timestamp * 1000);
-                    }
-                    // Verificamos si es una id
-                } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
-
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$key]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    $relations[strtolower($modelRelation) . '_ids'] = $field;
-
-                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
-                } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
-                    // Llamamos la función recursiva
-                    $updateData[$index]['fields'][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
-                }
+            // Decodificamos el campo 'secciones' si es un string JSON
+            if (is_string($updateData['secciones'])) {
+                $updateData['secciones'] = json_decode($updateData['secciones'], true);
             }
+
+            Log::info('documentData' . json_encode($updateData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+            // Creamos el arreglo para obtener los campos de las relaciones
+            [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($updateData['secciones'], $fieldsWithModel);
+
+            // Actualizar el documento en la colección de MongoDB
+            $modelClass::where('_id', $documentId)->update(array_merge([
+                'secciones' => $updateData['secciones'],
+                'Recurso_Digital' => $archivosActuales
+            ], $relations));
+
+            return response()->json(['message' => 'Documento actualizado con éxito']);
+        } catch (\Exception $e) {
+            Log::error('Error en update:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+
+            // Respuesta uniforme en JSON
+            return response()->json([
+                'message' => 'Error en update.',
+                'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
+            ], 500);
         }
-
-        Log::info('relaciones', [
-            ':' => $relations
-        ]);
-
-        // Actualizar el documento en la colección de MongoDB
-        $modelClass::where('_id', $documentId)->update(array_merge([
-            'secciones' => $updateData,
-            'Recursos Digitales' => $archivosActuales
-        ], $relations));
-
-        return response()->json(['message' => 'Documento actualizado con éxito']);
     }
 
 
 
     public function show($plantillaName, $documentId)
     {
+        try {
+        } catch (\Exception $e) {
+            Log::error('Error en store:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+
+            // Respuesta uniforme en JSON
+            return response()->json([
+                'message' => 'Error en store.',
+                'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
+            ], 500);
+        }
         // Verifica si la id del documento es válida
         if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
             throw new \Exception('ID de documento no válido');
@@ -577,85 +489,5 @@ class DocumentoController extends Controller
 
         // Retornamos el documento
         return response()->json($document);
-    }
-
-    /**
-     * Función recursiva para recorrer los subFormularios
-     * @param array $data
-     * @return array
-     */
-    public function recusiveSubForm(array $data, &$relations, $fieldsWithModel)
-    {
-        // Recorremos el arraglo
-        foreach ($data as $index => $value) {
-            foreach ($value as $key => $field) {
-                // Validamos que sea un valor numerico
-                if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
-                    // Verificar que sea string y se pueda convertir a fecha
-                    $data[$index][$key] = (int) $field;
-                } elseif (is_string($field) && strtotime($field)) {
-                    // Convertir a UTCDateTime
-                    $timestamp = strtotime($field);
-                    if ($timestamp !== false) {
-                        $data[$index][$key] =  new UTCDateTime($timestamp * 1000);
-                    }
-                    // Verificamos si es una id
-                } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
-
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$key]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    $relations[strtolower($modelRelation) . '_ids'][] = $field;
-
-                    // Validamos si el campo es una tabla
-                } elseif (is_array($field) && !empty($field) && is_string($field[0]) && preg_match('/^[0-9a-fA-F]{24}$/', $field[0])) {
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$key]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    $this->recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
-
-                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
-                } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
-                    // Llamamos la función recursiva
-                    $data[$index][$key] = $this->recusiveSubForm($field, $relations, $fieldsWithModel);
-                }
-            }
-        }
-
-        // Retornamos $data
-        return $data;
-    }
-
-    /**
-     * Función para recorrer el arraglo de la tabla
-     *
-     */
-    private function recursiveTable($table, &$relations, $field)
-    {
-        foreach ($table as $id) {
-            $relations[$field][] = $id;
-        }
-    }
-
-    public function extractFieldsWithModel($fields, &$fieldsWithModel)
-    {
-        foreach ($fields as $indexField => $field)
-        {
-            //Verificamos que tenga dataSource o tableConfig
-            if (isset($field['dataSource']) || isset($field['tableConfig']))
-            {
-                // Guardamos el dataSource o el tableConfig
-                $dataSource = isset($field['dataSource']) ? $field['dataSource'] : $field['tableConfig'];
-                // Obtenemos el nombre del modelo
-                $modelName = Plantillas::find($dataSource['plantillaId'])->nombre_modelo ?? null; $dataSource['modelo'] = $modelName;
-                // Agregamos el campo con su modelo
-                $fieldsWithModel[$field['name']] = $dataSource;
-            } else if ($field['type'] == 'subform') {
-                // Llamamos la funcion recursiva
-                $this->extractFieldsWithModel($field['subcampos'], $fieldsWithModel);
-            }
-        }
     }
 }

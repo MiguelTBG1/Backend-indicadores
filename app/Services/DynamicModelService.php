@@ -35,7 +35,8 @@ class DynamicModelService
         $content .= "    protected \$connection = 'mongodb';\n\n";
         $content .= "    protected \$collection = '{$name}_data';\n\n";
         $content .= "    protected \$primaryKey = '_id';\n\n";
-        $content .= "    protected \$fillable = [\n        'secciones',\n";
+        $content .= "    protected \$fillable = [\n        'secciones',\n        'Recurso_Digital',\n";
+
         foreach ($relations as $relation) {
             $name = strtolower($relation['modelo']);
             $content .= "        '{$name}_ids',\n";
