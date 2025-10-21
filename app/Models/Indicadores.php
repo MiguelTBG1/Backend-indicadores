@@ -26,6 +26,7 @@ class Indicadores extends Model
         'configuracion',
         'fecha_inicio',
         'fecha_fin',
+        'tipoIndicador'
     ];
 
 }

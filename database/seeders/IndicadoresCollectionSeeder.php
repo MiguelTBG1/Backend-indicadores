@@ -42,7 +42,8 @@ class IndicadoresCollectionSeeder extends Seeder
             'accion' => "Accion",
             "actividad" => "Actividad",
             "causa" => "Causa",
-            "departamento" => "Computo"
+            "departamento" => "Computo",
+            "tipoIndicador" => "Planeacion"
         ]);
 
         Indicadores::create([
@@ -74,7 +75,8 @@ class IndicadoresCollectionSeeder extends Seeder
             'accion' => "Accion",
             "actividad" => "Actividad",
             "causa" => "Causa",
-            "departamento" => "Computo"
+            "departamento" => "Computo",
+            "tipoIndicador" => "Planeacion"
         ]);
 
         Indicadores::create([
@@ -106,7 +108,8 @@ class IndicadoresCollectionSeeder extends Seeder
             'accion' => "Accion",
             "actividad" => "Actividad",
             "causa" => "Causa",
-            "departamento" => "Computo"
+            "departamento" => "Computo",
+            "tipoIndicador" => "Subdireccion"
         ]);
 
         Indicadores::create([
@@ -138,7 +141,8 @@ class IndicadoresCollectionSeeder extends Seeder
             'accion' => "Accion",
             "actividad" => "Actividad",
             "causa" => "Causa",
-            "departamento" => "Computo"
+            "departamento" => "Computo",
+            "tipoIndicador" => "Subdireccion"
         ]);
     }
 }
