@@ -208,6 +208,14 @@ class DocumentService
                     // Agregamos la id al arreglo de relaciones
                     self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
 
+                    // Validamos si es un archivo
+                } elseif ($field instanceof \Illuminate\Http\UploadedFile) {
+                    // Validar y guardar
+                    if (!$field->isValid()) {
+                        throw new \Exception("Archivo inválido en el campo: $keyField");
+                    }
+                    $secciones[$indexSeccion]['fields'][$keyField] = $field->store("uploads/plantilla_x", 'public');
+
                     // Validamos que sea un array, tenga datos y que el primer valor no sea un string
                 } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                     // Llamamos la función recursiva
