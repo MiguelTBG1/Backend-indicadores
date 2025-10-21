@@ -9,6 +9,7 @@ use App\Services\DynamicModelService;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 
+use function PHPUnit\Framework\isArray;
 use function PHPUnit\Framework\isNull;
 
 class DocumentService
@@ -174,7 +175,7 @@ class DocumentService
         return $uploadedFiles;
     }
 
-    public static function processSeccionesStore($secciones, $fieldsWithModel)
+    public static function processSeccionesStore($secciones, $fieldsWithModel, $files)
     {
         $relations = [];
 
@@ -209,17 +210,18 @@ class DocumentService
                     self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
 
                     // Validamos si es un archivo
-                } elseif ($field instanceof \Illuminate\Http\UploadedFile) {
+                } elseif (!is_array($field) && !is_string($field) && $files['file_' . $keyField] instanceof \Illuminate\Http\UploadedFile) {
+                    Log::info('es file');
                     // Validar y guardar
-                    if (!$field->isValid()) {
+                    if (!$files['file_' . $keyField]->isValid()) {
                         throw new \Exception("Archivo inválido en el campo: $keyField");
                     }
-                    $secciones[$indexSeccion]['fields'][$keyField] = $field->store("uploads/plantilla_x", 'public');
+                    $secciones[$indexSeccion]['fields'][$keyField] = $files['file_' . $keyField]->store("uploads/plantilla_x", 'public');
 
                     // Validamos que sea un array, tenga datos y que el primer valor no sea un string
                 } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                     // Llamamos la función recursiva
-                    $secciones[$indexSeccion]['fields'][$keyField] = self::recusiveSubForm($field, $relations, $fieldsWithModel);
+                    $secciones[$indexSeccion]['fields'][$keyField] = self::recusiveSubForm($field, $relations, $fieldsWithModel, $files, 'subform_'.$keyField);
                 }
             }
         }
@@ -234,7 +236,7 @@ class DocumentService
         }
     }
 
-    private static function recusiveSubForm(array $data, &$relations, $fieldsWithModel)
+    private static function recusiveSubForm(array $data, &$relations, $fieldsWithModel, $files, $prefijo)
     {
         // Recorremos el arraglo
         foreach ($data as $index => $value) {
@@ -265,11 +267,19 @@ class DocumentService
 
                     // Agregamos la id al arreglo de relaciones
                     self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
+                        // Validamos si es un archivo
+                } elseif (!is_array($field) && !is_string($field) && $files[$prefijo . '_' . $index . '_' . $key] instanceof \Illuminate\Http\UploadedFile) {
+                    Log::info('es file');
+                    // Validar y guardar
+                    if (!$files[$prefijo . '_' . $index . '_' . $key]->isValid()) {
+                        throw new \Exception("Archivo inválido en el campo: $field");
+                    }
+                    $data[$index][$key] = $files[$prefijo . '_' . $index . '_' . $key]->store("uploads/plantilla_x", 'public');
 
                     // Validamos que sea un array, tenga datos y que el primer valor no sea un string
                 } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
                     // Llamamos la función recursiva
-                    $data[$index][$key] = self::recusiveSubForm($field, $relations, $fieldsWithModel);
+                    $data[$index][$key] = self::recusiveSubForm($field, $relations, $fieldsWithModel, $files, $prefijo);
                 }
             }
         }
@@ -313,5 +323,19 @@ class DocumentService
         }
 
         return $archivosActuales;
+    }
+
+    public static function removeFiles($secciones)
+    {
+        foreach ($secciones as $seccion) {
+            foreach ($seccion['fields'] as $key => $field) {
+                if ($field && Storage::disk('public')->exist($field)) {
+                    Storage::disk('public')->delete($field);
+                    Log::info("Archivo eliminado: $field");
+                } else if (is_array($field) && !empty($field) && !is_string($field[0])) {
+                    self::removeFiles($field);
+                }
+            }
+        }
     }
 }

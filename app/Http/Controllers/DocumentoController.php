@@ -265,12 +265,12 @@ class DocumentoController extends Controller
             $documentData = $request->input('document_data');
 
             // Procesar archivos si están presentes
-            if ($request->hasFile('files')) {
+            /*if ($request->hasFile('files')) {
                 // Obtener los archivos subidos
                 $files = $request->file('files');
 
                 $documentData['Recurso_Digital'] = DocumentService::processFile($files, $plantillaName);
-            }
+            }*/
 
             //Buscamos el nombre del modelo
             $modelName = $plantilla->nombre_modelo ?? null;
@@ -282,18 +282,15 @@ class DocumentoController extends Controller
             $fieldsWithModel = DocumentService::getFieldsWithModels($plantilla);
 
             // Decodificamos el campo 'secciones' si es un string JSON
-            if (is_string($documentData['secciones'])) {
-                $documentData['secciones'] = json_decode($documentData['secciones'], true);
+            if (is_string($documentData)) {
+                $documentData = json_decode($documentData, true);
             }
 
-            //Log::info('documentData' . json_encode($documentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-            [$relations, $documentData['secciones']] = DocumentService::processSeccionesStore($documentData['secciones'], $fieldsWithModel);
+            [$relations, $documentData['secciones']] = DocumentService::processSeccionesStore($documentData['secciones'], $fieldsWithModel, $request->file('files'));
 
             $modelClass::create(
                 array_merge([
                     'secciones' => $documentData['secciones'],
-                    'Recurso_Digital' => $documentData['Recurso_Digital'] ?? []
                 ], $relations)
             );
 
@@ -413,7 +410,7 @@ class DocumentoController extends Controller
             $updateData = $request->input('document_data');
 
             // Obtener archivos actuales desde `existing_files` si se envían
-            $archivosActuales = DocumentService::removeFile($request->input('delete_files') ?? [], $document['Recurso_Digital'] ?? [], $request->file('files') ?? []);
+            $archivosActuales = DocumentService::removeFiles($plantilla->secciones);
 
             // Creamos el arreglo para guardar el campo y su modelo relacionado
             $fieldsWithModel = DocumentService::getFieldsWithModels($plantilla);
@@ -426,7 +423,7 @@ class DocumentoController extends Controller
             Log::info('documentData' . json_encode($updateData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
             // Creamos el arreglo para obtener los campos de las relaciones
-            [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($updateData['secciones'], $fieldsWithModel);
+            [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($updateData['secciones'], $fieldsWithModel, $request->file('files'));
 
             // Actualizar el documento en la colección de MongoDB
             $modelClass::where('_id', $documentId)->update(array_merge([
