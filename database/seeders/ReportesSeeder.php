@@ -12,6 +12,7 @@ class ReportesSeeder extends Seeder
      */
     public function run(): void
     {
+        /* NO SIRVE ESTE SEEDER, POSIBLEMENTE LAS ID'S ESTAN MAL GENERADAS
         $reportes = [
             [
                 "id" => 1727347200000,
@@ -99,6 +100,6 @@ class ReportesSeeder extends Seeder
         // Inserta todos los reportes
         foreach ($reportes as $reporte) {
             Reporte::create($reporte);
-        }
+        }*/
     }
 }
