@@ -8,13 +8,11 @@ use Illuminate\Support\Facades\Log;
 use App\Services\DynamicModelService;
 use Exception;
 use Illuminate\Support\Facades\Storage;
-
-use function PHPUnit\Framework\isArray;
 use function PHPUnit\Framework\isNull;
 
 class DocumentService
 {
-    /** 🔸 Valida que el ID sea ObjectId de Mongo */
+
     public static function validateObjectId(string $id, string $tipo = 'recurso'): void
     {
         if (!preg_match('/^[0-9a-fA-F]{24}$/', $id)) {
@@ -22,7 +20,7 @@ class DocumentService
         }
     }
 
-    /** 🔸 Extrae todos los campos que tienen modelos asociados */
+
     public static function getFieldsWithModels($plantilla): array
     {
         $fieldsWithModel = [];
@@ -46,7 +44,7 @@ class DocumentService
         }
     }
 
-    /** 🔸 Carga relaciones distintas para un documento */
+
     public static function loadRelations($document, array $models): array
     {
         $relations = [];
@@ -57,19 +55,13 @@ class DocumentService
         return $relations;
     }
 
-    /** 🔸 Recorre secciones de manera recursiva */
     public static function processSecciones(array $secciones, $relations, $fieldsWithModel): array
     {
-        Log::info('secciones' . json_encode($secciones, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
         if (is_array($secciones)) {
             foreach ($secciones as &$seccion) {
                 if (is_array($seccion['fields'])) {
                     foreach ($seccion['fields'] as $key => &$field) {
                         $field = self::processField($key, $field, $relations, $fieldsWithModel);
-                        Log::info('field', [
-                            ':' => $field
-                        ]);
                     }
                 }
             }
@@ -78,13 +70,8 @@ class DocumentService
         return $secciones;
     }
 
-    /** 🔸 Procesa campo individual */
     private static function processField($key, $field, $relations, $fieldsWithModel)
     {
-        Log::info('campo : ', [
-            'key' => $key,
-            'field' => $field
-        ]);
 
         // Si es subcampo (recursivo)
         if (is_array($field) && !empty($field) && !is_string($field[0])) {
@@ -134,10 +121,6 @@ class DocumentService
             }
         }
 
-        Log::info('result', [
-            ':' => $result
-        ]);
-
         return $result;
     }
 
@@ -180,53 +163,65 @@ class DocumentService
         $relations = [];
 
         // Buscar los campos que tengan un valor en formato de fecha
-        foreach ($secciones as $indexSeccion => $seccion) {
-            foreach ($seccion['fields'] as $keyField => $field) {
-
-                // Validamos que sea un valor numerico
-                if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
-                    // Verificar que sea string y se pueda convertir a fecha
-                    $secciones[$indexSeccion]['fields'][$keyField] = (int) $field;
-                } elseif (is_string($field) && strtotime($field)) {
-                    $timestamp = strtotime($field);
-                    if ($timestamp !== false) {
-                        $secciones[$indexSeccion]['fields'][$keyField] =  new UTCDateTime($timestamp * 1000);
-                    }
-                    // Verificamos si es una id
-                } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
-
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$keyField]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    $relations[strtolower($modelRelation) . '_ids'] = $field;
-
-                    // Validamos si el campo es una tabla
-                } elseif (is_array($field) && !empty($field) && is_string($field[0]) && preg_match('/^[0-9a-fA-F]{24}$/', $field[0])) {
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$keyField]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
-
-                    // Validamos si es un archivo
-                } elseif (!is_array($field) && !is_string($field) && $files['file_' . $keyField] instanceof \Illuminate\Http\UploadedFile) {
-                    Log::info('es file');
-                    // Validar y guardar
-                    if (!$files['file_' . $keyField]->isValid()) {
-                        throw new \Exception("Archivo inválido en el campo: $keyField");
-                    }
-                    $secciones[$indexSeccion]['fields'][$keyField] = $files['file_' . $keyField]->store("uploads/plantilla_x", 'public');
-
-                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
-                } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
-                    // Llamamos la función recursiva
-                    $secciones[$indexSeccion]['fields'][$keyField] = self::recusiveSubForm($field, $relations, $fieldsWithModel, $files, 'subform_'.$keyField);
-                }
+        foreach ($secciones as $indexSeccion => &$seccion) {
+            foreach ($seccion['fields'] as $keyField => &$field) {
+                $field = self::validateFieldStore($field, $keyField, $relations, $fieldsWithModel, $files);
             }
         }
 
         return [$relations, $secciones];
+    }
+
+    private static function validateFieldStore($field, $key, &$relations, $fieldsWithModel, $files, $prefijo = '',$first = true)
+    {
+
+        // Formamos el nombre del archivo
+        $nameFile = $first ? 'file_' . $key : $prefijo . '_' . $key;
+
+        // Validamos que sea un valor numerico
+        if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
+
+            return (int) $field;
+
+        // Verificar que sea string y se pueda convertir a fecha
+        } elseif (is_string($field) && strtotime($field)) {
+
+            return new UTCDateTime(strtotime($field) * 1000);
+
+            // Verificamos si es una id
+        } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+
+            // nombre de la funcion
+            $modelRelation = $fieldsWithModel[$key]['modelo'];
+
+            // Agregamos la id al arreglo de relaciones
+            $relations[strtolower($modelRelation) . '_ids'] = $field;
+
+            // Validamos si el campo es una tabla
+        } elseif (is_array($field) && !empty($field) && is_string($field[0]) && preg_match('/^[0-9a-fA-F]{24}$/', $field[0])) {
+            // nombre de la funcion
+            $modelRelation = $fieldsWithModel[$key]['modelo'];
+
+            // Agregamos la id al arreglo de relaciones
+            self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
+
+            // Validamos si es un archivo
+        } elseif (!is_array($field) && !is_string($field) && $files[$nameFile] instanceof \Illuminate\Http\UploadedFile) {
+
+            // Validar y guardar
+            if (!$files[$nameFile]->isValid()) {
+                throw new \Exception("Archivo inválido en el campo: $key");
+            }
+
+            return $files[$nameFile]->store("uploads/plantilla_x", 'public');
+
+        // Validamos que sea un subformulario
+        } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
+            // Llamamos la función recursiva
+            return self::recusiveSubForm($field, $relations, $fieldsWithModel, $files, 'subform_' . $key);
+        }
+
+        return $field;
     }
 
     private static function recursiveTable($table, &$relations, $field)
@@ -239,48 +234,10 @@ class DocumentService
     private static function recusiveSubForm(array $data, &$relations, $fieldsWithModel, $files, $prefijo)
     {
         // Recorremos el arraglo
-        foreach ($data as $index => $value) {
-            foreach ($value as $key => $field) {
-                // Validamos que sea un valor numerico
-                if (is_string($field) && filter_var($field, FILTER_VALIDATE_INT)) {
-                    // Verificar que sea string y se pueda convertir a fecha
-                    $data[$index][$key] = (int) $field;
-                } elseif (is_string($field) && strtotime($field)) {
-                    // Convertir a UTCDateTime
-                    $timestamp = strtotime($field);
-                    if ($timestamp !== false) {
-                        $data[$index][$key] =  new UTCDateTime($timestamp * 1000);
-                    }
-                    // Verificamos si es una id
-                } elseif (is_string($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+        foreach ($data as $index => &$value) {
+            foreach ($value as $key => &$field) {
 
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$key]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    $relations[strtolower($modelRelation) . '_ids'][] = $field;
-
-                    // Validamos si el campo es una tabla
-                } elseif (is_array($field) && !empty($field) && is_string($field[0]) && preg_match('/^[0-9a-fA-F]{24}$/', $field[0])) {
-                    // nombre de la funcion
-                    $modelRelation = $fieldsWithModel[$key]['modelo'];
-
-                    // Agregamos la id al arreglo de relaciones
-                    self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
-                        // Validamos si es un archivo
-                } elseif (!is_array($field) && !is_string($field) && $files[$prefijo . '_' . $index . '_' . $key] instanceof \Illuminate\Http\UploadedFile) {
-                    Log::info('es file');
-                    // Validar y guardar
-                    if (!$files[$prefijo . '_' . $index . '_' . $key]->isValid()) {
-                        throw new \Exception("Archivo inválido en el campo: $field");
-                    }
-                    $data[$index][$key] = $files[$prefijo . '_' . $index . '_' . $key]->store("uploads/plantilla_x", 'public');
-
-                    // Validamos que sea un array, tenga datos y que el primer valor no sea un string
-                } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
-                    // Llamamos la función recursiva
-                    $data[$index][$key] = self::recusiveSubForm($field, $relations, $fieldsWithModel, $files, $prefijo);
-                }
+                $field = self::validateFieldStore($field, $key, $relations, $fieldsWithModel, $files, $prefijo . '_' . $index, false);
             }
         }
 
@@ -290,12 +247,6 @@ class DocumentService
 
     public static function removeFile($files, $recurso_digital, $request)
     {
-        Log::info('Remove: ', [
-            'files: ' => $files,
-            'recurso_digital' => $recurso_digital,
-            'request' => $request
-        ]);
-
         $archivosActuales = [];
 
         // Manejo de eliminación de archivos
