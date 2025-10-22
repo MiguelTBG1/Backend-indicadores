@@ -245,37 +245,6 @@ class DocumentService
         return $data;
     }
 
-    public static function removeFile($files, $recurso_digital, $request)
-    {
-        $archivosActuales = [];
-
-        // Manejo de eliminación de archivos
-        if (isNull($files) && isNull($recurso_digital)) {
-            foreach ($files as $filePath) {
-                if (Storage::disk('public')->exists($filePath)) {
-                    Storage::disk('public')->delete($filePath);
-                    Log::info("Archivo eliminado: $filePath");
-                }
-
-                $archivosActuales = array_values(array_diff($archivosActuales, [$filePath]));
-            }
-        }
-
-        // Manejo de nuevos archivos subidos
-        if (isNull($request)) {
-            foreach ($request as $file) {
-                $filePath = $file->store('uploads', 'public');
-
-                // Asegurarse de no agregar archivos duplicados
-                if (!in_array($filePath, $archivosActuales)) {
-                    $archivosActuales[] = $filePath; // Agregar ruta de archivo al array si no existe ya
-                }
-            }
-        }
-
-        return $archivosActuales;
-    }
-
     public static function removeFiles($secciones)
     {
         foreach ($secciones as $seccion) {

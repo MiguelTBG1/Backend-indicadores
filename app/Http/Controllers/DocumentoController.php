@@ -314,6 +314,32 @@ class DocumentoController extends Controller
     public function destroy($plantillaName, $documentId)
     {
         try {
+
+            // Verifica si la id del documento es válida
+            DocumentService::validateObjectId($documentId);
+
+            // Buscar plantilla por nombre
+            $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
+
+            // Nombre del model
+            $nameModel = $plantilla->nombre_modelo;
+
+            // Creamos la clase del modelo
+            $modelClass = DynamicModelService::createModelClass($nameModel);
+
+            // Obtenemos el documento
+            $document = $modelClass::find($documentId);
+
+            // Eliminamos los archivos del documento
+            DocumentService::removeFiles($document->secciones);
+
+            // Eliminamos el documento con su ID
+            $modelClass::where('id', $documentId)->delete();
+
+
+            return response()->json([
+                'message' => 'Documento y archivos asociados eliminados con éxito',
+            ]);
         } catch (\Exception $e) {
             Log::error('Error en store:', [
                 'message' => $e->getMessage(),
@@ -328,56 +354,6 @@ class DocumentoController extends Controller
                 'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
             ], 500);
         }
-        // Verifica si la id del documento es válida
-        if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
-            throw new \Exception('ID de documento no válido');
-        }
-
-        // Buscar plantilla por nombre
-        $plantilla = Plantillas::where('nombre_coleccion', $plantillaName)->first();
-
-        // Nombre del model
-        $nameModel = $plantilla->nombre_modelo;
-
-        // Creamos la clase del modelo
-        $modelClass = DynamicModelService::createModelClass($nameModel);
-
-        // Obtenemos el documento
-        $document = $modelClass::find($documentId)->toArray();
-
-        // Verificar si el documento tiene un archivo asociado y eliminarlo
-        if (isset($document['Recurso Digital']) && is_array($document['Recurso Digital'])) {
-            foreach ($document['Recurso Digital'] as $filePath) {
-                // Asegurarse de que el archivo no tiene el prefijo "uploads/"
-                if (strpos($filePath, 'uploads/') === 0) {
-                    $filePath = substr($filePath, strlen('uploads/'));
-                }
-
-                // Obtener la ruta relativa correcta al archivo en el almacenamiento público
-                $relativePath = 'uploads/' . $filePath;
-
-                // Verificar si el archivo existe en el almacenamiento local
-                if (Storage::disk('public')->exists($relativePath)) {
-                    // Intentar eliminar el archivo del almacenamiento local
-                    try {
-                        Storage::disk('public')->delete($relativePath);
-                        Log::info('Archivo eliminado: ' . $relativePath);
-                    } catch (\Exception $e) {
-                        Log::error('Error al eliminar archivo: ' . $relativePath . '. Error: ' . $e->getMessage());
-                    }
-                } else {
-                    Log::warning('Archivo no encontrado en almacenamiento local: ' . $relativePath);
-                }
-            }
-        }
-
-        // Eliminamos el documento con su ID
-        $modelClass::where('id', $documentId)->delete();
-
-
-        return response()->json([
-            'message' => 'Documento y archivos asociados eliminados con éxito',
-        ]);
     }
 
     public function update(Request $request, $plantillaName, $documentId)
@@ -453,6 +429,25 @@ class DocumentoController extends Controller
     public function show($plantillaName, $documentId)
     {
         try {
+
+            // Verifica si la id del documento es válida
+            DocumentService::validateObjectId($documentId);
+
+            // Buscar plantilla por nombre
+            $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
+
+            // Nombre del model
+            $nameModel = $plantilla->nombre_modelo;
+
+            // Creamos la clase del modelo
+            $modelClass = DynamicModelService::createModelClass($nameModel);
+
+            // Obtenemos el documento
+            $document = $modelClass::find($documentId)->toArray();
+
+            // Retornamos el documento
+            return response()->json($document);
+
         } catch (\Exception $e) {
             Log::error('Error en store:', [
                 'message' => $e->getMessage(),
@@ -467,24 +462,5 @@ class DocumentoController extends Controller
                 'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
             ], 500);
         }
-        // Verifica si la id del documento es válida
-        if (!preg_match('/^[0-9a-fA-F]{24}$/', $documentId)) {
-            throw new \Exception('ID de documento no válido');
-        }
-
-        // Buscar plantilla por nombre
-        $plantilla = Plantillas::where('nombre_plantilla', $plantillaName)->first();
-
-        // Nombre del model
-        $nameModel = $plantilla->nombre_modelo;
-
-        // Creamos la clase del modelo
-        $modelClass = DynamicModelService::createModelClass($nameModel);
-
-        // Obtenemos el documento
-        $document = $modelClass::find($documentId)->toArray();
-
-        // Retornamos el documento
-        return response()->json($document);
     }
 }
