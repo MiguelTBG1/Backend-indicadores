@@ -27,6 +27,7 @@ class UserCollectionSeeder extends Seeder
         $lector = Rol::where('nombre', 'Lector general')->first();
         $analistaIndicador = Rol::where('nombre', 'Analista de indicadores')->first();
         $creadorDocumentos = Rol::where('nombre', 'Creador de documentos')->first();
+        $capturista = Rol::where('nombre', 'Capturista')->first();
 
         // Plantillas
         $plantillaPeriodos = '68b0938423ed6ec87508548c';
@@ -84,140 +85,20 @@ class UserCollectionSeeder extends Seeder
             'expires_at' => null,
         ]);
 
-        // Coordinador academico
-        User::create(
+         $admin = User::create(
             [
-                'nombre' => 'Rusell Emmanuel',
-                'apellido_paterno' => 'Canche',
-                'apellido_materno' => 'Ciao',
-                'email' => 'coordinador@test.com',
+                'nombre' => 'Capturista Capturador',
+                'apellido_paterno' => 'Premiun',
+                'apellido_materno' => 'Extremo',
+                'email' => 'capturista@test.com',
                 'password' => Hash::make('123456'),
-                'edad' => 30,
-                'genero' => 'Masculino',
+                'edad' => 666,
+                'genero' => 'Si',
                 'estado' => 'Activo',
-                'ocupacion' => 'Administrador',
-                'escolaridad' => 'Universidad',
-                'roles' => [$coordinador->_id],
+                'ocupacion' => 'CApturador de capturistas',
+                'escolaridad' => 'Universidad de capturistas',
+                'roles' => [$capturista->_id],
             ]
         );
-
-        // Editor de plantillas
-        User::create(
-            [
-                'nombre' => 'Daris Gael',
-                'apellido_paterno' => 'Martinez',
-                'apellido_materno' => 'Galicia',
-                'email' => 'editorPlantillas@test.com',
-                'password' => Hash::make('123456'),
-                'edad' => 22,
-                'genero' => 'Masculino',
-                'estado' => 'Activo',
-                'ocupacion' => 'Desarrollador',
-                'escolaridad' => 'Universidad',
-                'roles' => [$editorPlantillas->_id],
-            ]
-        );
-
-        // Lector
-        User::create(
-            [
-                'nombre' => 'Jose Miguel',
-                'apellido_paterno' => 'Alvarado',
-                'apellido_materno' => 'Chuc',
-                'email' => 'lector@test.com',
-                'password' => Hash::make('123456'),
-                'edad' => 22,
-                'genero' => 'Masculino',
-                'estado' => 'Activo',
-                'ocupacion' => 'Desarrollador',
-                'escolaridad' => 'Universidad',
-                'roles' => [$lector->_id],
-            ]
-        );
-
-        // Usuario Analista de Indicadores
-        User::create([
-            'nombre' => 'María Fernanda',
-            'apellido_paterno' => 'López',
-            'apellido_materno' => 'García',
-            'email' => 'analista@test.com',
-            'password' => Hash::make('123456'),
-            'edad' => 32,
-            'genero' => 'Femenino',
-            'estado' => 'Activo',
-            'ocupacion' => 'Analista',
-            'escolaridad' => 'Maestría',
-            'roles' => [$analistaIndicador->_id],
-        ]);
-
-        // Usuario Creador de Documentos
-        User::create([
-            'nombre' => 'Juan Carlos',
-            'apellido_paterno' => 'Ramírez',
-            'apellido_materno' => 'Torres',
-            'email' => 'creador@test.com',
-            'password' => Hash::make('123456'),
-            'edad' => 29,
-            'genero' => 'Masculino',
-            'estado' => 'Activo',
-            'ocupacion' => 'Documentalista',
-            'escolaridad' => 'Licenciatura',
-            'roles' => [$creadorDocumentos->_id],
-        ]);
-
-        // Usuario de prueba para permisos
-        User::create([
-            'nombre' => 'Prueba',
-            'apellido_paterno' => 'Ramírez',
-            'apellido_materno' => 'Torres',
-            'email' => 'prueba@test.com',
-            'password' => Hash::make('123456'),
-            'edad' => 29,
-            'genero' => 'Masculino',
-            'estado' => 'Activo',
-            'ocupacion' => 'Documentalista',
-            'escolaridad' => 'Licenciatura',
-            'permisos' => [
-                'allowed' => [
-                    [
-                        'recurso' => $plantillaRecurso->_id,
-                        'acciones' => [
-                            $comodinAccion->_id,
-                        ],
-                    ],
-                    [
-                        'recurso' => $documentoRecurso->_id,
-                        'acciones' => [
-                            $comodinAccion->_id
-                        ]
-                    ],
-                    [
-                        'recurso' => 'plantilla:' . $plantillaPeriodos,
-                        'acciones' => [
-                            $comodinAccion->_id,
-                        ],
-                    ],
-                    [
-                        'recurso' => 'plantilla:' . $plantillaProgramaEducativo,
-                        'acciones' => [
-                            $comodinAccion->_id,
-                        ],
-                    ],
-                    [
-                        'recurso' => 'documento:' . $plantillaAlumnos,
-                        'acciones' => [
-                            $read->_id,
-                            $create->_id,
-                        ],
-                    ],
-                    [
-                        'recurso' => 'documento:' . $plantillaProgramaEducativo,
-                        'acciones' => [
-                            $create->_id,
-                        ],
-                    ]
-                ],
-            ],
-        ]);
     }
 }

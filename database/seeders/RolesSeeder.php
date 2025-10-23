@@ -122,6 +122,29 @@ class RolesSeeder extends Seeder
                     ],
                 ],
             ],
+            [
+                'nombre' => 'Capturista',
+                'descripcion' => 'Se encarga de la captura de los datos de documentos, puede actualizar y borrar los registros',
+                'permisos' => [
+                    'allowed' => [
+                        [
+                            'recurso' => $documentos->_id,
+                            'acciones' => [
+                                $comodin->_id,
+                            ]
+                            ],
+                            [
+                            'recurso' => 'documento:'.$todosRecursos->_id,
+                            'acciones' => [
+                                $comodin->_id,
+                            ],
+                        ]
+                    ]
+                ],
+                'ui_permissions' => [
+                    'documentos' => true
+                ]
+            ]
         ];
 
         foreach ($roles as $rol) {

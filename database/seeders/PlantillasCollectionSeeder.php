@@ -20,7 +20,6 @@ class PlantillasCollectionSeeder extends Seeder
     {
         // Usuario administrador
         $admin_user = User::where('nombre', 'Rodrigo Alexander')->first();
-        $usuario2 = User::where('nombre', 'Daris Gael')->first();
 
         // Plantilla de periodos
         Plantillas::create([
@@ -90,7 +89,7 @@ class PlantillasCollectionSeeder extends Seeder
             'nombre_plantilla' => 'Profesores',
             'nombre_modelo' => 'Profesores',
             'nombre_coleccion' => 'Profesores_data',
-            'creado_por' => $usuario2->_id,
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Información Personal',
@@ -354,7 +353,7 @@ class PlantillasCollectionSeeder extends Seeder
             'nombre_plantilla' => 'Alumnos',
             'nombre_modelo' => 'Alumnos',
             'nombre_coleccion' => 'Alumnos_data',
-            'creado_por' => $usuario2->_id,
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Información General',
@@ -579,7 +578,7 @@ class PlantillasCollectionSeeder extends Seeder
             'nombre_plantilla' => 'Docentes',
             'nombre_modelo' => 'Docentes',
             'nombre_coleccion' => 'Docentes_data',
-            'creado_por' => $usuario2->_id,
+            'creado_por' => $admin_user->_id,
             'secciones' => [
                 [
                     'nombre' => 'Participación en Proyectos de Investigación',
