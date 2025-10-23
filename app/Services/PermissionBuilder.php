@@ -16,62 +16,79 @@ class PermissionBuilder
      * Estas habilidades siguen el siguiente formato:
      * <tipo_recurso>:<identificador>.<accion>
      */
-    public function buildForUser(User $user): array
+        public function buildForUser(User $user): array
     {
-        // Arreglo para almacenar todos los permisos
-        $allowedStr = []; // Permisos asignados
-        $deniedStr = []; // Permisos negados
+        // Colecciones intermedias (arrays de arrays, cada elemento viene de buildPermisoStrings)
+        $roleAllowed = [];
+        $roleDenied  = [];
+        $userAllowed = [];
+        $userDenied  = [];
 
         // Recorremos los permisos de los roles
         if (is_array($user->roles)) {
             foreach ($user->roles as $roleId) {
-
-                // Comprobamos que exista el rol
                 $rol = Rol::find($roleId);
                 if (! $rol) {
                     continue;
                 }
 
-                // --- Allowed ---
                 if (! empty($rol->permisos['allowed'])) {
                     foreach ($rol->permisos['allowed'] as $permiso) {
-
-                        $allowedStr[] = ($this->buildPermisoStrings($permiso));
+                        $roleAllowed[] = $this->buildPermisoStrings($permiso);
                     }
                 }
 
-                // --- Denied ---
-                // Aqui filtramos los permisos que sean negados explicitamente
                 if (! empty($rol->permisos['denied'])) {
                     foreach ($rol->permisos['denied'] as $permiso) {
-                        $deniedStr[] = $this->buildPermisoStrings($permiso);
+                        $roleDenied[] = $this->buildPermisoStrings($permiso);
                     }
                 }
             }
         }
 
-        // Recorremos los permisos particulares
+        // Permisos directos del usuario
         if (! empty($user->permisos['allowed'])) {
-            $allowed = $user->permisos['allowed'];
-            foreach ($allowed as $permiso) {
-                $allowedStr[] = $this->buildPermisoStrings($permiso);
+            foreach ($user->permisos['allowed'] as $permiso) {
+                $userAllowed[] = $this->buildPermisoStrings($permiso);
             }
         }
 
-        // QUitamos los permisos negados particulares
         if (! empty($user->permisos['denied'])) {
-            $denied = $user->permisos['denied'];
-            foreach ($denied as $permisoNegado) {
-                $deniedStr[] = $this->buildPermisoStrings($permisoNegado);
+            foreach ($user->permisos['denied'] as $permisoNegado) {
+                $userDenied[] = $this->buildPermisoStrings($permisoNegado);
             }
         }
 
-        $allowedStr = array_unique(array_merge(...$allowedStr));
-        $deniedStr = array_unique(array_merge(...$deniedStr));
-        $permisos = $this->buildFinalAbilities($allowedStr, $deniedStr);
+        // Helper para aplanar arrays de arrays a array único y único de strings
+        $flatten = function (array $arrOfArrs): array {
+            if (empty($arrOfArrs)) return [];
+            return array_values(array_unique(array_merge(...$arrOfArrs)));
+        };
 
-        // Aplanar el array si es necesario
-        return array_unique(array_merge($permisos));
+        $roleAllowedF = $flatten($roleAllowed);
+        $roleDeniedF  = $flatten($roleDenied);
+        $userAllowedF = $flatten($userAllowed);
+        $userDeniedF  = $flatten($userDenied);
+
+        // Política de precedencia:
+        // 1) userDenied > todo (si el usuario negó, se elimina)
+        // 2) userAllowed anula roleDenied (pero no userDenied)
+        // 3) roleAllowed se aplica si no fue negado por userDenied ni por userAllowed removido
+
+        // Quitar denies de roles que el usuario explícitamente permitió
+        $roleDeniedF = array_diff($roleDeniedF, $userAllowedF);
+
+        // Combinar denies: primero los denies de rol restantes, luego los denies de usuario (userDenied tienen máxima prioridad)
+        $deniedFinal = array_values(array_unique(array_merge($roleDeniedF, $userDeniedF)));
+
+        // Combinar allowed (roles + usuario) y remover los que están en deniedFinal
+        $allowedCombined = array_values(array_unique(array_merge($roleAllowedF, $userAllowedF)));
+        $allowedFinal = array_values(array_diff($allowedCombined, $deniedFinal));
+
+        // Resolver comodines y construir la lista final de abilities
+        $permisos = $this->buildFinalAbilities($allowedFinal, $deniedFinal);
+
+        return array_values(array_unique($permisos));
     }
 
     private function buildPermisoStrings(array $permiso): array
@@ -187,4 +204,7 @@ class PermissionBuilder
 
         return array_values(array_unique($resolved));
     }
+
+    //public buildUIPermisions(): array
+    
 }
