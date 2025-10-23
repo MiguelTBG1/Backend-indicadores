@@ -54,6 +54,14 @@ class UserCollectionSeeder extends Seeder
                 'ocupacion' => 'Administrador',
                 'escolaridad' => 'Universidad',
                 'roles' => [$super_usuario->_id],
+                'ui_permissions' => [
+                    'indicadores' => true,
+                    'plantillas' => true,
+                    'documentos' => true,
+                    'usuarios' => true,
+                    'estadisticas' => true,
+                    'reportes' => true,
+                ]
             ]
         );
 

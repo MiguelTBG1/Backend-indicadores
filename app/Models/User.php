@@ -41,7 +41,8 @@ class User extends Authenticatable
         'escolaridad',
         'roles',
         'permisos',
-        'funciones_permitidas'
+        'funciones_permitidas',
+        'ui_permissions'
     ];
 
 
