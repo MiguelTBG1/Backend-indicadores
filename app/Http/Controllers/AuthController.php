@@ -55,14 +55,14 @@ class AuthController extends Controller
             $nombreToken = str_replace(' ', '_', $user->nombre) . "_access_token"; // Nombre del token
 
             $permisos = $builder->buildForUser($user);
-
+            $uiPermissions = $builder->buildUIPermisions($user);
             $tiempoVida = now()->addWeek(); // TIempo de vida del token
 
             // Generamos el token
             $token = $user->createToken($nombreToken, $permisos, $tiempoVida)->plainTextToken;
 
             // Eliminamos los campos innecesarios de la respuesta
-            $user->makeHidden(['apellido_materno', 'apellido_paterno', 'email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles', 'permisos']);
+            $user->makeHidden(['apellido_materno', 'apellido_paterno', 'email', 'edad', 'genero', 'estado', 'ocupacion', 'escolaridad', 'roles', 'permisos', 'ui_permissions']);
 
             //$permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
 
@@ -83,6 +83,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token,
                 'permisos' => $permisos,
+                'ui_permissions' => $uiPermissions,
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             // En caso de error, regresamos un mensaje genérico

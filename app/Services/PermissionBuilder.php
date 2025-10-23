@@ -16,7 +16,7 @@ class PermissionBuilder
      * Estas habilidades siguen el siguiente formato:
      * <tipo_recurso>:<identificador>.<accion>
      */
-        public function buildForUser(User $user): array
+    public function buildForUser(User $user): array
     {
         // Colecciones intermedias (arrays de arrays, cada elemento viene de buildPermisoStrings)
         $roleAllowed = [];
@@ -103,12 +103,12 @@ class PermissionBuilder
             $recurso = $recursoObj->nombre;
         } else {
             if (str_contains($permiso['recurso'], 'plantilla')) {
-                Log::debug('Recurso plantilla encontrado: '.$permiso['recurso']);
+                Log::debug('Recurso plantilla encontrado: ' . $permiso['recurso']);
                 $recurso = $permiso['recurso'];
             } else {
 
                 if (str_contains($permiso['recurso'], 'documento')) {
-                    Log::debug('Recurso documento encontrado: '.$permiso['recurso']);
+                    Log::debug('Recurso documento encontrado: ' . $permiso['recurso']);
                     $recurso = $permiso['recurso'];
                 }
             }
@@ -118,7 +118,7 @@ class PermissionBuilder
             Log::debug("Tipo: {$tipo}, ID: {$id}");
             // Revisamos si la id es del recurso comodin:
             if (Recurso::where('_id', $id)->exists()) {
-                Log::debug('Recurso comodin encontrado: '.$id);
+                Log::debug('Recurso comodin encontrado: ' . $id);
                 $recurso = "{$tipo}:*";
             }
         }
@@ -205,6 +205,77 @@ class PermissionBuilder
         return array_values(array_unique($resolved));
     }
 
-    //public buildUIPermisions(): array
-    
+    // Devuelve un array de permisos para la interfaz de usuario
+    public function buildUIPermisions(User $user): array
+    {
+        $UIPermissions = [
+            'indicadores' => false,
+            'plantillas'  => false,
+            'documentos'  => false,
+            'reportes'    => false,
+            'estadisticas'=> false,
+            'usuarios'    => false,
+        ];
+
+        // recolectores
+        $roleTrue  = [];
+        $roleFalse = [];
+        $userTrue  = [];
+        $userFalse = [];
+
+        // Recorremos roles y acumulamos true/false explícitos si existen
+        if (is_array($user->roles) && !empty($user->roles)) {
+            foreach ($user->roles as $roleId) {
+                $rol = Rol::find($roleId);
+                if (!$rol || empty($rol->ui_permissions)) continue;
+
+                $uiPerms = is_array($rol->ui_permissions) ? $rol->ui_permissions : (array) $rol->ui_permissions;
+                foreach ($uiPerms as $modulo => $estado) {
+                    if (!is_bool($estado)) continue;
+                    if (!array_key_exists($modulo, $UIPermissions)) continue;
+                    if ($estado === true)  $roleTrue[]  = $modulo;
+                    if ($estado === false) $roleFalse[] = $modulo;
+                }
+            }
+        }
+
+        // Permisos directos del usuario
+        if (!empty($user->ui_permissions)) {
+            $uiPermsUser = is_array($user->ui_permissions) ? $user->ui_permissions : (array) $user->ui_permissions;
+            foreach ($uiPermsUser as $modulo => $estado) {
+                if (!is_bool($estado)) continue;
+                if (!array_key_exists($modulo, $UIPermissions)) continue;
+                if ($estado === true)  $userTrue[]  = $modulo;
+                if ($estado === false) $userFalse[] = $modulo;
+            }
+        }
+
+        // Normalizar únicos
+        $roleTrue  = array_unique($roleTrue);
+        $roleFalse = array_unique($roleFalse);
+        $userTrue  = array_unique($userTrue);
+        $userFalse = array_unique($userFalse);
+
+        // Política:
+        // 1) userFalse > todo
+        // 2) userTrue anula roleFalse
+        // 3) roleTrue aplica si no fue negado por userFalse ni removido por userTrue
+
+        // Eliminar denies de roles que el usuario explicitamente permitió
+        $roleFalse = array_diff($roleFalse, $userTrue);
+
+        // denies finales: roleFalse restantes + userFalse (userFalse tiene máxima prioridad)
+        $deniedFinal = array_unique(array_merge($roleFalse, $userFalse));
+
+        // allowed combinados (roles + usuario) y remover los que están en deniedFinal
+        $allowedCombined = array_unique(array_merge($roleTrue, $userTrue));
+        $allowedFinal = array_diff($allowedCombined, $deniedFinal);
+
+        // Construir resultado respetando solo las claves base de UIPermissions
+        foreach ($UIPermissions as $modulo => $_) {
+            $UIPermissions[$modulo] = in_array($modulo, $allowedFinal, true);
+        }
+
+        return $UIPermissions;
+    }
 }
