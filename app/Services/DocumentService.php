@@ -38,6 +38,8 @@ class DocumentService
                 $plantilla = Plantillas::find($dataSource['plantillaId']);
                 $dataSource['modelo'] = $plantilla->nombre_modelo ?? null;
                 $fieldsWithModel[$field['name']] = $dataSource;
+            } elseif ($field['type'] === 'file') {
+                $fieldsWithModel[$field['name']] = $field['type'];
             } elseif ($field['type'] === 'subform') {
                 self::extractFieldsWithModel($field['subcampos'], $fieldsWithModel);
             }
@@ -55,8 +57,27 @@ class DocumentService
         return $relations;
     }
 
+    public static function loadRelations2(array $models): array
+    {
+        $relations = [];
+
+        foreach ($models as $model) {
+            $modelInstance = DynamicModelService::createModelClass($model);
+
+            // ⚙️ Seleccionar solo los campos requeridos
+            $relations[$model] = $modelInstance::select(['_id', 'secciones'])
+                ->get()
+                ->keyBy('_id'); // 🔥 Indexado para acceso O(1)
+        }
+
+        return $relations;
+    }
+
+
     public static function processSecciones(array $secciones, $relations, $fieldsWithModel): array
     {
+        if (empty($secciones)) return $secciones;
+
         if (is_array($secciones)) {
             foreach ($secciones as &$seccion) {
                 if (is_array($seccion['fields'])) {
@@ -99,7 +120,7 @@ class DocumentService
     private static function getSingleRelationValue($key, $id, $relations, $fieldsWithModel)
     {
         $model = $fieldsWithModel[$key]['modelo'];
-        $relacion = $relations[$model]->firstWhere('_id', $id);
+        $relacion = $relations[$model][$id] ?? null;
 
         if (!$relacion) return null;
 
@@ -112,7 +133,7 @@ class DocumentService
         $result = [];
 
         foreach ($ids as $index => $id) {
-            $relacion = $relations[$model]->firstWhere('_id', $id);
+            $relacion = $relations[$model][$id] ?? null;
 
             if (!$relacion) continue;
 
@@ -134,45 +155,21 @@ class DocumentService
         return null;
     }
 
-    public static function processFile($files, $plantillaName)
-    {
-        $uploadedFiles = [];
-
-        // ciclo para subir los archivos
-        foreach ($files as $key => $file) {
-            // Verifica si el archivo es válido
-            if (!$file->isValid()) {
-                throw new \Exception('Archivo no válido: ' . $file->getClientOriginalName());
-            }
-
-            // Verifica el tamaño del archivo
-            if ($file->getSize() > 20971520) { // 20 MB
-                throw new \Exception('El archivo ' . $file->getClientOriginalName() . ' excede el tamaño máximo permitido.');
-            }
-
-            // Almacena el archivo y guarda la ruta en el arreglo
-            $filePath = $file->store("uploads/{$plantillaName}", 'public');
-            $uploadedFiles[] = $filePath;
-        }
-
-        return $uploadedFiles;
-    }
-
-    public static function processSeccionesStore($secciones, $fieldsWithModel, $files)
+    public static function processSeccionesStore($plantilla, $secciones, $fieldsWithModel, $files)
     {
         $relations = [];
 
         // Buscar los campos que tengan un valor en formato de fecha
         foreach ($secciones as $indexSeccion => &$seccion) {
             foreach ($seccion['fields'] as $keyField => &$field) {
-                $field = self::validateFieldStore($field, $keyField, $relations, $fieldsWithModel, $files);
+                $field = self::validateFieldStore($plantilla, $field, $keyField, $relations, $fieldsWithModel, $files);
             }
         }
 
         return [$relations, $secciones];
     }
 
-    private static function validateFieldStore($field, $key, &$relations, $fieldsWithModel, $files, $prefijo = '',$first = true)
+    private static function validateFieldStore($plantilla, $field, $key, &$relations, $fieldsWithModel, $files, $prefijo = '', $first = true)
     {
 
         // Formamos el nombre del archivo
@@ -183,7 +180,7 @@ class DocumentService
 
             return (int) $field;
 
-        // Verificar que sea string y se pueda convertir a fecha
+            // Verificar que sea string y se pueda convertir a fecha
         } elseif (is_string($field) && strtotime($field)) {
 
             return new UTCDateTime(strtotime($field) * 1000);
@@ -206,19 +203,36 @@ class DocumentService
             self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
 
             // Validamos si es un archivo
-        } elseif (!is_array($field) && !is_string($field) && $files[$nameFile] instanceof \Illuminate\Http\UploadedFile) {
+        } elseif ($fieldsWithModel[$key] === 'file' && ($files[$nameFile] instanceof \Illuminate\Http\UploadedFile || (is_array($files[$nameFile]) && $files[$nameFile][0] instanceof \Illuminate\Http\UploadedFile))) {
+
+            Log::info('es archivo');
+            // Validamos si es un arreglo de archivos (multiples)
+            if (is_array($files[$nameFile])) {
+                Log::info("Archivos múltiples recibidos en el campo: $key");
+                $storedFiles = [];
+                foreach ($files[$nameFile] as $file) {
+                    Log::info("Procesando archivo en el campo: $key");
+                    // Validar y guardar
+                    if (!$file->isValid()) {
+                        throw new \Exception("Archivo inválido en el campo: $key");
+                    }
+
+                    $storedFiles[] = $file->store("uploads/" . $plantilla, 'public');
+                }
+                return $storedFiles;
+            }
 
             // Validar y guardar
             if (!$files[$nameFile]->isValid()) {
                 throw new \Exception("Archivo inválido en el campo: $key");
             }
 
-            return $files[$nameFile]->store("uploads/plantilla_x", 'public');
+            return $files[$nameFile]->store("uploads/" . $plantilla, 'public');
 
-        // Validamos que sea un subformulario
+            // Validamos que sea un subformulario
         } elseif (is_array($field) && !empty($field) && !is_string($field[0])) {
             // Llamamos la función recursiva
-            return self::recusiveSubForm($field, $relations, $fieldsWithModel, $files, 'subform_' . $key);
+            return self::recusiveSubForm($plantilla, $field, $relations, $fieldsWithModel, $files, 'subform_' . $key);
         }
 
         return $field;
@@ -231,13 +245,13 @@ class DocumentService
         }
     }
 
-    private static function recusiveSubForm(array $data, &$relations, $fieldsWithModel, $files, $prefijo)
+    private static function recusiveSubForm($plantilla, $data, &$relations, $fieldsWithModel, $files, $prefijo)
     {
         // Recorremos el arraglo
         foreach ($data as $index => &$value) {
             foreach ($value as $key => &$field) {
 
-                $field = self::validateFieldStore($field, $key, $relations, $fieldsWithModel, $files, $prefijo . '_' . $index, false);
+                $field = self::validateFieldStore($plantilla, $field, $key, $relations, $fieldsWithModel, $files, $prefijo . '_' . $index, false);
             }
         }
 
@@ -249,13 +263,45 @@ class DocumentService
     {
         foreach ($secciones as $seccion) {
             foreach ($seccion['fields'] as $key => $field) {
-                if ($field && Storage::disk('public')->exist($field)) {
-                    Storage::disk('public')->delete($field);
-                    Log::info("Archivo eliminado: $field");
-                } else if (is_array($field) && !empty($field) && !is_string($field[0])) {
-                    self::removeFiles($field);
-                }
+                self::validateRemoveFiles($field);
             }
         }
+    }
+
+    private static function removeFilesSubForm($data)
+    {
+        foreach ($data as $index => $value) {
+            foreach ($value as $key => $field) {
+                self::validateRemoveFiles($field);
+            }
+        }
+    }
+
+    private static function validateRemoveFiles($field)
+    {
+        if ($field && is_string($field) && !filter_var($field, FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field)) {
+            Storage::disk('public')->delete($field);
+            Log::info("Archivo eliminado: $field");
+        } else if (is_array($field) && !empty($field) && !is_string($field[0])) {
+            self::removeFilesSubForm($field);
+        }
+    }
+
+    public static function processFiles($files)
+    {
+        Log::info('Archivos recibidos: ' . json_encode($files, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $filesProcessed = [];
+        foreach ($files as $nameFile => $file) {
+            // Verificamos si el nombre tiene terminación '_#'
+            if (preg_match('/^(.+)_(\d+)$/', $nameFile, $matches)) {
+                $nombreBase = preg_replace('/_\d+$/', '', $nameFile);
+                $filesProcessed[$nombreBase][] = $file;
+                continue;
+            }
+
+            $filesProcessed[$nameFile] = $file;
+        }
+        Log::info('Archivos procesados: ' . json_encode($filesProcessed, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        return $filesProcessed;
     }
 }
