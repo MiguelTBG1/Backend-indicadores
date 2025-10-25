@@ -122,7 +122,7 @@ class PlantillaController extends Controller
             $relations = [];
 
             // Recorremos secciones para buscar las relaciones
-            DynamicModelService::getRelations($secciones, $relations);
+            //DynamicModelService::getRelations($secciones, $relations);
 
             // Nombre del modelo
             $modelName = $plantilla->nombre_modelo;
@@ -183,12 +183,6 @@ class PlantillaController extends Controller
                 // Recorremos los campos de las secciones con recursividad
                 $secciones[$index]['fields'] = $this->traverseFields($seccion['fields']);
             }
-
-            Log::info('Secciones obtenidas para la plantilla', [
-                'id' => $id,
-                'nombre_plantilla' => $nombrePlantilla,
-                'secciones' => $secciones
-            ]);
 
             // Devolver la respuesta JSON
             return response()->json([
@@ -273,7 +267,7 @@ class PlantillaController extends Controller
             // Recorremos secciones para buscar las relaciones
             $relations = [];
 
-            DynamicModelService::getRelations($secciones, $relations);
+            //DynamicModelService::getRelations($secciones, $relations);
 
             // Nombre del modelo
             $modelName = $plantilla->nombre_modelo;

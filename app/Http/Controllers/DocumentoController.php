@@ -4,14 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Plantillas;
 use App\Services\DynamicModelService;
 use App\Services\DocumentService;
-use MongoDB\BSON\UTCDateTime;
 use Exception;
-use PhpParser\Comment\Doc;
 
 class DocumentoController extends Controller
 {
@@ -183,8 +180,12 @@ class DocumentoController extends Controller
     public function index($id)
     {
         try {
+            $start = microtime(true); // Para medir rendimiento
+
+            // ✅ Validar ID
             DocumentService::validateObjectId($id, 'plantilla');
 
+            // ✅ Cargar plantilla y modelo asociado
             $plantilla = Plantillas::findOrFail($id);
             $modelName = $plantilla->nombre_modelo;
 
@@ -192,32 +193,48 @@ class DocumentoController extends Controller
                 throw new \Exception("No se encontró el modelo asociado a la plantilla: $id", 404);
             }
 
-            // Crear clase del modelo dinámico
+            // ✅ Crear clase del modelo dinámico
             $modelClass = DynamicModelService::createModelClass($modelName);
 
-            // Obtener registros
-            $documents = $modelClass::all();
+            // ✅ Obtener solo campos necesarios
+            $documents = $modelClass::select(['_id', 'secciones'])->get();
             $documentsArray = $documents->toArray();
 
-            // Obtener campos con modelo
-            $fieldsWithModel = DocumentService::getFieldsWithModels($plantilla);
+            // ✅ Obtener campos con modelos relacionados
+            $fieldsWithModel = Cache::remember(
+                "fields_with_model_{$id}",
+                3600,
+                fn() =>
+                DocumentService::getFieldsWithModels($plantilla)
+            );
 
-            // Extraer modelos distintos
-            $distinctModels = collect($fieldsWithModel)->pluck('modelo')->unique()->values()->all();
+            // ✅ Extraer los modelos distintos
+            $distinctModels = collect($fieldsWithModel)
+                ->pluck('modelo')
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
-            // Procesar documentos
-            foreach ($documents as $i => $document) {
-                $relations = DocumentService::loadRelations($document, $distinctModels);
-                Log::info('relations', [
-                    ':' => $relations
-                ]);
+            // ✅ Cargar relaciones una sola vez, indexadas
+            $relations = Cache::remember(
+                "relations_{$modelName}",
+                3600,
+                fn() =>
+                DocumentService::loadRelations2($distinctModels)
+            );
 
-                $documentsArray[$i]['secciones'] = DocumentService::processSecciones(
+            // ✅ Procesar secciones sin recalcular relaciones
+            foreach ($documentsArray as &$document) {
+                $document['secciones'] = DocumentService::processSecciones(
                     $document['secciones'],
                     $relations,
                     $fieldsWithModel
                 );
             }
+
+            $total = microtime(true) - $start;
+            Log::info("Tiempo total en index({$modelName}): {$total} segundos");
 
             return response()->json($documentsArray);
         } catch (\Exception $e) {
@@ -225,16 +242,15 @@ class DocumentoController extends Controller
                 'message' => $e->getMessage(),
                 'file'    => $e->getFile(),
                 'line'    => $e->getLine(),
-                'trace'   => $e->getTraceAsString(),
             ]);
 
-            // Respuesta uniforme en JSON
             return response()->json([
                 'message' => 'Error en index.',
                 'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
             ], 500);
         }
     }
+
 
     /**
      * Función para guardar un documento en una plantilla específica.
@@ -264,14 +280,6 @@ class DocumentoController extends Controller
             $plantillaName = $plantilla->nombre_plantilla;
             $documentData = $request->input('document_data');
 
-            // Procesar archivos si están presentes
-            /*if ($request->hasFile('files')) {
-                // Obtener los archivos subidos
-                $files = $request->file('files');
-
-                $documentData['Recurso_Digital'] = DocumentService::processFile($files, $plantillaName);
-            }*/
-
             //Buscamos el nombre del modelo
             $modelName = $plantilla->nombre_modelo ?? null;
 
@@ -286,8 +294,13 @@ class DocumentoController extends Controller
                 $documentData = json_decode($documentData, true);
             }
 
-            [$relations, $documentData['secciones']] = DocumentService::processSeccionesStore($documentData['secciones'], $fieldsWithModel, $request->file('files'));
+            // Procesar los archivos para verificar si hay multiples archivos para un mismo campo
+            $files = DocumentService::processFiles($request->file('files'));
 
+            // Procesamos las secciones para guardar el documento
+            [$relations, $documentData['secciones']] = DocumentService::processSeccionesStore($plantillaName, $documentData['secciones'], $fieldsWithModel, $files);
+
+            // Guardar el documento en la colección de MongoDB
             $modelClass::create(
                 array_merge([
                     'secciones' => $documentData['secciones'],
@@ -396,10 +409,8 @@ class DocumentoController extends Controller
                 $updateData['secciones'] = json_decode($updateData['secciones'], true);
             }
 
-            Log::info('documentData' . json_encode($updateData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
             // Creamos el arreglo para obtener los campos de las relaciones
-            [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($updateData['secciones'], $fieldsWithModel, $request->file('files'));
+            [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($plantilla->nombre_plantilla, $updateData['secciones'], $fieldsWithModel, $request->file('files'));
 
             // Actualizar el documento en la colección de MongoDB
             $modelClass::where('_id', $documentId)->update(array_merge([
@@ -447,7 +458,6 @@ class DocumentoController extends Controller
 
             // Retornamos el documento
             return response()->json($document);
-
         } catch (\Exception $e) {
             Log::error('Error en store:', [
                 'message' => $e->getMessage(),
