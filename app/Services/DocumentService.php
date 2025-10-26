@@ -282,6 +282,14 @@ class DocumentService
         if ($field && is_string($field) && !filter_var($field, FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field)) {
             Storage::disk('public')->delete($field);
             Log::info("Archivo eliminado: $field");
+        } elseif (!empty($field) && is_array($field) && !filter_var($field[0], FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field[0])){
+            foreach ($field as $file) {
+                if (!Storage::disk('public')->exists($file)) {
+                    continue;
+                }
+                Storage::disk('public')->delete($file);
+                Log::info("Archivo eliminado: $file");
+            }
         } else if (is_array($field) && !empty($field) && !is_string($field[0])) {
             self::removeFilesSubForm($field);
         }

@@ -409,8 +409,11 @@ class DocumentoController extends Controller
                 $updateData['secciones'] = json_decode($updateData['secciones'], true);
             }
 
+            // Procesar los archivos para verificar si hay multiples archivos para un mismo campo
+            $files = DocumentService::processFiles($request->file('files'));
+
             // Creamos el arreglo para obtener los campos de las relaciones
-            [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($plantilla->nombre_plantilla, $updateData['secciones'], $fieldsWithModel, $request->file('files'));
+            [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($plantilla->nombre_plantilla, $updateData['secciones'], $fieldsWithModel, $files);
 
             // Actualizar el documento en la colección de MongoDB
             $modelClass::where('_id', $documentId)->update(array_merge([
