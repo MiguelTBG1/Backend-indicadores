@@ -21,27 +21,48 @@ class DocumentService
     }
 
 
-    public static function getFieldsWithModels($plantilla): array
+    public static function getFieldsWithModels($plantilla, $first = true): array
     {
         $fieldsWithModel = [];
         foreach ($plantilla->secciones as $seccion) {
-            self::extractFieldsWithModel($seccion['fields'], $fieldsWithModel);
+            self::extractFieldsWithModel($seccion['fields'], $fieldsWithModel, $first);
         }
+
         return $fieldsWithModel;
     }
 
-    private static function extractFieldsWithModel($fields, &$fieldsWithModel)
+    private static function extractFieldsWithModel($fields, &$fieldsWithModel, $first = true)
     {
         foreach ($fields as $field) {
             if (isset($field['dataSource']) || isset($field['tableConfig'])) {
+
                 $dataSource = $field['dataSource'] ?? $field['tableConfig'];
+
                 $plantilla = Plantillas::find($dataSource['plantillaId']);
+
                 $dataSource['modelo'] = $plantilla->nombre_modelo ?? null;
+
                 $fieldsWithModel[$field['name']] = $dataSource;
+
+                // Obtenemos las relaciones de los campos de 'tableConfig'
+                if (isset($field['tableConfig']) && is_array($field['tableConfig']) && $first) {
+                    // Llamamos a la función recursivamente
+                    $campos = self::getFieldsWithModels($plantilla, false);
+
+                    // Filtramos los campos
+                    $filtrado = array_filter(
+                        $campos,
+                        fn($key) => in_array($key, $dataSource['campos']),
+                        ARRAY_FILTER_USE_KEY
+                    );
+
+                    // Agregamos el arreglo a $fieldsWithModel
+                    $fieldsWithModel = array_merge($fieldsWithModel, $filtrado);
+                }
             } elseif ($field['type'] === 'file') {
                 $fieldsWithModel[$field['name']] = $field['type'];
             } elseif ($field['type'] === 'subform') {
-                self::extractFieldsWithModel($field['subcampos'], $fieldsWithModel);
+                self::extractFieldsWithModel($field['subcampos'], $fieldsWithModel, $first);
             }
         }
     }
@@ -139,6 +160,10 @@ class DocumentService
 
             foreach ($fieldsWithModel[$key]['campos'] as $campo) {
                 $result[$index][$campo] = self::getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $campo);
+
+                if (!is_array($result[$index][$campo]) && preg_match('/^[0-9a-fA-F]{24}$/', $result[$index][$campo])) {
+                    $result[$index][$campo] = self::getSingleRelationValue($campo, $result[$index][$campo], $relations, $fieldsWithModel);
+                }
             }
         }
 
@@ -203,7 +228,7 @@ class DocumentService
             self::recursiveTable($field, $relations, strtolower($modelRelation) . '_ids');
 
             // Validamos si es un archivo
-        } elseif ($fieldsWithModel[$key] === 'file' && ($files[$nameFile] instanceof \Illuminate\Http\UploadedFile || (is_array($files[$nameFile]) && $files[$nameFile][0] instanceof \Illuminate\Http\UploadedFile))) {
+        } elseif (isset($files[$nameFile]) && $fieldsWithModel[$key] === 'file' && ($files[$nameFile] instanceof \Illuminate\Http\UploadedFile || (is_array($files[$nameFile]) && $files[$nameFile][0] instanceof \Illuminate\Http\UploadedFile))) {
 
             Log::info('es archivo');
             // Validamos si es un arreglo de archivos (multiples)
@@ -282,7 +307,7 @@ class DocumentService
         if ($field && is_string($field) && !filter_var($field, FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field)) {
             Storage::disk('public')->delete($field);
             Log::info("Archivo eliminado: $field");
-        } elseif (!empty($field) && is_array($field) && !filter_var($field[0], FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field[0])){
+        } elseif (!empty($field) && is_array($field) && !filter_var($field[0], FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field[0])) {
             foreach ($field as $file) {
                 if (!Storage::disk('public')->exists($file)) {
                     continue;

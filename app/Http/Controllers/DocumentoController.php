@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Plantillas;
 use App\Services\DynamicModelService;
 use App\Services\DocumentService;
+use Dom\Document;
 use Exception;
+use PhpParser\Comment\Doc;
 
 class DocumentoController extends Controller
 {
@@ -201,12 +203,14 @@ class DocumentoController extends Controller
             $documentsArray = $documents->toArray();
 
             // ✅ Obtener campos con modelos relacionados
-            $fieldsWithModel = Cache::remember(
+            $fieldsWithModel = DocumentService::getFieldsWithModels($plantilla);
+
+            /*Cache::remember(
                 "fields_with_model_{$id}",
                 3600,
                 fn() =>
                 DocumentService::getFieldsWithModels($plantilla)
-            );
+            );*/
 
             // ✅ Extraer los modelos distintos
             $distinctModels = collect($fieldsWithModel)
@@ -217,12 +221,16 @@ class DocumentoController extends Controller
                 ->all();
 
             // ✅ Cargar relaciones una sola vez, indexadas
-            $relations = Cache::remember(
+            $relations = DocumentService::loadRelations2($distinctModels);
+
+            /*Cache::remember(
                 "relations_{$modelName}",
                 3600,
                 fn() =>
                 DocumentService::loadRelations2($distinctModels)
-            );
+            );*/
+
+            //Log::info('Relaciones: ' . json_encode($relations, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
             // ✅ Procesar secciones sin recalcular relaciones
             foreach ($documentsArray as &$document) {
@@ -263,7 +271,7 @@ class DocumentoController extends Controller
     {
         try {
 
-            Log::info('documentData' . json_encode($request->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            //Log::info('documentData' . json_encode($request->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
             // Verifica si la id de la plantilla es válida
             DocumentService::validateObjectId($id);
@@ -295,7 +303,7 @@ class DocumentoController extends Controller
             }
 
             // Procesar los archivos para verificar si hay multiples archivos para un mismo campo
-            $files = DocumentService::processFiles($request->file('files'));
+            $files = $request->file('files') ? DocumentService::processFiles($request->file('files')) : [];
 
             // Procesamos las secciones para guardar el documento
             [$relations, $documentData['secciones']] = DocumentService::processSeccionesStore($plantillaName, $documentData['secciones'], $fieldsWithModel, $files);
@@ -398,10 +406,10 @@ class DocumentoController extends Controller
             // Convertir el array recibido a un formato JSON válido
             $updateData = $request->input('document_data');
 
-            // Obtener archivos actuales desde `existing_files` si se envían
-            $archivosActuales = DocumentService::removeFiles($plantilla->secciones);
+            // Eliminamos los archivos del documento
+            DocumentService::removeFiles($plantilla->secciones);
 
-            // Creamos el arreglo para guardar el campo y su modelo relacionado
+            // Obtenemos los campos de la plantilla y su modelo relacionado
             $fieldsWithModel = DocumentService::getFieldsWithModels($plantilla);
 
             // Decodificamos el campo 'secciones' si es un string JSON
@@ -410,7 +418,7 @@ class DocumentoController extends Controller
             }
 
             // Procesar los archivos para verificar si hay multiples archivos para un mismo campo
-            $files = DocumentService::processFiles($request->file('files'));
+            $files = $request->file('files') ? DocumentService::processFiles($request->file('files')) : [];
 
             // Creamos el arreglo para obtener los campos de las relaciones
             [$relations, $updateData['secciones']] = DocumentService::processSeccionesStore($plantilla->nombre_plantilla, $updateData['secciones'], $fieldsWithModel, $files);
@@ -418,7 +426,6 @@ class DocumentoController extends Controller
             // Actualizar el documento en la colección de MongoDB
             $modelClass::where('_id', $documentId)->update(array_merge([
                 'secciones' => $updateData['secciones'],
-                'Recurso_Digital' => $archivosActuales
             ], $relations));
 
             return response()->json(['message' => 'Documento actualizado con éxito']);
