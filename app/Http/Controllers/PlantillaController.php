@@ -23,8 +23,6 @@ class PlantillaController extends Controller
         try {
             $user = $request->user();
 
-            Log::debug($user);
-
             // Obtener todas las plantillas
             $plantillas = Plantillas::all()->filter(function ($plantilla) use ($user) {
                 return $user->can('view', $plantilla);
@@ -98,7 +96,6 @@ class PlantillaController extends Controller
             // Agregar la plantilla a la colección de Plantillas
             // Verificar permisos antes de crear la plantilla
             if (!$user->can('create', Plantillas::class)) {
-                Log::debug('El usuario {' . $user->nombre . '} no tiene permisos para crear plantillas');
                 throw new \Exception('No tienes permisos para crear plantillas', 403);
             }
 
@@ -110,8 +107,6 @@ class PlantillaController extends Controller
                 'creado_por' => $user->_id
             ]);
 
-
-            Log::debug($plantilla->_id);
 
             // Verificar si la plantilla se creó correctamente
             if (!$plantilla) {

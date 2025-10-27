@@ -927,8 +927,7 @@ class PlantillasCollectionSeeder extends Seeder
 
                 // Nombre del modelo
                 $modelName = $plantilla->nombre_modelo;
-                Log::debug("Generando modelo dinámico para la plantilla: {$plantilla->nombre_plantilla} con el nombre de modelo: $modelName");
-
+                
                 // Actualizamos el modelo dinámico
                 DynamicModelService::generate($modelName, $relations);
 

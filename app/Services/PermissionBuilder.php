@@ -103,22 +103,18 @@ class PermissionBuilder
             $recurso = $recursoObj->nombre;
         } else {
             if (str_contains($permiso['recurso'], 'plantilla')) {
-                Log::debug('Recurso plantilla encontrado: ' . $permiso['recurso']);
                 $recurso = $permiso['recurso'];
             } else {
 
                 if (str_contains($permiso['recurso'], 'documento')) {
-                    Log::debug('Recurso documento encontrado: ' . $permiso['recurso']);
                     $recurso = $permiso['recurso'];
                 }
             }
             // Separamos el tipo de la id
             [$tipo, $id] = explode(':', $permiso['recurso'], 2);
 
-            Log::debug("Tipo: {$tipo}, ID: {$id}");
             // Revisamos si la id es del recurso comodin:
             if (Recurso::where('_id', $id)->exists()) {
-                Log::debug('Recurso comodin encontrado: ' . $id);
                 $recurso = "{$tipo}:*";
             }
         }

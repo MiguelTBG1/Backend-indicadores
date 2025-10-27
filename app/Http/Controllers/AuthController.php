@@ -66,16 +66,6 @@ class AuthController extends Controller
 
             //$permisosEncriptados = array_map(fn($permiso) => hash('sha256', $permiso), $permisos);
 
-            Log::info("Usuario ha iniciado sesión", [
-                'id' => $user->id,
-                'nombre' => $user->nombre,
-            ]);
-
-            Log::info("Permisos asignados", [
-                'usuario_id' => $user->id,
-                'permisos' => $permisos,
-            ]);
-
 
             // Respuesta exitosa
             return response()->json([

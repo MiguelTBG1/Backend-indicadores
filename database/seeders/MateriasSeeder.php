@@ -6,7 +6,6 @@ use App\DynamicModels\Alumnos;
 use App\DynamicModels\Materias;
 use App\DynamicModels\Profesores;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Log;
 use MongoDB\BSON\UTCDateTime;
 
 class MateriasSeeder extends Seeder
