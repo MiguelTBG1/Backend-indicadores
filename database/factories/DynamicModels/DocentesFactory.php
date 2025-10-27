@@ -36,10 +36,13 @@ class DocentesFactory extends Factory
                     'fields' => [
                         'Proyectos' => collect(range(1, $this->faker->numberBetween(0, 3))) // 0-3 proyectos
                             ->map(function () {
+                                $fechaFinalizacion = Carbon::now()->subDays(rand(0, 365));
+                            $fechaInicio = $fechaFinalizacion->copy()->subMonths(rand(4, 12))->subDays(rand(0, 30));
+
                                 return [
                                     'Nombre del proyecto' => $this->faker->sentence(3),
-                                    'Fecha de inicio' => $this->faker->date(),
-                                    'Fecha de finalizacion' => $this->faker->optional()->date(),
+                                    'Fecha de inicio' => new UTCDateTime($fechaInicio),
+                                    'Fecha de finalizacion' =>new  UTCDateTime($fechaFinalizacion),
                                     'Director del proyecto' => $this->faker->name(),
                                 ];
                             })->toArray(),
