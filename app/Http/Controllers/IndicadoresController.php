@@ -361,6 +361,12 @@ class IndicadoresController extends Controller
                     }
                 }
 
+                // Agregar fechas
+                $year = date('Y'); // Año actual// en milisegundos
+                $record['fecha_inicio'] = new UTCDateTime(strtotime("$year-01-01 00:00:00") * 1000);
+                $record['fecha_fin'] = new UTCDateTime(strtotime("$year-12-31 23:59:59") * 1000);
+
+
                 // Solo crear el registro si tiene al menos un campo no nulo
                 if (!empty(array_filter($record))) {
                     Indicadores::create($record);
