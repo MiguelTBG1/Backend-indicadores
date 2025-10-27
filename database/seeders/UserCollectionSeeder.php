@@ -28,6 +28,7 @@ class UserCollectionSeeder extends Seeder
         $analistaIndicador = Rol::where('nombre', 'Analista de indicadores')->first();
         $creadorDocumentos = Rol::where('nombre', 'Creador de documentos')->first();
         $capturista = Rol::where('nombre', 'Capturista')->first();
+        $planeacion = Rol::where('nombre', 'Planeación y presupuesto')->first();
 
         // Plantillas
         $plantillaPeriodos = '68b0938423ed6ec87508548c';
@@ -100,5 +101,19 @@ class UserCollectionSeeder extends Seeder
                 'roles' => [$capturista->_id],
             ]
         );
+
+        User::create([
+            'nombre' => 'Daris Gael',
+            'apellido_paterno' => 'Martinez',
+            'apellido_materno' => 'Galicia',
+            'email' => 'test@test.com',
+            'password' => Hash::make('123456'),
+            'edad' => 27,
+            'genero' => 'Masculino',
+            'estado' => 'Activo',
+            'ocupacion' => 'Desarrollador',
+            'escolaridad' => 'Universidad',
+            'roles' => [$planeacion->_id],
+        ]);
     }
 }

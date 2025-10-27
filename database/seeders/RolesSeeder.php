@@ -150,5 +150,50 @@ class RolesSeeder extends Seeder
         foreach ($roles as $rol) {
             Rol::create($rol);
         }
+
+        // ROL Planeación y presupuesto
+        Rol::create([
+            'nombre' => 'Planeación y presupuesto',
+            'descripcion' => 'Rol para permisos con indicadores,  reportes y graficas',
+            'permisos' => [
+                'allowed' => [
+                    [
+                        'recurso' => $indicadores->_id,
+                        'acciones' => [
+                            $comodin->_id
+                        ]
+                    ],
+                    [
+                        'recurso' => 'plantilla:'.$todosRecursos->_id,
+                        'acciones' => [
+                            $read->_id,
+                        ],
+                    ],
+                    [
+                        'recurso' => $plantillas->_id,
+                        'acciones' => [
+                            $read->_id,
+                        ]
+                    ],
+                    [
+                        'recurso' => 'documento:'.$todosRecursos->_id,
+                        'acciones' => [
+                            $read->_id,
+                        ],
+                    ],
+                    [
+                        'recurso' => $documentos->_id,
+                        'acciones' => [
+                            $read->_id,
+                        ]
+                    ]
+                ]
+            ],
+                'ui_permissions' => [
+                'indicadores' => true,
+                'reportes' => true,
+                'graficas' => true,
+            ]
+        ]);
     }
 }
