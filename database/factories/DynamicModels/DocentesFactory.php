@@ -6,6 +6,7 @@ use App\DynamicModels\Alumnos;
 use App\DynamicModels\Docentes;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
+use MongoDB\BSON\UTCDateTime;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
@@ -56,8 +57,8 @@ class DocentesFactory extends Factory
                             $cuentaConFinanciamiento = $this->faker->randomElement(['Si', 'No']);
                             $fields = [
                                 'Nombre del proyecto' => $this->faker->sentence(3),
-                                'Fecha de inicio' => $fechaInicio->toDateString(),
-                                'Fecha de finalizacion' => $fechaFinalizacion->toDateString(),
+                                'Fecha de inicio' => new UTCDateTime($fechaInicio),
+                                'Fecha de finalizacion' =>new  UTCDateTime($fechaFinalizacion),
                                 'Director del proyecto' => $this->faker->name(),
                                 'Cuenta con financiamiento' => $cuentaConFinanciamiento,
                             ];
@@ -69,16 +70,16 @@ class DocentesFactory extends Factory
 
                             $fields['Alumnos participantes'] =
                                 collect(range(1, $this->faker->numberBetween(2, 3)))->map(function () use (&$alumnosUsados, $alumnos) {
-                                    return [
-                                        'Alumno' => ! empty($alumnos) ? (
+                                    return 
+                                    ! empty($alumnos) ? (
                                             function () use (&$alumnosUsados, $alumnos) {
                                                 $alumno = $this->faker->randomElement($alumnos);
                                                 $alumnosUsados[] = $alumno;
 
                                                 return $alumno;
                                             }
-                                        )() : null,
-                                    ];
+                                        )() : null
+                                    ;
                                 })->toArray();
                             return $fields;
                         })->toArray(),
@@ -96,12 +97,12 @@ class DocentesFactory extends Factory
                             $fields['Alumnos participantes 2'] =
                                 collect(range(1, $this->faker->numberBetween(2, 3)))->map(function () use (&$alumnosUsados, $alumnos) {
                                     return [
-                                        'Alumno' => ! empty($alumnos) ? (
+                                        'Alumnos participantes 3' => ! empty($alumnos) ? (
                                             function () use (&$alumnosUsados, $alumnos) {
                                                 $alumno = $this->faker->randomElement($alumnos);
                                                 $alumnosUsados[] = $alumno;
-
-                                                return $alumno;
+                                                $alumnosClean[] = $alumno;
+                                                return $alumnosClean;
                                             }
                                         )() : null,
                                         'Nombre o tipo del reconocimiento recibido' => $this->faker->sentence(5),

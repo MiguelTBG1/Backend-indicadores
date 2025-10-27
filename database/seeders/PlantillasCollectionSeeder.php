@@ -617,20 +617,17 @@ class PlantillasCollectionSeeder extends Seeder
                                 ['name' => 'Monto de financiamiento', 'type' => 'number', 'required' => false],
                                 [
                                     'name' => 'Alumnos participantes',
-                                    'type' => 'subform',
+                                    'type' => 'tabla',
                                     'required' => false,
-                                    'subcampos' => [
-                                        [
-                                            'name' => 'Alumno',
-                                            'type' => 'select',
-                                            'required' => false,
-                                            'dataSource' => [
-                                                'plantillaId' => '68bb162223bbc9264e05fca0',
-                                                'plantillaNombre' => 'Alumnos',
-                                                'seccion' => 'Información General',
-                                                'campoMostrar' => 'Nombre Completo',
-                                            ],
-                                        ],
+                                    "tableConfig" => [
+                                        "plantillaId" => "68bb162223bbc9264e05fca0",
+                                        "plantillaNombre" => "Alumnos",
+                                        "seccion" => "Información General",
+                                        "campos" => [
+                                            "Nombre Completo",
+                                            "Número de control",
+                                            "Programa educativo"
+                                        ]
                                     ],
                                 ],
                             ],
@@ -652,14 +649,18 @@ class PlantillasCollectionSeeder extends Seeder
                                     'required' => false,
                                     'subcampos' => [
                                         [
-                                            'name' => 'Alumno',
-                                            'type' => 'select',
+                                            'name' => 'Alumnos participantes 3',
+                                            'type' => 'tabla',
                                             'required' => false,
-                                            'dataSource' => [
-                                                'plantillaId' => '68bb162223bbc9264e05fca0',
-                                                'plantillaNombre' => 'Alumnos',
-                                                'seccion' => 'Información General',
-                                                'campoMostrar' => 'Nombre Completo',
+                                            "tableConfig" => [
+                                                "plantillaId" => "68bb162223bbc9264e05fca0",
+                                                "plantillaNombre" => "Alumnos",
+                                                "seccion" => "Información General",
+                                                "campos" => [
+                                                    "Nombre Completo",
+                                                    "Número de control",
+                                                    "Programa educativo"
+                                                ]
                                             ],
                                         ],
                                         ['name' => 'Nombre o tipo del reconocimiento recibido', 'type' => 'string', 'required' => false],
