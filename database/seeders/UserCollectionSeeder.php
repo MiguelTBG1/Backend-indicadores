@@ -55,15 +55,7 @@ class UserCollectionSeeder extends Seeder
                 'estado' => 'Activo',
                 'ocupacion' => 'Administrador',
                 'escolaridad' => 'Universidad',
-                'roles' => [$super_usuario->_id],
-                'ui_permissions' => [
-                    'indicadores' => true,
-                    'plantillas' => true,
-                    'documentos' => true,
-                    'usuarios' => true,
-                    'estadisticas' => true,
-                    'reportes' => true,
-                ]
+                'roles' => [$super_usuario->_id]
             ]
         );
 

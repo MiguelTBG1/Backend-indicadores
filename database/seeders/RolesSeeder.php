@@ -54,6 +54,14 @@ class RolesSeeder extends Seeder
                         ],
                     ],
                 ],
+                'ui_permissions' => [
+                    'indicadores' => true,
+                    'plantillas' => true,
+                    'documentos' => true,
+                    'usuarios' => true,
+                    'estadisticas' => true,
+                    'reportes' => true,
+                ]
             ],
             [
                 'nombre' => 'Coordinador académico',
@@ -192,7 +200,7 @@ class RolesSeeder extends Seeder
                 'ui_permissions' => [
                 'indicadores' => true,
                 'reportes' => true,
-                'graficas' => true,
+                'estadisticas' => true,
             ]
         ]);
     }
