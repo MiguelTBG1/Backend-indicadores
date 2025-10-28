@@ -18,6 +18,7 @@ class IndicadorService
         $configuracion = self::normalizeConfig($configuracion);
 
         $validator = self::validateConfig($configuracion);
+
         if ($validator->fails()) {
             Log::error('Configuración no válida: ' . $validator->errors()->first());
             return 0;
@@ -27,7 +28,7 @@ class IndicadorService
         $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first();
 
         if (!$plantilla) {
-            throw new Exception('No se encontró la plantilla', 404);
+            return 0;
         }
 
         $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
@@ -38,7 +39,7 @@ class IndicadorService
 
         $pipeline = self::buildPipeline($configuracion);
 
-        Log::info('Pipeline construido', ['pipeline' => $pipeline]);
+        Log::info('Pipeline' . json_encode($pipeline, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         $cursor = $modelClass::raw(fn($collection) => $collection->aggregate($pipeline));
 

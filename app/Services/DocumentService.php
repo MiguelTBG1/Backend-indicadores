@@ -304,10 +304,10 @@ class DocumentService
 
     private static function validateRemoveFiles($field)
     {
-        if ($field && is_string($field) && !filter_var($field, FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field)) {
+        if ($field && is_string($field) && !filter_var($field, FILTER_VALIDATE_INT) && preg_match('/^uploads\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\.(png|jpg|jpeg|gif|pdf|mp4|mp3)$/', $field)) {
             Storage::disk('public')->delete($field);
             Log::info("Archivo eliminado: $field");
-        } elseif (!empty($field) && is_array($field) && !filter_var($field[0], FILTER_VALIDATE_INT) && Storage::disk('public')->exists($field[0])) {
+        } elseif (!empty($field) && is_array($field) && isset($field[0]) && is_string($field[0]) && !filter_var($field[0], FILTER_VALIDATE_INT) && preg_match('/^uploads\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\.(png|jpg|jpeg|gif|pdf|mp4|mp3)$/', $field[0])) {
             foreach ($field as $file) {
                 if (!Storage::disk('public')->exists($file)) {
                     continue;
@@ -315,7 +315,7 @@ class DocumentService
                 Storage::disk('public')->delete($file);
                 Log::info("Archivo eliminado: $file");
             }
-        } else if (is_array($field) && !empty($field) && !is_string($field[0])) {
+        } else if (is_array($field) && !empty($field) && isset($field[0]) && !is_string($field[0])) {
             self::removeFilesSubForm($field);
         }
     }

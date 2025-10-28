@@ -271,7 +271,7 @@ class DocumentoController extends Controller
     {
         try {
 
-            //Log::info('documentData' . json_encode($request->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            Log::info('documentData' . json_encode($request->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
             // Verifica si la id de la plantilla es válida
             DocumentService::validateObjectId($id);
