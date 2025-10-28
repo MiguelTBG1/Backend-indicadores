@@ -158,6 +158,8 @@ class DocumentService
 
             if (!$relacion) continue;
 
+            $result[$index]['_documentId'] = $id;
+
             foreach ($fieldsWithModel[$key]['campos'] as $campo) {
                 $result[$index][$campo] = self::getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $campo);
 
