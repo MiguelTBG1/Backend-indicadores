@@ -25,6 +25,12 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Arquitectura',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "No escolarizada",
+                                "Escolarizada",
+                                "Mixta"
+                            ]
                         ],
                     ],
                 ],
@@ -36,6 +42,12 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Contador Público',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "No escolarizada",
+                                "Escolarizada",
+                                "Mixta"
+                            ]
                         ],
                     ],
                 ],
@@ -47,6 +59,10 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Gastronomía',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "Escolarizada",
+                            ]
                         ],
                     ],
                 ],
@@ -58,6 +74,11 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería Ambiental',
+                            'Tipo' => "Posgrado",
+                            "Modalidad" => [
+                                "Escolarizada",
+                                "Mixta"
+                            ]
                         ],
                     ],
                 ],
@@ -69,6 +90,11 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería Biomédica',
+                            'Tipo' => "Posgrado",
+                            "Modalidad" => [
+                                "No escolarizada",
+                                "Escolarizada"
+                            ]
                         ],
                     ],
                 ],
@@ -80,6 +106,10 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería Bioquímica',
+                            'Tipo' => "Posgrado",
+                            "Modalidad" => [
+                                "Escolarizada"
+                            ]
                         ],
                     ],
                 ],
@@ -91,6 +121,10 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería Civil',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "Escolarizada"
+                            ]
                         ],
                     ],
                 ],
@@ -102,6 +136,12 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería Eléctrica',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "No escolarizada",
+                                "Escolarizada",
+                                "Mixta"
+                            ]
                         ],
                     ],
                 ],
@@ -113,6 +153,11 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería Electromecánica',
+                            'Tipo' => "Posgrado",
+                            "Modalidad" => [
+                                "No escolarizada",
+                                "Escolarizada",
+                            ]
                         ],
                     ],
                 ],
@@ -124,6 +169,11 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería Electrónica',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "Escolarizada",
+                                "Mixta"
+                            ]
                         ],
                     ],
                 ],
@@ -135,6 +185,12 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería en Sistemas Computacionales',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "No escolarizada",
+                                "Escolarizada",
+                                "Mixta"
+                            ]
                         ],
                     ],
                 ],
@@ -146,6 +202,12 @@ class ProgramaEducativoSeeder extends Seeder
                         'nombre' => 'Información General',
                         'fields' => [
                             'Nombre del programa' => 'Ingeniería en Tecnologías de la Información y Comunicaciones',
+                            'Tipo' => "Licenciatura",
+                            "Modalidad" => [
+                                "No escolarizada",
+                                "Escolarizada",
+                                "Mixta"
+                            ]
                         ],
                     ],
                 ],

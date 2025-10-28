@@ -78,6 +78,25 @@ class PlantillasCollectionSeeder extends Seeder
                             'type' => 'string',
                             'required' => true,
                         ],
+                        [
+                            "name" => "Tipo",
+                            "type" => "select",
+                            "required" => true,
+                            "options" => [
+                                "Licenciatura",
+                                "Posgrado"
+                            ]
+                        ],
+                        [
+                            "name" => "Modalidad",
+                            "type" => "checkBox",
+                            "required" => false,
+                            "options" => [
+                                "No escolarizada",
+                                "Escolarizada",
+                                "Mixta"
+                            ]
+                        ]
                     ],
                 ],
             ],
@@ -927,7 +946,7 @@ class PlantillasCollectionSeeder extends Seeder
 
                 // Nombre del modelo
                 $modelName = $plantilla->nombre_modelo;
-                
+
                 // Actualizamos el modelo dinámico
                 DynamicModelService::generate($modelName, $relations);
 
