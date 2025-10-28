@@ -101,7 +101,7 @@ class DocumentService
 
         if (is_array($secciones)) {
             foreach ($secciones as &$seccion) {
-                if (is_array($seccion['fields'])) {
+                if (isset($seccion['fields']) && is_array($seccion['fields'])) {
                     foreach ($seccion['fields'] as $key => &$field) {
                         $field = self::processField($key, $field, $relations, $fieldsWithModel);
                     }
@@ -140,6 +140,10 @@ class DocumentService
 
     private static function getSingleRelationValue($key, $id, $relations, $fieldsWithModel)
     {
+        if( !isset($fieldsWithModel[$key])){
+            return '';
+        }
+
         $model = $fieldsWithModel[$key]['modelo'];
         $relacion = $relations[$model][$id] ?? null;
 
@@ -150,6 +154,10 @@ class DocumentService
 
     private static function getMultipleRelationValues($key, array $ids, $relations, $fieldsWithModel): array
     {
+        if( !isset($fieldsWithModel[$key])){
+            return [];
+        }
+
         $model = $fieldsWithModel[$key]['modelo'];
         $result = [];
 
@@ -184,10 +192,16 @@ class DocumentService
 
     public static function processSeccionesStore($plantilla, $secciones, $fieldsWithModel, $files)
     {
+        if( !$secciones){
+            return '';
+        }
         $relations = [];
 
         // Buscar los campos que tengan un valor en formato de fecha
         foreach ($secciones as $indexSeccion => &$seccion) {
+
+            if (!isset($seccion['fields']) || !is_array($seccion['fields'])) continue;
+
             foreach ($seccion['fields'] as $keyField => &$field) {
                 $field = self::validateFieldStore($plantilla, $field, $keyField, $relations, $fieldsWithModel, $files);
             }
