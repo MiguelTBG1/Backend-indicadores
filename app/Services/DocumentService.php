@@ -28,6 +28,7 @@ class DocumentService
             self::extractFieldsWithModel($seccion['fields'], $fieldsWithModel, $first);
         }
 
+
         return $fieldsWithModel;
     }
 
@@ -49,10 +50,13 @@ class DocumentService
                     // Llamamos a la función recursivamente
                     $campos = self::getFieldsWithModels($plantilla, false);
 
+                    // Obtenemos el arreglo de campos
+                    $arrayCampos = array_map(fn($campo) => $campo['name'], $dataSource['campos']);
+
                     // Filtramos los campos
                     $filtrado = array_filter(
                         $campos,
-                        fn($key) => in_array($key, $dataSource['campos']),
+                        fn($key) => in_array($key, $arrayCampos),
                         ARRAY_FILTER_USE_KEY
                     );
 
@@ -140,6 +144,7 @@ class DocumentService
 
     private static function getSingleRelationValue($key, $id, $relations, $fieldsWithModel)
     {
+        //Log::info('Data' . json_encode(['key' => $key, 'ID' => $id, 'relaciones' => $relations, 'fieldsWithModel' => $fieldsWithModel], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         if( !isset($fieldsWithModel[$key])){
             return '';
         }
@@ -169,10 +174,10 @@ class DocumentService
             $result[$index]['_documentId'] = $id;
 
             foreach ($fieldsWithModel[$key]['campos'] as $campo) {
-                $result[$index][$campo] = self::getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $campo);
+                $result[$index][$campo['name']] = self::getFieldValue($relacion, $fieldsWithModel[$key]['seccion'], $campo['name']);
 
-                if (!is_array($result[$index][$campo]) && preg_match('/^[0-9a-fA-F]{24}$/', $result[$index][$campo])) {
-                    $result[$index][$campo] = self::getSingleRelationValue($campo, $result[$index][$campo], $relations, $fieldsWithModel);
+                if (!is_array($result[$index][$campo['name']]) && preg_match('/^[0-9a-fA-F]{24}$/', $result[$index][$campo['name']])) {
+                    $result[$index][$campo['name']] = self::getSingleRelationValue($campo['name'], $result[$index][$campo['name']], $relations, $fieldsWithModel);
                 }
             }
         }
@@ -303,6 +308,7 @@ class DocumentService
     public static function removeFiles($secciones)
     {
         foreach ($secciones as $seccion) {
+            if (!isset($seccion['fields']) || !is_array($seccion['fields'])) continue;
             foreach ($seccion['fields'] as $key => $field) {
                 self::validateRemoveFiles($field);
             }
