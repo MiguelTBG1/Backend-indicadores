@@ -15,7 +15,7 @@ class RecursosSeeder extends Seeder
         $recursos = [
             [
                 'clave' => '*',
-                'nombre' => '*',
+                'nombre' => 'Comodin',
                 'descripcion' => 'Todos los recursos estaticos',
                 'tipo' => 'estatico',
             ],

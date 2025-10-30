@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Accion;
+use App\Models\Plantillas;
 use App\Models\Recurso;
 use App\Models\Rol;
 use Illuminate\Database\Seeder;
@@ -28,6 +29,10 @@ class RolesSeeder extends Seeder
         $update = Accion::where('clave', 'update')->first();
         $delete = Accion::where('clave', 'delete')->first();
 
+        // OBtenemos plantillas especificas (de prueba)
+        $plantillaAlumnos ='68bb162223bbc9264e05fca0';
+        $plantillaAreas = '68cc40d088161ce06d09312c';
+        
         $roles = [
             [
                 'nombre' => 'super_usuario',
@@ -88,6 +93,14 @@ class RolesSeeder extends Seeder
                             'recurso' => $plantillas->_id,
                             'acciones' => [$comodin->_id],
                         ],
+                        [
+                            'recurso' => 'plantilla:'.$plantillaAlumnos,
+                            'acciones' => [$comodin->_id],
+                        ],
+                        [
+                            'recurso' => 'plantilla:'.$plantillaAreas,
+                            'acciones' => [$read->_id, $update->_id],
+                        ]
                     ],
                 ],
             ],

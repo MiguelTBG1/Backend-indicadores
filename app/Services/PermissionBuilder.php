@@ -100,7 +100,7 @@ class PermissionBuilder
 
         if ($recursoObj) {
             // Caso recurso estático
-            $recurso = $recursoObj->nombre;
+            $recurso = $recursoObj->clave;
         } else {
             if (str_contains($permiso['recurso'], 'plantilla')) {
                 $recurso = $permiso['recurso'];

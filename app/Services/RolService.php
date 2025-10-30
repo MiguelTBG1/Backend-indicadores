@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Models\Accion;
+use App\Models\Plantillas;
 use App\Models\Recurso;
 use App\Models\Rol;
 
 class RolService
 {
-     protected array $cacheRecursos = [];
+    protected array $cacheRecursos = [];
     protected array $cacheAcciones = [];
 
     /**
@@ -52,15 +53,49 @@ class RolService
             [$tipo, $id] = explode(':', $recursoId, 2);
             $base = $this->cacheRecursos[$id] ?? Recurso::find($id);
 
-            if ($base) {
-                $this->cacheRecursos[$id] = $base;
-                return [
-                    'id' => (string) $base->_id,
-                    'nombre' => "{$base->nombre} ({$tipo})",
-                    'descripcion' => $base->descripcion ?? null
-                ];
+            // Si el ID corresponde al comodín, se busca en la colección 'Recurso'
+            if ($id === Recurso::where('clave', '*')->value('id')) { // ID del comodín
+                $base = $this->cacheRecursos[$id] ?? Recurso::find($id);
+
+                if ($base) {
+                    $this->cacheRecursos[$id] = $base;
+                    return [
+                        'id' => (string) $base->_id,
+                        'nombre' => "{$base->nombre} ({$tipo})",
+                        'tipo' => 'comodín',
+                        'descripcion' => $base->descripcion ?? null
+                    ];
+                }
             }
 
+            // Si no es comodín, buscamos según el tipo (colección específica)
+            switch ($tipo) {
+                case 'plantilla':
+                    $plantilla = Plantillas::find($id);
+                    if ($plantilla) {
+                        return [
+                            'id' => (string) $plantilla->_id,
+                            'nombre' => "{$tipo} {$plantilla->nombre_plantilla}",
+                            'tipo' => $tipo,
+                            'descripcion' => $plantilla->descripcion ?? null
+                        ];
+                    }
+                    break;
+
+                case 'documento':
+                    $documento = Plantillas::find($id);
+                    if ($documento) {
+                        return [
+                            'id' => (string) $documento->_id,
+                            'nombre' => "{$tipo} {$documento->nombre}",
+                            'tipo' => $tipo,
+                            'descripcion' => $documento->descripcion ?? null
+                        ];
+                    }
+                    break;
+            }
+
+            // Si no se encontró nada
             return ['id' => $recursoId, 'nombre' => $recursoId, 'descripcion' => null];
         }
 
@@ -96,7 +131,7 @@ class RolService
                     'nombre' => $accion->nombre,
                     'descripcion' => $accion->descripcion,
                 ]
-                : ['id' => $id, 'nombre' => $id, 'descripcion' => null ];
+                : ['id' => $id, 'nombre' => $id, 'descripcion' => null];
 
             return $this->cacheAcciones[$id];
         })->values()->all();
