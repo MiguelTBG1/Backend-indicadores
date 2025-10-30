@@ -57,11 +57,11 @@ class RolService
                 return [
                     'id' => (string) $base->_id,
                     'nombre' => "{$base->nombre} ({$tipo})",
-                    'tipo' => $base->tipo ?? null,
+                    'descripcion' => $base->descripcion ?? null
                 ];
             }
 
-            return ['id' => $recursoId, 'nombre' => $recursoId];
+            return ['id' => $recursoId, 'nombre' => $recursoId, 'descripcion' => null];
         }
 
         // Sin prefijo
@@ -72,11 +72,11 @@ class RolService
             return [
                 'id' => (string) $base->_id,
                 'nombre' => $base->nombre,
-                'tipo' => $base->tipo ?? null,
+                'descripcion' => $base->descripcion ?? null,
             ];
         }
 
-        return ['id' => $recursoId, 'nombre' => $recursoId];
+        return ['id' => $recursoId, 'nombre' => $recursoId, 'descripcion' => null];
     }
 
     /**
@@ -96,7 +96,7 @@ class RolService
                     'nombre' => $accion->nombre,
                     'descripcion' => $accion->descripcion,
                 ]
-                : ['id' => $id, 'nombre' => $id];
+                : ['id' => $id, 'nombre' => $id, 'descripcion' => null ];
 
             return $this->cacheAcciones[$id];
         })->values()->all();
