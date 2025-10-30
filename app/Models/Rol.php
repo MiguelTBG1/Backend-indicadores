@@ -16,6 +16,7 @@ class Rol extends Model
         'nombre',
         'descripcion',
         'permisos',
+        'ui_permissions',
         'created_at',
         'updated_at'
     ];

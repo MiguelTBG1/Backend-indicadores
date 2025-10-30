@@ -6,7 +6,7 @@ use App\Models\Rol;
 use App\Models\User;
 
 use Symfony\Component\HttpFoundation\Response;
-
+use App\Services\RolService;
 use Illuminate\Http\Request;
 
 /**
@@ -23,8 +23,8 @@ class RolesController extends Controller
      */
     public function index()
     {
-        $roles = Rol::all();
-
+        $roles = Rol::all()->makeHidden(['permisos', 'ui_permissions']);
+        
         if ($roles->isEmpty()) {
             return response()->json([
                 'success' => true,
@@ -48,21 +48,24 @@ class RolesController extends Controller
      */
     public function show($rolId)
     {
-        $rol = Rol::find($rolId);
+           $rol = Rol::find($rolId);
 
-        if ($rol) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Rol encontrado',
-                'rol' => $rol
-            ], Response::HTTP_OK);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Rol no encontrado',
-                'rol' => []
-            ], Response::HTTP_NOT_FOUND);
-        }
+    if (!$rol) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Rol no encontrado',
+            'rol' => []
+        ], Response::HTTP_NOT_FOUND);
+    }
+
+    $rolService = new RolService();
+    $rol = $rolService->expandPermissions($rol);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Rol encontrado',
+        'rol' => $rol
+    ], Response::HTTP_OK);
     }
 
     /** Guarda un nuevo rol */
