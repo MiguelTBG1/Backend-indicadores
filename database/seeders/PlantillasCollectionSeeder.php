@@ -643,9 +643,9 @@ class PlantillasCollectionSeeder extends Seeder
                                         "plantillaNombre" => "Alumnos",
                                         "seccion" => "Información General",
                                         "campos" => [
-                                            "Nombre Completo",
-                                            "Número de control",
-                                            "Programa educativo"
+                                            ["name" => "Nombre Completo", "type" => "string"],
+                                            ["name" => "Número de control", "type" => "string"],
+                                            ["name" => "Programa educativo", "type" => "select"],
                                         ]
                                     ],
                                 ],
@@ -676,9 +676,9 @@ class PlantillasCollectionSeeder extends Seeder
                                                 "plantillaNombre" => "Alumnos",
                                                 "seccion" => "Información General",
                                                 "campos" => [
-                                                    "Nombre Completo",
-                                                    "Número de control",
-                                                    "Programa educativo"
+                                                    ["name" => "Nombre Completo", "type" => "string"],
+                                                    ["name" => "Número de control", "type" => "string"],
+                                                    ["name" => "Programa educativo", "type" => "select"],
                                                 ]
                                             ],
                                         ],
