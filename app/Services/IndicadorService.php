@@ -31,15 +31,22 @@ class IndicadorService
             return 0;
         }
 
+        // Obtenemos los campos de tipo 'tabla'
+        $fieldWithType = self::getFieldWithType($plantilla->secciones);
+
+        Log::info('Campos de tipo tabla' . json_encode($fieldWithType, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
         $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
 
         if (($configuracion['operacion'] ?? '') === 'porcentaje') {
             return self::calculatePercentage($configuracion, $modelClass);
         }
 
-        $pipeline = self::buildPipeline($configuracion);
+        $pipeline = self::buildPipeline($configuracion, $fieldWithType);
 
         Log::info('Pipeline' . json_encode($pipeline, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        //return 0;
 
         $cursor = $modelClass::raw(fn($collection) => $collection->aggregate($pipeline));
 
@@ -171,10 +178,12 @@ class IndicadorService
         ]);
     }
 
-    private static function buildPipeline(array $config): array
+    private static function buildPipeline(array $config, array $fieldWithType = []): array
     {
         $arrayConfig = [];
         self::recursiveConfig($config, $arrayConfig);
+
+        Log::info('Config: ' . json_encode($arrayConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         $pipeline = [];
 
@@ -224,12 +233,16 @@ class IndicadorService
             }
 
             $ultimoCampo = end($arrayFilter);
-            $pipeline[] = ['$unwind' => '$secciones.fields.' . $prefijo  . $ultimoCampo];
+
+            if (isset($fieldWithType[implode('.', $arrayFilter)]) && $fieldWithType[implode('.', $arrayFilter)]['type'] === 'tabla') {
+                $pipeline = array_merge($pipeline, self::registerTable($config, $arrayConfig, $fieldWithType[implode('.', $arrayFilter)]));
+                break;
+            } else {
+                $pipeline[] = ['$unwind' => '$secciones.fields.' . $prefijo  . $ultimoCampo];
+            }
         }
 
-        self::recursiveGroup($pipeline, $arrayConfig);
-
-        Log::info(json_encode($pipeline, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        self::recursiveGroup($pipeline, $arrayConfig, $fieldWithType);
 
         return $pipeline;
     }
@@ -298,7 +311,7 @@ class IndicadorService
      * @param array $configuracion Configuración del indicador
      * @param array &$arrayConfig Arreglo de campos y operaciones
      */
-    private static function recursiveGroup(&$pipeline, $arrayConfig)
+    private static function recursiveGroup(&$pipeline, $arrayConfig, $fieldWithType)
     { // Obtenemos el arreglo de campos y operacion
         $array = $arrayConfig['campo'];
         $arrayOperacion = $arrayConfig['operacion'];
@@ -338,11 +351,55 @@ class IndicadorService
                 : (count($array) >= 2
                     ? "resultado_{$array[count($array) - 2]}"
                     :  "resultado");
+            Log::info('array', [
+                'array' => $array,
+            ]);
+
+            $campo = '';
+
+            Log::info('campo: ' . implode('.', array_slice($array, 0, -1)));
+
+            if (count($array) >= 2 && isset($fieldWithType[implode('.', array_slice($array, 0, -1))]) && $fieldWithType[implode('.', array_slice($array, 0, -1))]['type'] === 'tabla') {
+                $campo = [
+                    '$let' => [
+                        'vars' => [
+                            'numVal' => [
+                                '$cond' => [
+                                    'if' => [
+                                        '$isArray' => [
+                                            '$docs_tabla.secciones.fields.' . end($array)
+                                        ],
+                                    ],
+                                    'then' => [
+                                        '$arrayElemAt' => [
+                                            '$docs_tabla.secciones.fields.' . end($array),
+                                            0
+                                        ]
+                                    ],
+                                    'else' => [
+                                        '$docs_tabla.secciones.fields.' . end($array)
+                                    ]
+                                ]
+                            ]
+                        ],
+                        'in' => [
+                            '$ifNull' => [
+                                '$$numVal',
+                                0
+                            ]
+                        ]
+                    ]
+
+                ];
+            }
+
+
+            if ($campo === '') $campo = '$secciones.fields.' . implode('.', $array);
 
             // Determinamos el valor del resultado
             $resultContent = $i > 0
                 ? $resultContent = self::convertOperation($arrayOperacion[0], '$resultado_' . (count($array) >= 2 ? $array[count($array) - 1] : ($array[1] ?? $array[0])))
-                : self::convertOperation(end($arrayOperacion), '$secciones.fields.' . implode('.', $array));
+                : self::convertOperation(end($arrayOperacion), $campo);
 
             // Determinamos el _id
             $idContent = empty($idFields)
@@ -440,6 +497,89 @@ class IndicadorService
 
             // Agregamos el campo al pipeline
             $subPipeline[$campo] = '$secciones.fields.' . $campoConcat;
+        }
+
+        return $subPipeline;
+    }
+
+    private static function getFieldWithType($secciones)
+    {
+        $fieldWithType = [];
+
+        foreach ($secciones as $seccion) {
+            Log::info('Seccion', $seccion);
+            foreach ($seccion['fields'] as $index => $field) {
+                if ($field['type'] === 'tabla') {
+                    $fieldWithType[$field['name']] = $field;
+                } elseif ($field['type'] === 'subform') {
+                    $fieldWithType = array_merge($fieldWithType, self::recursiveGetFielWithType($field['subcampos'], $field['name'] . '.'));
+                }
+            }
+        }
+
+        return $fieldWithType;
+    }
+
+    private static function recursiveGetFielWithType($data, $prefijo)
+    {
+        $fieldWithType = [];
+
+        foreach ($data as $index => $field) {
+
+            if ($field['type'] === 'tabla') {
+                $fieldWithType[$prefijo . $field['name']] = $field;
+            } elseif ($field['type'] === 'subform') {
+                $fieldWithType = array_merge($fieldWithType, self::recursiveGetFielWithType($field['subcampos'], $prefijo . $field['name'] . '.'));
+            }
+        }
+
+        return $fieldWithType;
+    }
+
+    private static function registerTable($configuracion, $arrayConfig, $field)
+    {
+
+        // Obtenemos el nombre de la colección del campo
+        $plantilla = Plantillas::find($field['tableConfig']['plantillaId']);
+        $nombreCollection = $plantilla->nombre_coleccion;
+
+        $condiciones = [];
+
+        // Verificamos si tiene condiciones el ultimo campo
+        if (!empty(end($arrayConfig['condicion']))) {
+            $condiciones = self::getCondiciones('docs_tabla.secciones.fields.', end($arrayConfig['condicion']));
+        }
+
+        $subPipeline = [
+            [
+                '$addFields' => [
+                    'tabla_object_ids' => [
+                        '$map' => [
+                            'input' => ['$ifNull' => ['$secciones.fields.' . implode('.', array_slice($arrayConfig['campo'], 0, -1)), []]],
+                            'as' => 'id_str',
+                            'in' => ['$toObjectId' => '$$id_str']
+                        ]
+                    ]
+                ]
+            ],
+            [
+                '$lookup' => [
+                    'from' => $nombreCollection,
+                    'localField' => 'tabla_object_ids',
+                    'foreignField' => '_id',
+                    'as' => 'docs_tabla'
+                ]
+            ],
+            [
+                '$unwind' => '$docs_tabla'
+            ]
+        ];
+
+        // Agregamos las condiciones de la tabla
+        if (!empty($condiciones)) {
+            $subPipeline[] = [
+                '$match' => $condiciones
+            ];
         }
 
         return $subPipeline;
