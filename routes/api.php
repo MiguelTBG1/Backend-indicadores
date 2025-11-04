@@ -127,41 +127,55 @@ Route::middleware(['auth.sanctum'])->group(function () {
             Route::put('{id}', 'update');
             Route::delete('{id}', 'destroy');
         });
+
+    Route::get('/proxy-file', function (Request $request) {
+        try {
+
+            $url = $request->query('url');
+
+            // 🔒 Validación de seguridad: solo permitir URLs de tu propio storage
+            if (!$url || !str_starts_with($url, url('/storage/'))) {
+                abort(403, 'URL no permitida');
+            }
+
+            // Convertir URL pública a ruta del sistema de archivos
+            // Ej: http://127.0.0.1:8000/storage/uploads/archivo/xxx.png
+            // → se convierte en: storage/app/public/uploads/archivo/xxx.png
+
+            // Extraer la parte después de /storage/
+            $path = parse_url($url, PHP_URL_PATH);
+            if (!str_starts_with($path, '/storage/')) {
+                abort(403);
+            }
+
+            $relativePath = substr($path, strlen('/storage/')); // "uploads/archivo/xxx.png"
+            $filePath = storage_path('app/public/' . $relativePath);
+
+            // Verificar que el archivo exista
+            if (!file_exists($filePath)) {
+                abort(404, 'Archivo no encontrado');
+            }
+
+            // Obtener tipo MIME
+            $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
+
+            // Devolver el archivo
+            return response()->file($filePath, [
+                'Content-Type' => $mimeType,
+                'Access-Control-Allow-Origin' => 'http://localhost:5174', // tu frontend
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error en proxy-file:', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Error en proxy-file.',
+                'error'   => config('app.debug') ? $e->getMessage() : 'Error interno',
+            ], 500);
+        }
+    });
 });
-Route::get('/api/proxy-file', function (Request $request) {
-    $url = $request->query('url');
-
-    // 🔒 Validación de seguridad: solo permitir URLs de tu propio storage
-    if (!$url || !str_starts_with($url, url('/storage/'))) {
-        abort(403, 'URL no permitida');
-    }
-
-    // Convertir URL pública a ruta del sistema de archivos
-    // Ej: http://127.0.0.1:8000/storage/uploads/archivo/xxx.png
-    // → se convierte en: storage/app/public/uploads/archivo/xxx.png
-
-    // Extraer la parte después de /storage/
-    $path = parse_url($url, PHP_URL_PATH);
-    if (!str_starts_with($path, '/storage/')) {
-        abort(403);
-    }
-
-    $relativePath = substr($path, strlen('/storage/')); // "uploads/archivo/xxx.png"
-    $filePath = storage_path('app/public/' . $relativePath);
-
-    // Verificar que el archivo exista
-    if (!file_exists($filePath)) {
-        abort(404, 'Archivo no encontrado');
-    }
-
-    // Obtener tipo MIME
-    $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
-
-    // Devolver el archivo
-    return response()->file($filePath, [
-        'Content-Type' => $mimeType,
-        'Access-Control-Allow-Origin' => 'http://localhost:5174', // tu frontend
-    ]);
-});
-// Reporte PDF
-Route::get('/generate-invoice-pdf', [ReporteController::class, 'generatePdf']);
