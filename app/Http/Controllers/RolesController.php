@@ -75,12 +75,14 @@ class RolesController extends Controller
             'nombre' => 'string|required',
             'descripcion' => 'string|required',
             'permisos' => 'array|nullable',
+            'ui_permissions' => 'nullable',
         ]);
 
         $rol = Rol::create([
             'nombre' => $request->nombre,
             'descripcion' => $request->descripcion,
             'permisos' => $request->permisos,
+            'ui_permissions' => $request->ui_permissions
         ]);
 
         return response()->json(['message' => '¡Rol creado exitosamente!', 'Rol' => $rol], 201);
