@@ -11,54 +11,6 @@ use Exception;
 class IndicadorService
 {
     /**
-     * Calcula el valor de una configuración (indicador, serie, etc.)
-     */
-    public static function calculate(array $configuracion): int
-    {
-        $configuracion = self::normalizeConfig($configuracion);
-
-        $validator = self::validateConfig($configuracion);
-
-        if ($validator->fails()) {
-            Log::error('Configuración no válida: ' . $validator->errors()->first());
-            return 0;
-        }
-
-        // Buscamos la plantilla
-        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first();
-
-        if (!$plantilla) {
-            return 0;
-        }
-
-        // Obtenemos los campos de tipo 'tabla'
-        $fieldWithType = self::getFieldWithType($plantilla->secciones);
-
-        Log::info('Campos de tipo tabla' . json_encode($fieldWithType, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-        $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
-
-        if (($configuracion['operacion'] ?? '') === 'porcentaje') {
-            return self::calculatePercentage($configuracion, $modelClass);
-        }
-
-        $pipeline = self::buildPipeline($configuracion, $fieldWithType);
-
-        Log::info('Pipeline' . json_encode($pipeline, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-        //return 0;
-
-        $cursor = $modelClass::raw(fn($collection) => $collection->aggregate($pipeline));
-
-
-        $resultados = iterator_to_array($cursor);
-
-        Log::info('Resultado del cálculo', $resultados);
-
-        return $resultados[0]['resultado'] ?? 0;
-    }
-
-    /**
      * Calcula múltiples configuraciones
      */
     public function calculateMultiple(array $configs): array
@@ -159,13 +111,75 @@ class IndicadorService
     }
 
     /**
-     * Valida que la configuracion este bien definida
+     * Función para calcular un indicador
+     * @param array $configuracion Configuración del indicador
+     * @return int El valor del indicador
+     */
+    public static function calculate(array $configuracion): int
+    {
+        $configuracion = self::normalizeConfig($configuracion);
+
+        // Validamos la configuración
+        /*$validator = self::validateConfig($configuracion);
+
+        // Verificamos si la configuración es válida
+        if ($validator->fails()) {
+            Log::error('Configuración no válida: ' . $validator->errors()->first());
+            return 0;
+        }*/
+
+        // Obtenemos la plantilla
+        $plantilla = Plantillas::where('nombre_coleccion', $configuracion['coleccion'])->first();
+
+        // Validamos que exista la plantilla
+        if (!$plantilla) {
+            Log::error('Plantilla no encontrada: ' . $configuracion['coleccion']);
+            return 0;
+        }
+
+        // Obtenemos los campos de tipo 'tabla'
+        $fieldWithType = self::getFieldWithType($plantilla->secciones);
+
+        // Creamos la clase del modelo
+        $modelClass = DynamicModelService::createModelClass($plantilla->nombre_modelo);
+
+        // Validamos la operación 'porcentaje'
+        if (($configuracion['operacion'] ?? '') === 'porcentaje') {
+            return self::calculatePercentage($configuracion, $modelClass);
+        }
+
+        // Construimos el pipeline
+        $pipeline = self::buildPipeline($configuracion, $fieldWithType);
+
+        Log::info('Pipeline' . json_encode($pipeline, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        //return 0;
+
+        // Ejecutamos el pipeline
+        $cursor = $modelClass::raw(fn($collection) => $collection->aggregate($pipeline));
+
+        // Obtenemos los resultados
+        $resultados = iterator_to_array($cursor);
+
+        Log::info('Resultado del cálculo: ', $resultados);
+
+        // Retornamos el resultado
+        return $resultados[0]['resultado'] ?? 0;
+    }
+
+    /**
+     * Funcción para validar la configuración
+     * @param array $config Configuración a validar
      */
     private static function validateConfig(array $config)
     {
+        // Operaciones válidas
         $operaciones = ['contar', 'sumar', 'promedio', 'maximo', 'minimo', 'distinto', 'porcentaje'];
+
+        // Operadores válidos
         $operadores = ['igual', 'mayor', 'menor', 'diferente', 'mayor_igual', 'menor_igual'];
 
+        // Validamos la configuración
         return Validator::make($config, [
             'coleccion' => 'required|string',
             'operacion' => 'required|string|in:' . implode(',', $operaciones),
@@ -178,90 +192,155 @@ class IndicadorService
         ]);
     }
 
+    /**
+     * Función para construir el pipeline de agregación
+     * @param array $config Configuración del indicador
+     * @param array $fieldWithType Arreglo de campos con su tipo
+     * @return array El pipeline de agregación
+     */
     private static function buildPipeline(array $config, array $fieldWithType = []): array
     {
-        $arrayConfig = [];
-        self::recursiveConfig($config, $arrayConfig);
 
-        Log::info('Config: ' . json_encode($arrayConfig, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // Aplanamos la configuración
+        $fluttendConfig = self::flattenConfiguration($config);
 
+        // Creamos el pipeline
         $pipeline = [];
 
-        if (isset($config['campoFechaFiltro']) && !empty($config['campoFechaFiltro'])) {
-            $seccion = array_shift($config['campoFechaFiltro']);
-            $campo = implode('.', $config['campoFechaFiltro']);
-            $pipeline[] = [
-                '$match' => [
-                    'secciones' => [
-                        '$elemMatch' => [
-                            'nombre' => $seccion,
-                            'fields.' . $campo => [
-                                '$gte' => $config['fecha_inicio'],
-                                '$lte' => $config['fecha_fin']
-                            ]
-                        ]
-                    ]
-                ]
-            ];
-        }
+        // Agregamos el match de fecha si es necesario
+        isset($config['campoFechaFiltro']) && !empty($config['campoFechaFiltro']) ? $pipeline[] = self::addFilterDate($config) : null;
 
+        // Descomprimimos las secciones y agregamos el match para filtrar por sección
         $pipeline[] = ['$unwind' => '$secciones'];
         $pipeline[] = ['$match' => ['secciones.nombre' => $config['secciones']]];
 
-        foreach ($arrayConfig['campo'] as $index => $campo) {
-            $arrayFilter = array_slice($arrayConfig['campo'], 0, $index + 1);
-            $slice = array_slice($arrayFilter, 0, -1);
-            $prefijo = count($slice) > 0 ? implode('.', $slice) . '.' : '';
+        // Construimos etapas de agregación
+        $pipeline = array_merge($pipeline, self::buildPipelineStages($config, $fluttendConfig, $fieldWithType, $pipeline));
 
-            if (isset($arrayConfig['filtro']) && !empty($arrayConfig['filtro']) && $arrayConfig['filtro'][0] == $index) {
-                $arrayConfig['condicion'][$index] = [
-                    ['campo' => $arrayConfig['filtro'][1], 'operador' => 'mayor_igual', 'valor' => $arrayConfig['filtro'][2]],
-                    ['campo' => $arrayConfig['filtro'][1], 'operador' => 'menor_igual', 'valor' => $arrayConfig['filtro'][3]]
-                ];
-            }
-
-            $condiciones = isset($arrayConfig['condicion']) && !empty($arrayConfig['condicion'] && isset($arrayConfig['condicion'][$index]))
-                ? self::getCondiciones('secciones.fields.' . $prefijo, $arrayConfig['condicion'][$index])
-                : null;
-
-            if (!is_null($condiciones) && !empty($condiciones)) {
-                $pipeline[] = ['$match' => $condiciones];
-            }
-
-            if (count($arrayConfig['campo']) == $index + 1) {
-                continue;
-            }
-
-            $ultimoCampo = end($arrayFilter);
-
-            if (isset($fieldWithType[implode('.', $arrayFilter)]) && $fieldWithType[implode('.', $arrayFilter)]['type'] === 'tabla') {
-                $pipeline = array_merge($pipeline, self::registerTable($config, $arrayConfig, $fieldWithType[implode('.', $arrayFilter)]));
-                break;
-            } else {
-                $pipeline[] = ['$unwind' => '$secciones.fields.' . $prefijo  . $ultimoCampo];
-            }
-        }
-
-        self::recursiveGroup($pipeline, $arrayConfig, $fieldWithType);
+        // Construimos etapas de agrupación anidadas
+        $pipeline = array_merge($pipeline, self::buildNestedGroupStages($fluttendConfig, $fieldWithType));
 
         return $pipeline;
     }
 
     /**
-     * Función para obtener el arreglos de campos y operaciones
-     * @param array $configuracion Configuración del indicador
-     * @param array &$arrayConfig Arreglo de campos, operaciones y condiciones
+     * Aplana una configuración anidada de indicador en listas planas de campos, operaciones y condiciones.
+     *
+     * @param array $config Configuración del indicador (puede contener 'subConfiguracion')
+     * @return array Arreglo con claves 'campo', 'operacion' y 'condicion', cada una con una lista plana
      */
-    private static function recursiveConfig($configuracion, &$arrayConfig)
-    { // agregamos el campo, la operación y la condición
-        $arrayConfig['campo'][] = $configuracion['campo'] ?? null;
-        $arrayConfig['operacion'][] = $configuracion['operacion'] ?? null;
-        $arrayConfig['condicion'][] = isset($configuracion['condicion']) ? $configuracion['condicion'] : null;
+    private static function flattenConfiguration(array $config): array
+    {
+        $flattened = [
+            'campo' => [$config['campo'] ?? null],
+            'operacion' => [$config['operacion'] ?? null],
+            'condicion' => [isset($config['condicion']) ? $config['condicion'] : null],
+        ];
 
-        // Verificamos si tiene subconfiguracion
-        if (isset($configuracion['subConfiguracion']) && !empty($configuracion['subConfiguracion'])) {
-            self::recursiveConfig($configuracion['subConfiguracion'], $arrayConfig);
+        if (!empty($config['subConfiguracion'])) {
+            $nested = self::flattenConfiguration($config['subConfiguracion']);
+            $flattened['campo'] = array_merge($flattened['campo'], $nested['campo']);
+            $flattened['operacion'] = array_merge($flattened['operacion'], $nested['operacion']);
+            $flattened['condicion'] = array_merge($flattened['condicion'], $nested['condicion']);
         }
+
+        return $flattened;
+    }
+
+    /**
+     * Función para agregar filtros de fecha al pipeline cuando sea necesario
+     * @param array $config Configuración del indicador
+     * @return array El pipeline con filtros de fecha agregados
+     */
+    private static function addFilterDate(array $config)
+    {
+        // Obtenemos la sección y el campo
+        $seccion = array_shift($config['campoFechaFiltro']);
+        $campo = implode('.', $config['campoFechaFiltro']);
+
+        // Retornamos el match con los filtros de fecha
+        return [
+            '$match' => [
+                'secciones' => [
+                    '$elemMatch' => [
+                        'nombre' => $seccion,
+                        'fields.' . $campo => [
+                            '$gte' => $config['fecha_inicio'],
+                            '$lte' => $config['fecha_fin']
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Construye etapas del pipeline de agregación a partir de la configuración aplanada.
+     */
+    private static function buildPipelineStages(array $config, array $flattenedConfig, array $fieldWithType, array &$pipeline): array
+    {
+        // Preprocesar: aplicar filtro de rango si existe
+        //self::applyRangeFilterToConditions($flattenedConfig);
+
+        // Creamos el $subPipeline
+        $subPipeline = [];
+
+        // Recorremos la configuración aplanada
+        foreach ($flattenedConfig['campo'] as $index => $campo) {
+            // Filtramos el arreglo de campos desde el inicio hasta el campo actual + 1
+            $currentPathParts = array_slice($flattenedConfig['campo'], 0, $index + 1);
+
+            // Concatenamos los campos para formar el prefijo del campo actual
+            $currentPath = implode('.', $currentPathParts);
+            $prefix = $index > 0
+                ? implode('.', array_slice($currentPathParts, 0, -1)) . '.'
+                : '';
+
+            // Agregar condiciones si existen
+            if (isset($flattenedConfig['condicion'][$index]) && !empty($flattenedConfig['condicion'][$index])) {
+                $subPipeline[] = [
+                    '$match' => self::getCondiciones('secciones.fields.' . $prefix, $flattenedConfig['condicion'][$index])
+                ];
+            }
+
+            // Si es el último campo, no hacemos unwind ni procesamos tablas
+            if ($index === count($flattenedConfig['campo']) - 1) {
+                continue;
+            }
+
+            // Verificar si el campo actual es de tipo 'tabla'
+            if (isset($fieldWithType[$currentPath]) && $fieldWithType[$currentPath]['type'] === 'tabla') {
+                $subPipeline = array_merge($subPipeline, self::registerTable($config, $flattenedConfig, $fieldWithType[$currentPath]));
+                break; // Salimos porque registerTable maneja el resto
+            }
+
+            // Si no es tabla, hacemos unwind del campo actual
+            $subPipeline[] = ['$unwind' => '$secciones.fields.' . $currentPath];
+        }
+
+        // Retornamos el $subPipeline
+        return $subPipeline;
+    }
+
+    /**
+     * Aplica un filtro de rango (fecha, número, etc.) a las condiciones si está definido.
+     * @param array &$flattenedConfig Arreglo de condiciones aplanado
+     */
+    private static function applyRangeFilterToConditions(array &$flattenedConfig): void
+    {
+        if (empty($flattenedConfig['filtro']) || !isset($flattenedConfig['filtro'][0], $flattenedConfig['filtro'][1])) {
+            return;
+        }
+
+        $targetIndex = $flattenedConfig['filtro'][0];
+        $field = $flattenedConfig['filtro'][1];
+        $min = $flattenedConfig['filtro'][2];
+        $max = $flattenedConfig['filtro'][3];
+
+        $flattenedConfig['condicion'][$targetIndex] = [
+            ['campo' => $field, 'operador' => 'mayor_igual', 'valor' => $min],
+            ['campo' => $field, 'operador' => 'menor_igual', 'valor' => $max],
+        ];
     }
 
     /**
@@ -269,7 +348,7 @@ class IndicadorService
      * @param string $prefijo Prefijo del campo
      * @param array $arrayCondiciones Arreglo de condiciones
      */
-    private static function getCondiciones($prefijo, $arrayCondiciones)
+    private static function getCondiciones($prefijo, $arrayCondiciones): array
     {
         // Creamos el arraglo de condiciones
         $condiciones = [];
@@ -296,8 +375,6 @@ class IndicadorService
                 $valueCondition = [$prefijo . $condicion['campo'] => [self::convertOperator($condicion['operador']) => $condicion['valor']]];
             }
 
-            Log::info('Condicion', $valueCondition);
-
             // Agregamos la condición al arreglo de condiciones
             $condiciones['$and'][] = $valueCondition;
         }
@@ -307,136 +384,111 @@ class IndicadorService
     }
 
     /**
-     * Función para obtener el arreglos de campos y operaciones
-     * @param array $configuracion Configuración del indicador
-     * @param array &$arrayConfig Arreglo de campos y operaciones
+     * Construye etapas '$group' anidadas para el pipeline de agregación.
+     *
+     * @param array &$pipeline        Pipeline de MongoDB (modificado por referencia)
+     * @param array $flattenedConfig  Configuración aplanada con claves 'campo' y 'operacion'
+     * @param array $fieldWithType    Mapa de rutas de campo => ['type' => '...']
      */
-    private static function recursiveGroup(&$pipeline, $arrayConfig, $fieldWithType)
-    { // Obtenemos el arreglo de campos y operacion
-        $array = $arrayConfig['campo'];
-        $arrayOperacion = $arrayConfig['operacion'];
+    private static function buildNestedGroupStages(array $flattenedConfig, array $fieldWithType): array
+    {
+        // Obtenemos los campos, operaciones y total de niveles
+        $campos = $flattenedConfig['campo'];
+        $operaciones = $flattenedConfig['operacion'];
+        $totalLevels = count($campos);
 
-        // Obtenemos el largo del arreglo
-        $arrayCount = count($array);
+        // Creamos el $subPipeline
+        $subPipeline = [];
 
-        // Recorremos el arreglo de campos y operaciones
-        for ($i = 0; $i < $arrayCount; $i++) {
+        // Iteramos de adentro hacia afuera (de lo más específico a lo general)
+        for ($level = $totalLevels; $level >= 1; $level--) {
+            $currentCampos = array_slice($campos, 0, $level);
+            $currentPath = implode('.', $currentCampos);
+            $operation = $operaciones[$level - 1];
 
-            $idFields = [];
+            // Determinar el campo a usar en la operación
+            $fieldExpr = $level === $totalLevels
+                ? self::buildFieldExpression($currentCampos, $fieldWithType, $level)
+                : '$resultado_' . $campos[$level - 1];
 
-            // Validamos que sea no sea el primer ciclo
-            if ($i > 0) {
-                // Tomamos todos los campos excepto el último
-                $camposParaGroup = array_slice($array, 0, -1);
+            // Nombre del resultado
+            $resultKey = $operation === 'distinto'
+                ? 'distinto'
+                : ($level > 1 ? "resultado_{$campos[$level - 2]}" : 'resultado');
 
-                // Mapeamos los campos para el _id
-                $mapCampos = array_map(function ($campo) {
-                    return [$campo => $campo];
-                }, $camposParaGroup);
+            // Construir _id para el group
+            $groupId = self::buildGroupId($campos, $level);
 
-                // Aplanamos el array de arrays en un solo array asociativo
-                foreach ($mapCampos as $item) {
-                    $idFields[key($item)] = current($item);
-                }
-
-                // Agregamos 'doc' => '$_id.doc'
-                $idFields = count($array) >= 2
-                    ? array_merge(['doc' => '$_id.doc'], $idFields)
-                    : null;
-            }
-
-            // Determinamos el nombre del resultado
-            $resultName = end($arrayOperacion) == 'distinto'
-                ?  'distinto'
-                : (count($array) >= 2
-                    ? "resultado_{$array[count($array) - 2]}"
-                    :  "resultado");
-            Log::info('array', [
-                'array' => $array,
-            ]);
-
-            $campo = '';
-
-            Log::info('campo: ' . implode('.', array_slice($array, 0, -1)));
-
-            if (count($array) >= 2 && isset($fieldWithType[implode('.', array_slice($array, 0, -1))]) && $fieldWithType[implode('.', array_slice($array, 0, -1))]['type'] === 'tabla') {
-                $campo = [
-                    '$let' => [
-                        'vars' => [
-                            'numVal' => [
-                                '$cond' => [
-                                    'if' => [
-                                        '$isArray' => [
-                                            '$docs_tabla.secciones.fields.' . end($array)
-                                        ],
-                                    ],
-                                    'then' => [
-                                        '$arrayElemAt' => [
-                                            '$docs_tabla.secciones.fields.' . end($array),
-                                            0
-                                        ]
-                                    ],
-                                    'else' => [
-                                        '$docs_tabla.secciones.fields.' . end($array)
-                                    ]
-                                ]
-                            ]
-                        ],
-                        'in' => [
-                            '$ifNull' => [
-                                '$$numVal',
-                                0
-                            ]
-                        ]
-                    ]
-
-                ];
-            }
-
-
-            if ($campo === '') $campo = '$secciones.fields.' . implode('.', $array);
-
-            // Determinamos el valor del resultado
-            $resultContent = $i > 0
-                ? $resultContent = self::convertOperation($arrayOperacion[0], '$resultado_' . (count($array) >= 2 ? $array[count($array) - 1] : ($array[1] ?? $array[0])))
-                : self::convertOperation(end($arrayOperacion), $campo);
-
-            // Determinamos el _id
-            $idContent = empty($idFields)
-                ? (count($array) >= 2
-                    ? array_merge(['doc' => '$_id'], self::recursiveCampo(array_slice($array, 0, -1)))
-                    : null)
-                : $idFields;
-
-            // Agregamos el primer $group
-            $pipeline[] = [
+            // Agregar etapa $group
+            $subPipeline[] = [
                 '$group' => [
-                    '_id' => $idContent,
-                    $resultName => $resultContent
+                    '_id' => $groupId,
+                    $resultKey => self::convertOperation($operation, $fieldExpr),
                 ]
             ];
 
-            // Validamos que sea operacion 'distinto'
-            if (end($arrayOperacion) == 'distinto') {
-
-                // Determinamos el nombre del resultado
-                $resultName = count($array) >= 2
-                    ? "resultado_{$array[count($array) - 2]}"
-                    : "resultado";
-
-                // Agregamos el segundo $group
-                $pipeline[] = [
+            // Si es 'distinto', agregar $project para contar elementos únicos
+            if ($operation === 'distinto') {
+                $finalResultKey = $level > 1 ? "resultado_{$campos[$level - 2]}" : 'resultado';
+                $subPipeline[] = [
                     '$project' => [
                         '_id' => 0,
-                        $resultName => ['$size' => '$distinto']
+                        $finalResultKey => ['$size' => '$distinto'],
                     ]
                 ];
             }
-
-            // Eliminamos el último campo y operación
-            array_pop($array);
-            array_pop($arrayOperacion);
         }
+
+        return $subPipeline;
+    }
+
+    /**
+     * Construye la expresión de campo para la operación de agregación.
+     */
+    private static function buildFieldExpression(array $currentCampos, array $fieldWithType, int $level): string|array
+    {
+        $parentPath = implode('.', array_slice($currentCampos, 0, -1));
+        if (isset($fieldWithType[$parentPath]) && $fieldWithType[$parentPath]['type'] === 'tabla') {
+            $lastField = end($currentCampos);
+            return [
+                '$let' => [
+                    'vars' => [
+                        'numVal' => [
+                            '$cond' => [
+                                'if' => ['$isArray' => ['$docs_tabla.secciones.fields.' . $lastField]],
+                                'then' => ['$arrayElemAt' => ['$docs_tabla.secciones.fields.' . $lastField, 0]],
+                                'else' => '$docs_tabla.secciones.fields.' . $lastField,
+                            ]
+                        ]
+                    ],
+                    'in' => ['$ifNull' => ['$$numVal', 0]]
+                ]
+            ];
+        }
+
+
+        return '$secciones.fields.' . implode('.', $currentCampos);
+    }
+
+    /**
+     * Construye el objeto _id para la etapa $group.
+     */
+    private static function buildGroupId(array $campos, int $level): ?array
+    {
+        if ($level <= 1) {
+            return null; // Agrupar todo en un solo documento
+        }
+
+        $idFields = ['doc' => '$_id'];
+        $pathSoFar = [];
+
+        for ($i = 0; $i < $level - 1; $i++) {
+            $pathSoFar[] = $campos[$i];
+            $fullPath = implode('.', $pathSoFar);
+            $idFields[$campos[$i]] = '$secciones.fields.' . $fullPath;
+        }
+
+        return $idFields;
     }
 
     /**
@@ -536,7 +588,7 @@ class IndicadorService
         return $fieldWithType;
     }
 
-    private static function registerTable($configuracion, $arrayConfig, $field)
+    private static function registerTable($configuracion, $fluttendConfig, $field)
     {
 
         // Obtenemos el nombre de la colección del campo
@@ -546,8 +598,8 @@ class IndicadorService
         $condiciones = [];
 
         // Verificamos si tiene condiciones el ultimo campo
-        if (!empty(end($arrayConfig['condicion']))) {
-            $condiciones = self::getCondiciones('docs_tabla.secciones.fields.', end($arrayConfig['condicion']));
+        if (!empty(end($fluttendConfig['condicion']))) {
+            $condiciones = self::getCondiciones('docs_tabla.secciones.fields.', end($fluttendConfig['condicion']));
         }
 
         $subPipeline = [
@@ -555,7 +607,7 @@ class IndicadorService
                 '$addFields' => [
                     'tabla_object_ids' => [
                         '$map' => [
-                            'input' => ['$ifNull' => ['$secciones.fields.' . implode('.', array_slice($arrayConfig['campo'], 0, -1)), []]],
+                            'input' => ['$ifNull' => ['$secciones.fields.' . implode('.', array_slice($fluttendConfig['campo'], 0, -1)), []]],
                             'as' => 'id_str',
                             'in' => ['$toObjectId' => '$$id_str']
                         ]
