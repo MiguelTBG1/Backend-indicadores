@@ -62,7 +62,7 @@ class RolService
                     return [
                         'id' => (string) $base->_id,
                         'nombre' => "{$base->nombre} ({$tipo})",
-                        'tipo' => 'comodín',
+                        'tipo' => $tipo,
                         'descripcion' => $base->descripcion ?? null
                     ];
                 }
@@ -107,11 +107,12 @@ class RolService
             return [
                 'id' => (string) $base->_id,
                 'nombre' => $base->nombre,
+                'tipo' => 'ruta',
                 'descripcion' => $base->descripcion ?? null,
             ];
         }
 
-        return ['id' => $recursoId, 'nombre' => $recursoId, 'descripcion' => null];
+        return ['id' => $recursoId, 'nombre' => $recursoId, 'descripcion' => null, 'tipo' => 'NO ENCONTRADO'];
     }
 
     /**

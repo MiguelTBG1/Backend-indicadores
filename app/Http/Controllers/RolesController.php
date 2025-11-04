@@ -24,7 +24,7 @@ class RolesController extends Controller
     public function index()
     {
         $roles = Rol::all()->makeHidden(['permisos', 'ui_permissions']);
-        
+
         if ($roles->isEmpty()) {
             return response()->json([
                 'success' => true,
@@ -48,24 +48,24 @@ class RolesController extends Controller
      */
     public function show($rolId)
     {
-           $rol = Rol::find($rolId);
+        $rol = Rol::find($rolId);
 
-    if (!$rol) {
+        if (!$rol) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rol no encontrado',
+                'rol' => []
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $rolService = new RolService();
+        $rol = $rolService->expandPermissions($rol);
+
         return response()->json([
-            'success' => false,
-            'message' => 'Rol no encontrado',
-            'rol' => []
-        ], Response::HTTP_NOT_FOUND);
-    }
-
-    $rolService = new RolService();
-    $rol = $rolService->expandPermissions($rol);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Rol encontrado',
-        'rol' => $rol
-    ], Response::HTTP_OK);
+            'success' => true,
+            'message' => 'Rol encontrado',
+            'rol' => $rol
+        ], Response::HTTP_OK);
     }
 
     /** Guarda un nuevo rol */
@@ -92,13 +92,14 @@ class RolesController extends Controller
     /**
      * Actualiza un rol
      */
-    public function update(Request $request, $rolId) {
+    public function update(Request $request, $rolId)
+    {
 
         // Buscamos el rol
         $rol = Rol::find($rolId);
 
         // Validamos que exista
-        if(!$rol) {
+        if (!$rol) {
             return response()->json([
                 'success' => false,
                 'message' => 'Rol no encontrado'
@@ -106,7 +107,7 @@ class RolesController extends Controller
         }
 
         // Validamos los campos recibidos
-           $validated = $request->validate([
+        $validated = $request->validate([
             'nombre' => 'string',
             'descripcion' => 'string',
             'permisos' => 'array|nullable',
@@ -117,8 +118,8 @@ class RolesController extends Controller
 
         // Actualizamos solo los campos presentes en la solicitud
         $rol->fill($validated);
-        
-        $rol -> save();
+
+        $rol->save();
 
         return response()->json([
             'success' => false,
@@ -149,7 +150,7 @@ class RolesController extends Controller
                 'success' => false,
                 'message' => 'No se puede eliminar el rol porque está asignado a uno o más usuarios.'
             ], Response::HTTP_CONFLICT);
-    }
+        }
 
         $rol->delete();
 
