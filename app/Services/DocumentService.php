@@ -120,17 +120,22 @@ class DocumentService
     {
 
         // Si es subcampo (recursivo)
-        if (is_array($field) && !empty($field) && !is_string($field[0])) {
-
-            foreach ($field as $subIndex => &$data) {
-                foreach ($data as $subKey => &$subField) {
-                    $subField = self::processField($subKey, $subField, $relations, $fieldsWithModel);
+        if (is_array($field) && !empty($field)) {
+            // Si el primer elemento es un array → probablemente subform/tabla
+            if (is_array($field[0])) {
+                foreach ($field as $subIndex => &$data) {
+                    if (is_array($data)) {
+                        foreach ($data as $subKey => &$subField) {
+                            $subField = self::processField($subKey, $subField, $relations, $fieldsWithModel);
+                        }
+                    }
                 }
             }
+            // Si no, es un array simple → no recursión
         }
 
         // Si es un ID
-        if (!is_array($field) && preg_match('/^[0-9a-fA-F]{24}$/', $field)) {
+        if (!is_array($field) && self::isObjectId($field)) {
             return self::getSingleRelationValue($key, $field, $relations, $fieldsWithModel);
         }
 
@@ -142,10 +147,15 @@ class DocumentService
         return $field;
     }
 
+    private static function isObjectId($value)
+    {
+        return is_string($value) && strlen($value) === 24 && ctype_xdigit($value);
+    }
+
     private static function getSingleRelationValue($key, $id, $relations, $fieldsWithModel)
     {
         //Log::info('Data' . json_encode(['key' => $key, 'ID' => $id, 'relaciones' => $relations, 'fieldsWithModel' => $fieldsWithModel], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        if( !isset($fieldsWithModel[$key])){
+        if (!isset($fieldsWithModel[$key])) {
             return '';
         }
 
@@ -159,7 +169,7 @@ class DocumentService
 
     private static function getMultipleRelationValues($key, array $ids, $relations, $fieldsWithModel): array
     {
-        if( !isset($fieldsWithModel[$key])){
+        if (!isset($fieldsWithModel[$key])) {
             return [];
         }
 
@@ -187,17 +197,14 @@ class DocumentService
 
     private static function getFieldValue($document, $nombreSeccion, $nombreCampo)
     {
-        foreach ($document['secciones'] as $seccion) {
-            if ($seccion['nombre'] === $nombreSeccion) {
-                return $seccion['fields'][$nombreCampo] ?? null;
-            }
-        }
-        return null;
+        // Usa el índice precalculado
+        $indexed = $document['_indexed_sections'] ?? [];
+        return $indexed[$nombreSeccion][$nombreCampo] ?? null;
     }
 
     public static function processSeccionesStore($plantilla, $secciones, $fieldsWithModel, $files)
     {
-        if( !$secciones){
+        if (!$secciones) {
             return '';
         }
         $relations = [];

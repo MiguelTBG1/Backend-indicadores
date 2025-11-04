@@ -200,6 +200,9 @@ class DocumentoController extends Controller
 
             // ✅ Obtener solo campos necesarios
             $documents = $modelClass::select(['_id', 'secciones'])->get();
+            // Tiempo
+            Log::info('Tiempo: ' . (microtime(true) - $start) . ' segundos');
+
             $documentsArray = $documents->toArray();
 
             // ✅ Obtener campos con modelos relacionados
@@ -223,6 +226,20 @@ class DocumentoController extends Controller
             // ✅ Cargar relaciones una sola vez, indexadas
             $relations = DocumentService::loadRelations2($distinctModels);
 
+            Log::info('Tiempo: ' . (microtime(true) - $start) . ' segundos');
+
+            // ✅ Indexar secciones por nombre en cada documento relacionado para acceso O(1)
+            foreach ($relations as $modelName => $docs) {
+                foreach ($docs as $id => $doc) {
+                    $indexedSections = [];
+                    foreach ($doc['secciones'] ?? [] as $section) {
+                        $indexedSections[$section['nombre']] = $section['fields'] ?? [];
+                    }
+                    // Guardamos el índice directamente en el documento (sin modificar el original en DB)
+                    $relations[$modelName][$id]['_indexed_sections'] = $indexedSections;
+                }
+            }
+
             /*Cache::remember(
                 "relations_{$modelName}",
                 3600,
@@ -244,6 +261,7 @@ class DocumentoController extends Controller
             $total = microtime(true) - $start;
             Log::info("Tiempo total en index({$modelName}): {$total} segundos");
 
+            //Log::info('Documentos: ' . json_encode($documentsArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             return response()->json($documentsArray);
         } catch (\Exception $e) {
             Log::error('Error en index:', [
@@ -380,6 +398,8 @@ class DocumentoController extends Controller
     public function update(Request $request, $plantillaName, $documentId)
     {
         try {
+
+            Log::info('documentData' . json_encode($request->all(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             // Verifica si la id del documento es válida
             DocumentService::validateObjectId($documentId);
 
