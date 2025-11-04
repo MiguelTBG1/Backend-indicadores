@@ -189,14 +189,14 @@ class DocumentoController extends Controller
 
             // ✅ Cargar plantilla y modelo asociado
             $plantilla = Plantillas::findOrFail($id);
-            $modelName = $plantilla->nombre_modelo;
+            $nombreModelo = $plantilla->nombre_modelo;
 
-            if (!$modelName) {
+            if (!$nombreModelo) {
                 throw new \Exception("No se encontró el modelo asociado a la plantilla: $id", 404);
             }
 
             // ✅ Crear clase del modelo dinámico
-            $modelClass = DynamicModelService::createModelClass($modelName);
+            $modelClass = DynamicModelService::createModelClass($nombreModelo);
 
             // ✅ Obtener solo campos necesarios
             $documents = $modelClass::select(['_id', 'secciones'])->get();
@@ -241,7 +241,7 @@ class DocumentoController extends Controller
             }
 
             /*Cache::remember(
-                "relations_{$modelName}",
+                "relations_{$nombreModelo}",
                 3600,
                 fn() =>
                 DocumentService::loadRelations2($distinctModels)
@@ -259,7 +259,7 @@ class DocumentoController extends Controller
             }
 
             $total = microtime(true) - $start;
-            Log::info("Tiempo total en index({$modelName}): {$total} segundos");
+            Log::info("Tiempo total en index({$nombreModelo}): {$total} segundos");
 
             //Log::info('Documentos: ' . json_encode($documentsArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             return response()->json($documentsArray);
