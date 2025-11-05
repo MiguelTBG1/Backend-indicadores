@@ -110,9 +110,7 @@ class RolesController extends Controller
             'nombre' => 'string',
             'descripcion' => 'string',
             'permisos' => 'array|nullable',
-            'permisos.*.recurso' => 'string',
-            'permisos.*.acciones' => 'array',
-            'funciones_permitidas' => 'array|nullable',
+            'ui_permissions' => 'nullable',
         ]);
 
         // Actualizamos solo los campos presentes en la solicitud
