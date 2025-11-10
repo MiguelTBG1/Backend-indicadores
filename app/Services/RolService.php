@@ -137,4 +137,16 @@ class RolService
             return $this->cacheAcciones[$id];
         })->values()->all();
     }
+
+    /**
+     * Expande el rol devolviendo su informacion correcta
+     */
+    public function resolveRoles(array $rolesID): array 
+    {
+        return collect($rolesID)->map(function ($id) {
+            $rol = Rol::find($id);
+            
+            return $rol;
+        })->values()->all();
+    }
 }

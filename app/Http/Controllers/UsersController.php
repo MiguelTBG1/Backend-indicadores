@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\MockObject\Stub\ReturnStub;
 use Symfony\Component\HttpFoundation\Response;
+use App\Services\RolService;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -29,15 +30,41 @@ class UsersController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'No se encontraron usuarios',
-                'users' => []
+                'usuarios' => []
             ], Response::HTTP_OK);
         }
 
-        // Retornamos la respuesta con los usuarios
+
+        $rolService = new RolService();
+        // Mapeamos los usuarios con sus roles expandidos
+        $usuarios = $users->map(function ($user) use ($rolService) {
+            $roles = $rolService->resolveRoles($user->roles ?? []);
+
+            // Formateamos la salida básica
+            return [
+                'id' => $user->_id,
+                'nombre' => $user->nombre,
+                'apellido_paterno' => $user->apellido_paterno,
+                'apellido_materno' => $user->apellido_materno,
+                'email' => $user->email,
+                'edad' => $user->edad,
+                'genero' => $user->genero,
+                'estado' => $user->estado,
+                'ocupacion' => $user->ocupacion,
+                'escolaridad' => $user->escolaridad,
+                'roles' => collect($roles)->map(fn($rol) => [
+                    'id' => $rol->_id,
+                    'nombre' => $rol->nombre,
+                    'descripcion' => $rol->descripcion,
+                ]),
+
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'Usuarios encontrados',
-            'users' => $users,
+            'usuarios' => $usuarios,
         ], Response::HTTP_OK);
     }
 
@@ -80,10 +107,7 @@ class UsersController extends Controller
             'escolaridad' => 'string',
             'roles' => 'array|nullable',
             'permisos' => 'array|nullable',
-            'permisos.*.recurso' => 'required|string',
-            'permisos.*.acciones' => 'array|required',
-            'permisos.*.activo' => 'boolean|nullable',
-            'funciones_permitidas' => 'array|nullable',
+            'ui_permissions' => 'nullable',
         ]);
 
         $user = User::create([
