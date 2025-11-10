@@ -76,6 +76,16 @@ class UsersController extends Controller
         $user = User::find($userId);
 
         if ($user) {
+            $permisoService = new PermisoService();
+            // Si tiene permisos los expandimos
+            if ($user->permisos) {
+                $user->permisos = $permisoService->expandPermissions($user->permisos);
+            }
+
+            // Si tiene roles los expandimos
+            if($user->roles) {
+                $user->roles = $permisoService->resolveRoles($user->roles ?? []);
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Usuario encontrado',
@@ -89,6 +99,7 @@ class UsersController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
     }
+
     /**
      * Registra un nuevo usuario.
      */

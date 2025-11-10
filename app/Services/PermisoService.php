@@ -13,32 +13,28 @@ class PermisoService
     protected array $cacheAcciones = [];
 
     /**
-     * Expande los permisos de un rol reemplazando IDs con nombres legibles.
+     * Expande una estructura de permisos, reemplazando IDs por nombres legibles.
+     *
+     * @param array|null $permisos Estructura de permisos a expandir.
+     * @return array Estructura de permisos expandida.
      */
-    public function expandPermissions(Rol $rol): Rol
+    public function expandPermissions(array $permisos): array
+
     {
-        $permisos = $rol->permisos ?? [];
+        $permisos = $permisos ?? [];
 
-        if (isset($permisos['allowed'])) {
-            $permisos['allowed'] = collect($permisos['allowed'])->map(function ($permiso) {
-                return [
-                    'recurso' => $this->resolveRecurso($permiso['recurso'] ?? null),
-                    'acciones' => $this->resolveAcciones($permiso['acciones'] ?? []),
-                ];
-            })->values();
+        foreach (['allowed', 'denied'] as $tipo) {
+            if (isset($permisos[$tipo])) {
+                $permisos[$tipo] = collect($permisos[$tipo])->map(function ($permiso) {
+                    return [
+                        'recurso' => $this->resolveRecurso($permiso['recurso'] ?? null),
+                        'acciones' => $this->resolveAcciones($permiso['acciones'] ?? []),
+                    ];
+                })->values();
+            }
         }
 
-        if (isset($permisos['denied'])) {
-            $permisos['denied'] = collect($permisos['denied'])->map(function ($permiso) {
-                return [
-                    'recurso' => $this->resolveRecurso($permiso['recurso'] ?? null),
-                    'acciones' => $this->resolveAcciones($permiso['acciones'] ?? []),
-                ];
-            })->values();
-        }
-
-        $rol->permisos = $permisos;
-        return $rol;
+        return $permisos;
     }
 
     /**
@@ -141,11 +137,11 @@ class PermisoService
     /**
      * Expande el rol devolviendo su informacion correcta
      */
-    public function resolveRoles(array $rolesID): array 
+    public function resolveRoles(array $rolesID): array
     {
         return collect($rolesID)->map(function ($id) {
             $rol = Rol::find($id);
-            
+
             return $rol;
         })->values()->all();
     }

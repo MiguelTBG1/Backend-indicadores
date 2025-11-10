@@ -59,7 +59,7 @@ class RolesController extends Controller
         }
 
         $permisoService = new PermisoService();
-        $rol = $permisoService->expandPermissions($rol);
+        $rol->permisos = $permisoService->expandPermissions($rol->permisos);
 
         return response()->json([
             'success' => true,
