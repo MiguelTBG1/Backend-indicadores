@@ -83,7 +83,7 @@ class UsersController extends Controller
             }
 
             // Si tiene roles los expandimos
-            if($user->roles) {
+            if ($user->roles) {
                 $user->roles = $permisoService->resolveRoles($user->roles ?? []);
             }
             return response()->json([
@@ -133,7 +133,7 @@ class UsersController extends Controller
             'ocupacion' => $request->ocupacion,
             'escolaridad' => $request->escolaridad,
             'permisos' => $request->permisos ?? [], // Asegura que permisos sea un array
-            'funciones_permitidas' => $request->funciones_permitidas ?? [], // Asegura que funciones_permitidas sea un array
+            'ui_permissions' => $request->ui_permissions,
             'roles' => $request->roles ?? [], // Asegura que roles sea un array
         ]);
 
@@ -179,9 +179,7 @@ class UsersController extends Controller
                 'escolaridad' => 'string',
                 'roles' => 'array|nullable',
                 'permisos' => 'array|nullable',
-                'permisos.*.recurso' => 'string',
-                'permisos.*.acciones' => 'array',
-                'funciones_permitidas' => 'array|nullable',
+                'ui_permissions' => 'nullable',
             ]);
 
             // Actualiza solo los campos presentes en la solicitud
@@ -196,7 +194,7 @@ class UsersController extends Controller
             $user->escolaridad = $request->has('escolaridad') ? $request->escolaridad : $user->escolaridad;
             $user->roles = $request->has('roles') ? $request->roles : $user->roles;
             $user->permisos = $request->has('permisos') ? $request->permisos : $user->permisos;
-            $user->funciones_permitidas = $request->has('funciones_permitidas') ? $request->funciones_permitidas : $user->funciones_permitidas;
+            $user->ui_permissions = $request->has('ui_permissions') ? $request->ui_permissions : $user->ui_permissions;
 
             $user->save();
 
