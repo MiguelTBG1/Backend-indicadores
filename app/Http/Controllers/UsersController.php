@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Services\PermisoService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\MockObject\Stub\ReturnStub;
 use Symfony\Component\HttpFoundation\Response;
-use App\Services\RolService;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -35,10 +35,10 @@ class UsersController extends Controller
         }
 
 
-        $rolService = new RolService();
+        $permisoService = new PermisoService();
         // Mapeamos los usuarios con sus roles expandidos
-        $usuarios = $users->map(function ($user) use ($rolService) {
-            $roles = $rolService->resolveRoles($user->roles ?? []);
+        $usuarios = $users->map(function ($user) use ($permisoService) {
+            $roles = $permisoService->resolveRoles($user->roles ?? []);
 
             // Formateamos la salida básica
             return [

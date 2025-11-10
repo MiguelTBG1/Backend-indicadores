@@ -7,7 +7,7 @@ use App\Models\Plantillas;
 use App\Models\Recurso;
 use App\Models\Rol;
 
-class RolService
+class PermisoService
 {
     protected array $cacheRecursos = [];
     protected array $cacheAcciones = [];

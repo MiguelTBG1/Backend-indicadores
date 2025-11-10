@@ -6,7 +6,7 @@ use App\Models\Rol;
 use App\Models\User;
 
 use Symfony\Component\HttpFoundation\Response;
-use App\Services\RolService;
+use App\Services\PermisoService;
 use Illuminate\Http\Request;
 
 /**
@@ -58,8 +58,8 @@ class RolesController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $rolService = new RolService();
-        $rol = $rolService->expandPermissions($rol);
+        $permisoService = new PermisoService();
+        $rol = $permisoService->expandPermissions($rol);
 
         return response()->json([
             'success' => true,
