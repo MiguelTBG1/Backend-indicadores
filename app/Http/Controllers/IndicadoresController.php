@@ -217,6 +217,7 @@ class IndicadoresController extends Controller
                 'actividad' => 'nullable|string|max:500',
                 'causa' => 'nullable|string|max:500',
                 'accion' => 'nullable|string|max:500',
+                'tipoIndicador' => 'nullable|string|max:100',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
@@ -237,6 +238,7 @@ class IndicadoresController extends Controller
                 'actividad',
                 'causa',
                 'accion',
+                'tipoIndicador',
                 'fecha_inicio',
                 'fecha_fin'
             ]);
@@ -466,6 +468,7 @@ class IndicadoresController extends Controller
                 'actividad' => 'nullable|string|max:500',
                 'causa' => 'nullable|string|max:500',
                 'accion' => 'nullable|string|max:500',
+                'tipoIndicador' => 'nullable|string|max:100',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             ]);
@@ -486,6 +489,7 @@ class IndicadoresController extends Controller
                 'actividad',
                 'causa',
                 'accion',
+                'tipoIndicador',
                 'fecha_inicio',
                 'fecha_fin'
             ]);
