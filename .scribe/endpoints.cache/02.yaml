@@ -3,7 +3,9 @@
 name: Indicadores
 description: |-
 
-  APIs para administrar los indicadores
+  Endpoints para gestionar los indicadores y métricas del sistema.
+  Los indicadores representan métricas calculadas dinámicamente como
+  "Número de alumnos registrados", etc.
 endpoints:
   -
     httpMethods:
@@ -13,11 +15,15 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Obtener indicadores'
-      description: 'Retorna una lista de indicadores disponibles en el sistema.'
+      title: 'Listar todos los indicadores'
+      description: |-
+        Obtiene la lista completa de indicadores configurados en el sistema.
+        Cada indicador incluye su configuración base y el campo numerador inicializado en 0.
       authenticated: true
       custom: []
     headers:
@@ -35,22 +41,58 @@ endpoints:
       -
         status: 200
         content: |-
-          scenario= "No hay indicadores en la base de datos" {"success": true,
-          "message": "No se encontraron indicadores",
-          "indicadires": [] }
+          {
+            "success": true,
+            "message": "Indicadores encontrados",
+            "indicadores": [
+            {
+                "_idProyecto": "1.1.2",
+                "numero": 2,
+                "nombreIndicador": "Numero de alumnos que son mujeres",
+                "denominador": 200,
+                "numerador": 0,
+                "configuracion": {
+                    "coleccion": "Alumnos_data",
+                    "operacion": "contar",
+                    "secciones": "Información General",
+                    "campo": null,
+                    "campoFechaFiltro": [
+                        "Información General",
+                        "Fecha de inscripcion"
+                    ],
+                    "condicion": [
+                        {
+                            "campo": "Género",
+                            "operador": "igual",
+                            "valor": "Femenino"
+                        }
+                    ]
+                },
+            ]
+          }
         headers: []
         description: ''
         custom: []
       -
-        status: 201
+        status: 200
         content: |-
           {
-          "success": true,
-          "message": "Indicadores encontrados",
-          "indicadires": ["Hola"]
+            "success": true,
+            "message": "No se encontraron indicadores",
+            "indicadores": []
           }
         headers: []
-        description: ''
+        description: 'Sin indicadores registrados'
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "message": "Error del sistema al obtener los indicadores",
+            "error": "Descripción detallada del error"
+          }
+        headers: []
+        description: 'Error del servidor'
         custom: []
     responseFields: []
     auth:
@@ -69,11 +111,13 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Obtiene un indicador por su ID'
-      description: ''
+      title: 'Consultar indicador por ID'
+      description: 'Obtiene los detalles completos de un indicador específico mediante su identificador único.'
       authenticated: true
       custom: []
     headers:
@@ -83,16 +127,16 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the indicadore.'
+        description: 'ID del indicador a consultar.'
         required: true
-        example: architecto
+        example: 507f1f77bcf86cd799439011
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      id: 507f1f77bcf86cd799439011
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -125,11 +169,16 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Inserta un nuevo indicador en la base de datos'
-      description: ''
+      title: 'Crear indicador'
+      description: |-
+        Registra un nuevo indicador en el sistema. La configuración para
+        calcular el numerador debe agregarse posteriormente.
+        El numerador se inicializa en 0 hasta que se configure el cálculo.
       authenticated: true
       custom: []
     headers:
@@ -140,8 +189,140 @@ endpoints:
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
+    bodyParameters:
+      nombreIndicador:
+        name: nombreIndicador
+        description: 'Nombre descriptivo del indicador.'
+        required: true
+        example: 'Número de alumnos registrados'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      numero:
+        name: numero
+        description: 'Número identificador del indicador.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      _idProyecto:
+        name: _idProyecto
+        description: 'ID del proyecto asociado al indicador.'
+        required: true
+        example: 1.1.2
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      numerador:
+        name: numerador
+        description: 'Valor inicial del numerador del indicador. Default: 0.'
+        required: false
+        example: 0.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      denominador:
+        name: denominador
+        description: 'Valor del denominador del indicador.'
+        required: false
+        example: 100.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      departamento:
+        name: departamento
+        description: 'Departamento responsable del indicador.'
+        required: true
+        example: Académico
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      actividad:
+        name: actividad
+        description: 'Actividad relacionada con el indicador.'
+        required: false
+        example: 'Inscripción de alumnos'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      causa:
+        name: causa
+        description: 'Causa asociada al indicador.'
+        required: false
+        example: 'Baja inscripción'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      accion:
+        name: accion
+        description: 'Acción correctiva para el indicador.'
+        required: false
+        example: 'Campaña de promoción'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      tipoIndicador:
+        name: tipoIndicador
+        description: 'Tipo o categoría del indicador.'
+        required: false
+        example: Planeación
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      fecha_inicio:
+        name: fecha_inicio
+        description: 'Fecha de inicio de vigencia del indicador.'
+        required: false
+        example: '2024-01-01'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      fecha_fin:
+        name: fecha_fin
+        description: 'Fecha de fin de vigencia del indicador.'
+        required: false
+        example: '2024-12-31'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      nombreIndicador: 'Número de alumnos registrados'
+      numero: 1
+      _idProyecto: 1.1.2
+      numerador: 0.0
+      denominador: 100.0
+      departamento: Académico
+      actividad: 'Inscripción de alumnos'
+      causa: 'Baja inscripción'
+      accion: 'Campaña de promoción'
+      tipoIndicador: Planeación
+      fecha_inicio: '2024-01-01'
+      fecha_fin: '2024-12-31'
     fileParameters: []
     responses: []
     responseFields: []
@@ -161,11 +342,15 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Actualiza un indicador por su ID'
-      description: ''
+      title: 'Actualizar indicador'
+      description: |-
+        Modifica la información de un indicador existente.
+        Se puede actualizar parcialmente enviando solo los campos necesarios.
       authenticated: true
       custom: []
     headers:
@@ -208,11 +393,15 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Borra un indicador por su ID'
-      description: ''
+      title: 'Eliminar indicador'
+      description: |-
+        Elimina permanentemente un indicador del sistema.
+        Esta acción no puede deshacerse.
       authenticated: true
       custom: []
     headers:
@@ -255,11 +444,13 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Agrega o actualiza la configuración de un indicador por su ID'
-      description: ''
+      title: 'Actualizar configuración de un indicador'
+      description: 'Modifica la configuración de un indicador existente.'
       authenticated: true
       custom: []
     headers:
@@ -302,11 +493,15 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Obtener la configuración de un indicador por su ID'
-      description: ''
+      title: 'Obtener configuración de un indicador'
+      description: |-
+        Consulta la configuración de cálculo de un indicador específico.
+        Retorna un objeto vacío si el indicador no tiene configuración definida.
       authenticated: true
       custom: []
     headers:
@@ -358,11 +553,15 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Obtener entre fechas'
-      description: 'Obtiene todos los indicadores filtrado por rango de fechas'
+      title: 'Filtrar indicadores por rango de fechas'
+      description: |-
+        Obtiene los indicadores que se encuentren dentro del rango de fechas especificado
+        y calcula sus valores (numerador) según su configuración para el periodo solicitado.
       authenticated: true
       custom: []
     headers:
@@ -376,38 +575,27 @@ endpoints:
     bodyParameters:
       inicio:
         name: inicio
-        description: 'La fecha de inicio'
-        required: false
-        example: architecto
-        type: string
+        description: 'Fecha de inicio del periodo a consultar. Formato: YYYY-MM-DD.'
+        required: true
+        example: '2024-01-01'
+        type: date
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
       fin:
         name: fin
-        description: 'La fecha de fin'
-        required: false
-        example: architecto
-        type: string
+        description: 'Fecha de fin del periodo a consultar. Debe ser igual o posterior a la fecha de inicio. Formato: YYYY-MM-DD.'
+        required: true
+        example: '2024-12-31'
+        type: date
         enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      after_or_equa;:
-        name: after_or_equa;
-        description: HOla
-        required: false
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanBodyParameters:
-      inicio: architecto
-      fin: architecto
-      after_or_equa;: architecto
+      inicio: '2024-01-01'
+      fin: '2024-12-31'
     fileParameters: []
     responses: []
     responseFields: []
@@ -427,24 +615,41 @@ endpoints:
       groupName: Indicadores
       groupDescription: |-
 
-        APIs para administrar los indicadores
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Carga un archivo Excel y guarda los indicadores en la base de datos'
-      description: ''
+      title: 'Cargar indicadores desde archivo Excel'
+      description: |-
+        Importa múltiples indicadores desde un archivo Excel o CSV.
+        El archivo debe contener las columnas: Proyecto, #, Indicador,
+        Denominador y Departamento. Las fechas de inicio y fin se establecen
+        automáticamente para el año en curso (01/01 - 31/12).
       authenticated: true
       custom: []
     headers:
       Authorization: 'Bearer {TU_TOKEN}'
-      Content-Type: application/json
+      Content-Type: multipart/form-data
       Accept: application/json
     urlParameters: []
     cleanUrlParameters: []
     queryParameters: []
     cleanQueryParameters: []
-    bodyParameters: []
+    bodyParameters:
+      excel_file:
+        name: excel_file
+        description: 'Archivo Excel (.xlsx, .xls) o CSV con los indicadores a importar. El tamaño máximo es 2MB.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
     cleanBodyParameters: []
-    fileParameters: []
+    fileParameters:
+      excel_file: null
     responses: []
     responseFields: []
     auth:

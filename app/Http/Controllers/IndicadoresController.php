@@ -18,25 +18,60 @@ use PhpParser\Comment\Doc;
 /**
  * @group Indicadores
  *
- * APIs para administrar los indicadores
+ * Endpoints para gestionar los indicadores y métricas del sistema.
+ * Los indicadores representan métricas calculadas dinámicamente como
+ * "Número de alumnos registrados", etc.
  */
 class IndicadoresController extends Controller
 {
     /**
-     * Obtener indicadores
+     * Listar todos los indicadores
      *
-     * Retorna una lista de indicadores disponibles en el sistema.
+     * Obtiene la lista completa de indicadores configurados en el sistema.
+     * Cada indicador incluye su configuración base y el campo numerador inicializado en 0.
      *
-     * @return JsonResponse La respuesta con los indicadores
-     * @response 201 {
-     * "success": true,
-     * "message": "Indicadores encontrados",
-     * "indicadires": ["Hola"]
+     * @return JsonResponse Lista de indicadores disponibles
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Indicadores encontrados",
+     *   "indicadores": [
+     *   {
+     *       "_idProyecto": "1.1.2",
+     *       "numero": 2,
+     *       "nombreIndicador": "Numero de alumnos que son mujeres",
+     *       "denominador": 200,
+     *       "numerador": 0,
+     *       "configuracion": {
+     *           "coleccion": "Alumnos_data",
+     *           "operacion": "contar",
+     *           "secciones": "Información General",
+     *           "campo": null,
+     *           "campoFechaFiltro": [
+     *               "Información General",
+     *               "Fecha de inscripcion"
+     *           ],
+     *           "condicion": [
+     *               {
+     *                   "campo": "Género",
+     *                   "operador": "igual",
+     *                   "valor": "Femenino"
+     *               }
+     *           ]
+     *       },
+     *   ]
      * }
      *
-     * @response status=200 scenario= "No hay indicadores en la base de datos" {"success": true,
-     * "message": "No se encontraron indicadores",
-     * "indicadires": [] }
+     * @response 200 scenario="Sin indicadores registrados" {
+     *   "success": true,
+     *   "message": "No se encontraron indicadores",
+     *   "indicadores": []
+     * }
+     * 
+     * @response 500 scenario="Error del servidor" {
+     *   "message": "Error del sistema al obtener los indicadores",
+     *   "error": "Descripción detallada del error"
+     * }
      */
     public function index()
     {
@@ -90,15 +125,15 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Obtener entre fechas
+     * Filtrar indicadores por rango de fechas
      *
-     * Obtiene todos los indicadores filtrado por rango de fechas
+     * Obtiene los indicadores que se encuentren dentro del rango de fechas especificado
+     * y calcula sus valores (numerador) según su configuración para el periodo solicitado.
      *
-     * @bodyParam inicio string La fecha de inicio
-     * @bodyParam fin string La fecha de fin
-     * @bodyParam after_or_equa; string HOla
-     * @param Request $request Datos del rango de fecha
-     * @return JsonResponse La respuesta con los indicadores
+     * @bodyParam inicio date required Fecha de inicio del periodo a consultar. Formato: YYYY-MM-DD. Example: 2024-01-01
+     * @bodyParam fin date required Fecha de fin del periodo a consultar. Debe ser igual o posterior a la fecha de inicio. Formato: YYYY-MM-DD. Example: 2024-12-31
+     * @param Request $request Datos del rango de fechas
+     * @return JsonResponse Lista de indicadores con valores calculados
      */
     public function filterByDateRange(Request $request)
     {
@@ -166,9 +201,14 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Obtiene un indicador por su ID
-     * @param string $id ID del indicador a obtener
-     * @return JsonResponse La respuesta con el indicador
+     * Consultar indicador por ID
+     *
+     * Obtiene los detalles completos de un indicador específico mediante su identificador único.
+     * 
+     * @urlParam id string required ID del indicador a consultar. Example: 507f1f77bcf86cd799439011
+     * 
+     * @param string $id Identificador del indicador
+     * @return JsonResponse Detalles del indicador solicitado
      */
     public function show($id)
     {
@@ -198,9 +238,26 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Inserta un nuevo indicador en la base de datos
-     * @param Request $request Datos del indicador a insertar
-     * @return JsonResponse La respuesta de la operación
+     * Crear indicador
+     * 
+     * Registra un nuevo indicador en el sistema. La configuración para 
+     * calcular el numerador debe agregarse posteriormente.
+     * El numerador se inicializa en 0 hasta que se configure el cálculo.
+     * 
+     * @bodyParam nombreIndicador string required Nombre descriptivo del indicador. Example: Número de alumnos registrados
+     * @bodyParam numero integer required Número identificador del indicador. Example: 1
+     * @bodyParam _idProyecto string required ID del proyecto asociado al indicador. Example: 1.1.2
+     * @bodyParam numerador float Valor inicial del numerador del indicador. Default: 0. Example: 0
+     * @bodyParam denominador float Valor del denominador del indicador. Example: 100
+     * @bodyParam departamento string required Departamento responsable del indicador. Example: Académico
+     * @bodyParam actividad string Actividad relacionada con el indicador. Example: Inscripción de alumnos
+     * @bodyParam causa string Causa asociada al indicador. Example: Baja inscripción
+     * @bodyParam accion string Acción correctiva para el indicador. Example: Campaña de promoción
+     * @bodyParam tipoIndicador string Tipo o categoría del indicador. Example: Planeación
+     * @bodyParam fecha_inicio date Fecha de inicio de vigencia del indicador. Example: 2024-01-01
+     * @bodyParam fecha_fin date Fecha de fin de vigencia del indicador. Example: 2024-12-31
+     * @param Request $request Datos del indicador a crear
+     * @return JsonResponse Confirmación de creación con el indicador registrado
      * @throws Exception Si ocurre un error durante la inserción
      */
     public function store(Request $request)
@@ -281,9 +338,17 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Carga un archivo Excel y guarda los indicadores en la base de datos
-     * @param Request $request Datos del archivo Excel
-     * @return JsonResponse La respuesta de la operación
+     * Cargar indicadores desde archivo Excel
+     * 
+     * Importa múltiples indicadores desde un archivo Excel o CSV.
+     * El archivo debe contener las columnas: Proyecto, #, Indicador, 
+     * Denominador y Departamento. Las fechas de inicio y fin se establecen
+     * automáticamente para el año en curso (01/01 - 31/12).
+     *  
+     * @bodyParam excel_file file required Archivo Excel (.xlsx, .xls) o CSV con los indicadores a importar. El tamaño máximo es 2MB.
+     * 
+     * @param Request $request Archivo con los datos a importar
+     * @return JsonResponse Confirmación de importación exitosa
      */
     public function upload(Request $request)
     {
@@ -397,7 +462,10 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Borra un indicador por su ID
+     * Eliminar indicador
+     * 
+     * Elimina permanentemente un indicador del sistema.
+     * Esta acción no puede deshacerse.
      * @param string $id ID del indicador a borrar
      * @return JsonResponse La respuesta de la operación
      */
@@ -411,7 +479,7 @@ class IndicadoresController extends Controller
             if (!$indicador) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se encontró el indicador a borrar',
+                    'message' => 'No se encontró el indicador a eliminar',
                     'id_recibido' => $id
                 ], Response::HTTP_NOT_FOUND);
             }
@@ -436,7 +504,10 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Actualiza un indicador por su ID
+     * Actualizar indicador
+     *
+     * Modifica la información de un indicador existente.
+     * Se puede actualizar parcialmente enviando solo los campos necesarios.
      * @param Request $request Datos del indicador a actualizar
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
@@ -534,7 +605,10 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Agrega o actualiza la configuración de un indicador por su ID
+     * Actualizar configuración de un indicador
+     *
+     * Modifica la configuración de un indicador existente.
+     * 
      * @param Request $request Datos de configuración del indicador
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación
@@ -599,7 +673,11 @@ class IndicadoresController extends Controller
     }
 
     /**
-     * Obtener la configuración de un indicador por su ID
+     * Obtener configuración de un indicador
+     * 
+     * Consulta la configuración de cálculo de un indicador específico.
+     * Retorna un objeto vacío si el indicador no tiene configuración definida.
+     * 
      * @param Request $request Datos de configuración del indicador
      * @param string $id ID del indicador a actualizar
      * @return JsonResponse La respuesta de la operación

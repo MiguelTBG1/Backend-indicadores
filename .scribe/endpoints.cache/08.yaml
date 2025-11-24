@@ -163,11 +163,11 @@ endpoints:
         custom: []
       rangos:
         name: rangos
-        description: validation.min.
+        description: 'Los rangos de fechas para la gráfica.'
         required: true
         example:
-          - []
-        type: 'object[]'
+          - architecto
+        type: 'string[]'
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -179,6 +179,16 @@ endpoints:
         example:
           - []
         type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      tipoRango:
+        name: tipoRango
+        description: ''
+        required: true
+        example: architecto
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
@@ -239,14 +249,12 @@ endpoints:
       chartOptions:
         - architecto
       rangos:
-        -
-          inicio: architecto
-          fin: architecto
-          label: architecto
+        - architecto
       series:
         -
           name: architecto
           configuracion: []
+      tipoRango: architecto
     fileParameters: []
     responses: []
     responseFields: []
@@ -343,6 +351,16 @@ endpoints:
         exampleWasSpecified: false
         nullable: true
         custom: []
+      tipoRango:
+        name: tipoRango
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
       'rangos[].inicio':
         name: 'rangos[].inicio'
         description: 'This field is required when <code>rangos</code> is present.'
@@ -396,6 +414,7 @@ endpoints:
     cleanBodyParameters:
       titulo: b
       descripcion: architecto
+      tipoRango: architecto
       rangos:
         -
           inicio: architecto

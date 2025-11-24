@@ -183,47 +183,17 @@ endpoints:
         description: ''
         required: false
         example: null
-        type: 'object[]'
+        type: object
         enumValues: []
         exampleWasSpecified: false
         nullable: true
         custom: []
-      funciones_permitidas:
-        name: funciones_permitidas
+      ui_permissions:
+        name: ui_permissions
         description: ''
         required: false
         example: null
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: true
-        custom: []
-      'permisos[].recurso':
-        name: 'permisos[].recurso'
-        description: ''
-        required: true
-        example: architecto
         type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      'permisos[].acciones':
-        name: 'permisos[].acciones'
-        description: ''
-        required: true
-        example: []
-        type: object
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      'permisos[].activo':
-        name: 'permisos[].activo'
-        description: ''
-        required: false
-        example: false
-        type: boolean
         enumValues: []
         exampleWasSpecified: false
         nullable: true
@@ -239,11 +209,6 @@ endpoints:
       estado: architecto
       ocupacion: architecto
       escolaridad: architecto
-      permisos:
-        -
-          recurso: architecto
-          acciones: []
-          activo: false
     fileParameters: []
     responses: []
     responseFields: []
