@@ -355,6 +355,7 @@ class IndicadoresController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'excel_file' => 'required|mimes:xlsx,xls,csv|max:2048',
+                'tipoIndicador' => 'required|string|max:100',
             ], [
                 'excel_file.required' => 'El archivo es requerido',
                 'excel_file.mimes' => 'El archivo debe ser un Excel o CSV',
@@ -432,6 +433,7 @@ class IndicadoresController extends Controller
                 $year = date('Y'); // Año actual// en milisegundos
                 $record['fecha_inicio'] = new UTCDateTime(strtotime("$year-01-01 00:00:00") * 1000);
                 $record['fecha_fin'] = new UTCDateTime(strtotime("$year-12-31 23:59:59") * 1000);
+                $record['tipoIndicador'] = $request->input('tipoIndicador');
 
 
                 // Solo crear el registro si tiene al menos un campo no nulo
