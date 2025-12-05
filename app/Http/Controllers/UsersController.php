@@ -22,9 +22,17 @@ class UsersController extends Controller
     /**
      * Retorna todos los usuarios
      */
-    public function index()
+    public function index(Request $request)
     {
+        // Obtenemos el usuario actual
+        $currentUser = $request->user();
+
         $users = User::all();
+
+        // Eliminamos al usuario actual de la lista
+        $users = $users->filter(function ($user) use ($currentUser) {
+            return $user->_id !== $currentUser->_id;
+        });
 
         if ($users->isEmpty()) {
             return response()->json([
@@ -56,7 +64,7 @@ class UsersController extends Controller
                     'id' => $rol->_id,
                     'nombre' => $rol->nombre,
                     'descripcion' => $rol->descripcion,
-                ]),
+                ])->toArray(),
 
             ];
         });
@@ -64,7 +72,7 @@ class UsersController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Usuarios encontrados',
-            'usuarios' => $usuarios,
+            'usuarios' => array_values($usuarios->toArray()),
         ], Response::HTTP_OK);
     }
 
