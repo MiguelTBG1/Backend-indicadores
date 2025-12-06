@@ -111,21 +111,21 @@ Route::middleware(['auth.sanctum'])->group(function () {
     Route::controller(ReporteController::class)
         ->prefix('reportes')
         ->group(function () {
-            Route::get('/', 'index');
-            Route::post('/', 'store');
-            Route::get('{id}', 'show');
-            Route::put('{id}', 'update');
-            Route::delete('{id}', 'destroy');
+            Route::get('/', 'index')->middleware(['abilities:reportes.read']);
+            Route::post('/', 'store')->middleware(['abilities:reportes.create']);
+            Route::get('{id}', 'show')->middleware(['abilities:reportes.read']);
+            Route::put('{id}', 'update')->middleware(['abilities:reportes.update']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:reportes.delete']);
         });
 
     Route::controller(GraficaController::class)
         ->prefix('graficas')
         ->group(function () {
-            Route::get('/', 'index');
-            Route::get('{id}', 'show');
-            Route::post('/', 'store');
-            Route::put('{id}', 'update');
-            Route::delete('{id}', 'destroy');
+            Route::get('/', 'index')->middleware(['abilities:graficas.read']);
+            Route::get('{id}', 'show')->middleware(['abilities:graficas.read']);
+            Route::post('/', 'store')->middleware(['abilities:graficas.create']);
+            Route::put('{id}', 'update')->middleware(['abilities:graficas.update']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:graficas.delete']);
         });
 
     Route::get('/proxy-file', function (Request $request) {

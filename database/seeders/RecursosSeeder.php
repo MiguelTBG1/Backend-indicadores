@@ -61,6 +61,19 @@ class RecursosSeeder extends Seeder
                 'descripcion' => 'Rutas de recursos del sistema',
                 'tipo' => 'estatico',
             ],
+            [
+                'clave' => 'reportes',
+                'nombre' => 'Reportes',
+                'descripcion' => 'Rutas de reportes del sistema',
+                'tipo' => 'estatico',
+            ],
+            [
+                'clave' => 'estadisticas',
+                'nombre' => 'Estadisticas',
+                'descripcion' => 'Rutas de estadisticas del sistema',
+                'tipo' => 'estatico',
+            ]
+
         ];
 
         foreach ($recursos as $recurso) {
