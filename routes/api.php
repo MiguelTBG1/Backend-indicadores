@@ -121,11 +121,11 @@ Route::middleware(['auth.sanctum'])->group(function () {
     Route::controller(GraficaController::class)
         ->prefix('graficas')
         ->group(function () {
-            Route::get('/', 'index')->middleware(['abilities:graficas.read']);
-            Route::get('{id}', 'show')->middleware(['abilities:graficas.read']);
-            Route::post('/', 'store')->middleware(['abilities:graficas.create']);
-            Route::put('{id}', 'update')->middleware(['abilities:graficas.update']);
-            Route::delete('{id}', 'destroy')->middleware(['abilities:graficas.delete']);
+            Route::get('/', 'index')->middleware(['abilities:estadisticas.read']);
+            Route::get('{id}', 'show')->middleware(['abilities:estadisticas.read']);
+            Route::post('/', 'store')->middleware(['abilities:estadisticas.create']);
+            Route::put('{id}', 'update')->middleware(['abilities:estadisticas.update']);
+            Route::delete('{id}', 'destroy')->middleware(['abilities:estadisticas.delete']);
         });
 
     Route::get('/proxy-file', function (Request $request) {
