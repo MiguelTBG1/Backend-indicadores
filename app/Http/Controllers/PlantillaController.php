@@ -11,12 +11,18 @@ use Exception;
 use App\Services\DynamicModelService;
 use function PHPUnit\Framework\isArray;
 
+/**
+ * @group Plantillas
+ * 
+ * Gestión de las plantillas del sistema.
+ * Una plantilla puede ser considerado como un formularió.
+ */
 class PlantillaController extends Controller
 {
     /**
-     * Función para obtener todas las plantillas
-     * @return \Illuminate\Http\JsonResponse
-     *
+     * Listar plantillas
+     * 
+     * Retorna una lista de todas las plantillas de las cuales el usuario que hizo esta solicitud tiene permiso de ver.
      */
     public function index(Request $request)
     {
@@ -49,9 +55,9 @@ class PlantillaController extends Controller
     }
 
     /**
-     * Función para crear una nueva plantilla
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Crear plantilla
+     * 
+     * Crea una nueva plantilla en el sistema.
      */
     public function store(Request $request)
     {
@@ -142,10 +148,11 @@ class PlantillaController extends Controller
     }
 
     /**
-     * Función para obtener las secciones de una plantilla por ID
-     * @param string $id
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * Obtener plantilla
+     * 
+     * Obtiene una plantilla especifica mediante su ID
+     * 
+     * @urlParam id int required El id de la plantilla.
      */
     public function getSecciones($id)
     {
@@ -197,11 +204,16 @@ class PlantillaController extends Controller
     }
 
     /**
-     * Función para actualizar una plantilla por ID
-     * @param \Illuminate\Http\Request $request
-     * @param string $id
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * Actualizar plantilla
+     * 
+     * Actualiza una plantilla en especifico.
+     * 
+     * <aside class="notice">
+     * Se requiere:
+     * - Permiso de actualización sobre el recurso Plantillas
+     * - Permiso de actualización sobre la plantilla específica
+     *  </aside>
+     * @urlParam id int required El id de la plantilla.
      */
     public function update(Request $request, $id)
     {
@@ -287,10 +299,11 @@ class PlantillaController extends Controller
     }
 
     /**
-     * Función para eliminar una plantilla por ID
-     * @param string $id
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * Borrar plantilla
+     * 
+     * Borra una plantilla en especifico.
+     * 
+     * @urlParam id int required La id de la plantilla a borrar
      */
     public function destroy(Request $request, $id)
     {
@@ -326,7 +339,7 @@ class PlantillaController extends Controller
                 throw new \Exception('No se puede eliminar la plantilla porque tiene datos asociados', 409);
             }
 
-            if(!$user->can('delete', $plantilla)) {
+            if (!$user->can('delete', $plantilla)) {
                 throw new \Exception('El usuario no puede eliminar la plantilla ');
             }
             // Eliminar la plantilla de la colección de Plantillas
