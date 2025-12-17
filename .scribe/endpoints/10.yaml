@@ -1,0 +1,481 @@
+name: Gráficas
+description: |-
+
+  Endpoints relacionados con la gestión de gráficas.
+endpoints:
+  -
+    httpMethods:
+      - GET
+    uri: api/graficas
+    metadata:
+      groupName: Gráficas
+      groupDescription: |-
+
+        Endpoints relacionados con la gestión de gráficas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar todas las gráficas.'
+      description: 'Retorna una lista de todas las gráficas disponibles.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/graficas/{id}'
+    metadata:
+      groupName: Gráficas
+      groupDescription: |-
+
+        Endpoints relacionados con la gestión de gráficas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Mostrar una gráfica específica.'
+      description: 'Retorna la información completa de una gráfica identificada por su ID.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'El ID de la gráfica que se desea obtener.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/graficas
+    metadata:
+      groupName: Gráficas
+      groupDescription: |-
+
+        Endpoints relacionados con la gestión de gráficas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Crea una nueva graica.'
+      description: ''
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      titulo:
+        name: titulo
+        description: 'El título de la gráfica.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      descripcion:
+        name: descripcion
+        description: 'La descripción de la gráfica.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      chartOptions:
+        name: chartOptions
+        description: 'Configuraciones de la gráfica. Usa la estructura de ApexCharts.'
+        required: false
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      rangos:
+        name: rangos
+        description: 'Los rangos de fechas para la gráfica.'
+        required: true
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      series:
+        name: series
+        description: validation.min.
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      tipoRango:
+        name: tipoRango
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'rangos[].inicio':
+        name: 'rangos[].inicio'
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'rangos[].fin':
+        name: 'rangos[].fin'
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'rangos[].label':
+        name: 'rangos[].label'
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'series[].name':
+        name: 'series[].name'
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'series[].configuracion':
+        name: 'series[].configuracion'
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      titulo: architecto
+      descripcion: architecto
+      chartOptions:
+        - architecto
+      rangos:
+        - architecto
+      series:
+        -
+          name: architecto
+          configuracion: []
+      tipoRango: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: 'api/graficas/{id}'
+    metadata:
+      groupName: Gráficas
+      groupDescription: |-
+
+        Endpoints relacionados con la gestión de gráficas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the grafica.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      titulo:
+        name: titulo
+        description: validation.max.
+        required: false
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      descripcion:
+        name: descripcion
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      chartOptions:
+        name: chartOptions
+        description: ''
+        required: false
+        example: null
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      rangos:
+        name: rangos
+        description: ''
+        required: false
+        example: null
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      series:
+        name: series
+        description: ''
+        required: false
+        example: null
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      tipoRango:
+        name: tipoRango
+        description: ''
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      'rangos[].inicio':
+        name: 'rangos[].inicio'
+        description: 'This field is required when <code>rangos</code> is present.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'rangos[].fin':
+        name: 'rangos[].fin'
+        description: 'This field is required when <code>rangos</code> is present.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'rangos[].label':
+        name: 'rangos[].label'
+        description: 'This field is required when <code>rangos</code> is present.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'series[].name':
+        name: 'series[].name'
+        description: 'This field is required when <code>series</code> is present.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'series[].configuracion':
+        name: 'series[].configuracion'
+        description: 'This field is required when <code>series</code> is present.'
+        required: false
+        example: null
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      titulo: b
+      descripcion: architecto
+      tipoRango: architecto
+      rangos:
+        -
+          inicio: architecto
+          fin: architecto
+          label: architecto
+      series:
+        -
+          name: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/graficas/{id}'
+    metadata:
+      groupName: Gráficas
+      groupDescription: |-
+
+        Endpoints relacionados con la gestión de gráficas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the grafica.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []

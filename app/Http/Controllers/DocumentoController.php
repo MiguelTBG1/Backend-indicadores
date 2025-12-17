@@ -12,12 +12,17 @@ use Dom\Document;
 use Exception;
 use PhpParser\Comment\Doc;
 
+/**
+ * @group Documentos
+ * 
+ * Gestiona los documentos/registros de las plantillas dinámicas.
+ */
 class DocumentoController extends Controller
 {
     /**
-     * Función para obtener los nombres de las plantillas disponibles
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * Listar plantillas (leibles)
+     * 
+     * Retorna una lista de todas las plantillas de las cuales el usuario que hizo esta solicitud tiene permiso de ver/leer en documentos.
      */
     public function redableTemplateNames(Request $request)
     {
@@ -78,6 +83,11 @@ class DocumentoController extends Controller
         }
     }
 
+    /**
+     * Listar plantillas (creables)
+     * 
+     * Retorna una lista de todas las plantillas de las cuales el usuario que hizo esta solicitud tiene permiso de crear documentos.
+     */
     public function creableTemplateNames(Request $request)
     {
         try {
@@ -114,9 +124,9 @@ class DocumentoController extends Controller
     }
 
     /**
-     * Función para obtener los nombres de las plantillas disponibles
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * Listar plantillas
+     * 
+     * Lista todas las plantillas disponibles en el sistema.
      */
     public function templateNames()
     {
@@ -174,10 +184,11 @@ class DocumentoController extends Controller
     }
 
     /**
-     * Obtiene todos los documentos de una plantilla específica.
-     * @param string $id ID de la plantilla.
-     * @return \Illuminate\Http\JsonResponse Lista de documentos de la plantilla.
-     * @throws \Exception Para manejo de errores personalizados.
+     * Listar documentos de una plantilla
+     * 
+     * Lista todos los documentos de una plantilla específica.
+     * 
+     * @urlParam id string required El ID de la plantilla. Example: 64b8f0c2e1d3f2a5b6c7d8e9
      */
     public function index($id)
     {
@@ -279,11 +290,11 @@ class DocumentoController extends Controller
 
 
     /**
-     * Función para guardar un documento en una plantilla específica.
-     * @param \Illuminate\Http\Request $request
-     * @param string $id ID de la plantilla.
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * Crear documento de una plantilla
+     * 
+     * Crea un documento de una plantilla en específico.
+     * 
+     * @urlParam id string required El ID de la plantilla. Example: 64b8f0c2e1d3f2a5b6c7d8e9
      */
     public function store(Request $request, $id)
     {
@@ -350,6 +361,14 @@ class DocumentoController extends Controller
         }
     }
 
+    /**
+     * Eliminar documento
+     * 
+     * Elimina un documento de una plantilla específica.
+     * 
+     * @urlParam plantillaName string required El nombre de la plantilla. Example: Docentes
+     * @urlParam documentId string required El ID del documento. Example: 64b8f0c2e1d3f2a5b6c7d8e9
+     */
     public function destroy($plantillaName, $documentId)
     {
         try {
@@ -395,6 +414,14 @@ class DocumentoController extends Controller
         }
     }
 
+    /**
+     * Actualizar documento 
+     * 
+     * Actualiza un documento de una plantilla específica.
+     * 
+     * @urlParam plantillaName string required El nombre de la plantilla. Example: Docentes
+     * @urlParam documentId string required El ID del documento. Example: 64b8f0c2e1d3f2a5b6c7d8e9
+     */
     public function update(Request $request, $plantillaName, $documentId)
     {
         try {
@@ -465,8 +492,14 @@ class DocumentoController extends Controller
         }
     }
 
-
-
+    /**
+     * Obtener documento
+     * 
+     *  Obtiene un documento de una plantilla especifica.
+     * 
+     * @urlParam plantillaName string required El nombre de la plantilla. Example: Docentes
+     * @urlParam documentId string required El ID del documento. Example: 64b8f0c2e1d3f2a5b6c7d8e
+     */
     public function show($plantillaName, $documentId)
     {
         try {

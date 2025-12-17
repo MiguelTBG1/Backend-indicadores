@@ -1,27 +1,40 @@
-name: Ejes
+name: Documentos
 description: |-
 
-  Controlador para operaciones crud de las operaciones permitidas en el sistema (CRUD).
+  Gestiona los documentos/registros de las plantillas dinámicas.
 endpoints:
   -
     httpMethods:
       - GET
-    uri: api/ejes
+    uri: 'api/documentos/{id}'
     metadata:
-      groupName: Ejes
-      groupDescription: ''
+      groupName: Documentos
+      groupDescription: |-
+
+        Gestiona los documentos/registros de las plantillas dinámicas.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Función para obtener todos los ejes.'
-      description: ''
+      title: 'Listar documentos de una plantilla'
+      description: 'Lista todos los documentos de una plantilla específica.'
       authenticated: true
       custom: []
     headers:
       Authorization: 'Bearer {TU_TOKEN}'
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      id:
+        name: id
+        description: 'El ID de la plantilla.'
+        required: true
+        example: 64b8f0c2e1d3f2a5b6c7d8e9
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 64b8f0c2e1d3f2a5b6c7d8e9
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -49,14 +62,16 @@ endpoints:
   -
     httpMethods:
       - GET
-    uri: 'api/ejes/{id}'
+    uri: 'api/documentos/{plantillaName}/{documentId}'
     metadata:
-      groupName: Ejes
-      groupDescription: ''
+      groupName: Documentos
+      groupDescription: |-
+
+        Gestiona los documentos/registros de las plantillas dinámicas.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Función para obtener un eje por ID.'
-      description: ''
+      title: 'Obtener documento'
+      description: 'Obtiene un documento de una plantilla especifica.'
       authenticated: true
       custom: []
     headers:
@@ -64,18 +79,29 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
-        name: id
-        description: 'The ID of the eje.'
+      plantillaName:
+        name: plantillaName
+        description: 'El nombre de la plantilla.'
         required: true
-        example: architecto
+        example: Docentes
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      documentId:
+        name: documentId
+        description: 'El ID del documento.'
+        required: true
+        example: 64b8f0c2e1d3f2a5b6c7d8e
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      plantillaName: Docentes
+      documentId: 64b8f0c2e1d3f2a5b6c7d8e
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -103,22 +129,35 @@ endpoints:
   -
     httpMethods:
       - POST
-    uri: api/ejes
+    uri: 'api/documentos/{id}'
     metadata:
-      groupName: Ejes
-      groupDescription: ''
+      groupName: Documentos
+      groupDescription: |-
+
+        Gestiona los documentos/registros de las plantillas dinámicas.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Función para insertar un nuevo eje.'
-      description: ''
+      title: 'Crear documento de una plantilla'
+      description: 'Crea un documento de una plantilla en específico.'
       authenticated: true
       custom: []
     headers:
       Authorization: 'Bearer {TU_TOKEN}'
       Content-Type: application/json
       Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
+    urlParameters:
+      id:
+        name: id
+        description: 'El ID de la plantilla.'
+        required: true
+        example: 64b8f0c2e1d3f2a5b6c7d8e9
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 64b8f0c2e1d3f2a5b6c7d8e9
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -136,15 +175,17 @@ endpoints:
     custom: []
   -
     httpMethods:
-      - PUT
-    uri: 'api/ejes/{id}'
+      - POST
+    uri: 'api/documentos/{plantillaName}/{documentId}'
     metadata:
-      groupName: Ejes
-      groupDescription: ''
+      groupName: Documentos
+      groupDescription: |-
+
+        Gestiona los documentos/registros de las plantillas dinámicas.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Actualizar documento'
+      description: 'Actualiza un documento de una plantilla específica.'
       authenticated: true
       custom: []
     headers:
@@ -152,18 +193,29 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
-        name: id
-        description: 'The ID of the eje.'
+      plantillaName:
+        name: plantillaName
+        description: 'El nombre de la plantilla.'
         required: true
-        example: architecto
+        example: Docentes
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      documentId:
+        name: documentId
+        description: 'El ID del documento.'
+        required: true
+        example: 64b8f0c2e1d3f2a5b6c7d8e9
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      plantillaName: Docentes
+      documentId: 64b8f0c2e1d3f2a5b6c7d8e9
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -182,14 +234,16 @@ endpoints:
   -
     httpMethods:
       - DELETE
-    uri: 'api/ejes/{id}'
+    uri: 'api/documentos/{plantillaName}/{documentId}'
     metadata:
-      groupName: Ejes
-      groupDescription: ''
+      groupName: Documentos
+      groupDescription: |-
+
+        Gestiona los documentos/registros de las plantillas dinámicas.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Eliminar documento'
+      description: 'Elimina un documento de una plantilla específica.'
       authenticated: true
       custom: []
     headers:
@@ -197,18 +251,29 @@ endpoints:
       Content-Type: application/json
       Accept: application/json
     urlParameters:
-      id:
-        name: id
-        description: 'The ID of the eje.'
+      plantillaName:
+        name: plantillaName
+        description: 'El nombre de la plantilla.'
         required: true
-        example: architecto
+        example: Docentes
         type: string
         enumValues: []
-        exampleWasSpecified: false
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      documentId:
+        name: documentId
+        description: 'El ID del documento.'
+        required: true
+        example: 64b8f0c2e1d3f2a5b6c7d8e9
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      plantillaName: Docentes
+      documentId: 64b8f0c2e1d3f2a5b6c7d8e9
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -227,16 +292,106 @@ endpoints:
   -
     httpMethods:
       - GET
-    uri: api/acciones
+    uri: api/documentos/plantillas-creable
     metadata:
-      groupName: Ejes
+      groupName: Documentos
       groupDescription: |-
 
-        Controlador para operaciones crud de las operaciones permitidas en el sistema (CRUD).
+        Gestiona los documentos/registros de las plantillas dinámicas.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Obtiene todos los roles'
-      description: ''
+      title: 'Listar plantillas (creables)'
+      description: 'Retorna una lista de todas las plantillas de las cuales el usuario que hizo esta solicitud tiene permiso de crear documentos.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/documentos/plantillas-redable
+    metadata:
+      groupName: Documentos
+      groupDescription: |-
+
+        Gestiona los documentos/registros de las plantillas dinámicas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar plantillas (leibles)'
+      description: 'Retorna una lista de todas las plantillas de las cuales el usuario que hizo esta solicitud tiene permiso de ver/leer en documentos.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/documentos/plantillas
+    metadata:
+      groupName: Documentos
+      groupDescription: |-
+
+        Gestiona los documentos/registros de las plantillas dinámicas.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar plantillas'
+      description: 'Lista todas las plantillas disponibles en el sistema.'
       authenticated: true
       custom: []
     headers:
