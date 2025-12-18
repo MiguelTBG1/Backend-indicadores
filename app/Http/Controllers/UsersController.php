@@ -151,6 +151,11 @@ class UsersController extends Controller
         ], Response::HTTP_CREATED);
     }
 
+    /**
+     * Elimina un usuario
+     * 
+     * @urlParam id int required El ID del usuario que se desea eliminar.
+     */
     public function destroy($id)
     {
         $user = User::find($id);
@@ -170,6 +175,11 @@ class UsersController extends Controller
         }
     }
 
+    /**
+     * Actualizar usuario.
+     * 
+     * @urlParam id int required El ID del usuario que se desea actualizar.
+     */
     public function update(Request $request, $id)
     {
         $user = User::find($id);

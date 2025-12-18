@@ -14,7 +14,7 @@ endpoints:
         Endpoints relacionados con la gestión de gráficas.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Listar todas las gráficas.'
+      title: 'Listar gráficas.'
       description: 'Retorna una lista de todas las gráficas disponibles.'
       authenticated: true
       custom: []
@@ -59,7 +59,7 @@ endpoints:
         Endpoints relacionados con la gestión de gráficas.
       subgroup: ''
       subgroupDescription: ''
-      title: 'Mostrar una gráfica específica.'
+      title: 'Obtener gráfica'
       description: 'Retorna la información completa de una gráfica identificada por su ID.'
       authenticated: true
       custom: []
@@ -275,8 +275,8 @@ endpoints:
         Endpoints relacionados con la gestión de gráficas.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Actualizar gráfica'
+      description: 'Actualiza la información de una gráfica existente.'
       authenticated: true
       custom: []
     headers:
@@ -286,16 +286,16 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the grafica.'
+        description: 'El ID de la gráfica que se desea actualizar.'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -443,8 +443,8 @@ endpoints:
         Endpoints relacionados con la gestión de gráficas.
       subgroup: ''
       subgroupDescription: ''
-      title: ''
-      description: ''
+      title: 'Eliminar gráfica'
+      description: 'Elimina una gráfica existente.'
       authenticated: true
       custom: []
     headers:
@@ -454,16 +454,16 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the grafica.'
+        description: 'El ID de la gráfica que se desea eliminar.'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

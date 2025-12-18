@@ -472,10 +472,10 @@ Esto es útil para evitar problemas de CORS al acceder a archivos desde el front
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
                                              id="toc-item-graficas-GETapi-graficas">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Listar todas las gráficas.">
+                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Listar gráficas.">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
                                                    href="#graficas-GETapi-graficas">
-                                                    Listar todas las gráficas.
+                                                    Listar gráficas.
                                                 </a>
                                             </div>
                                                                                     </div>
@@ -484,10 +484,10 @@ Esto es útil para evitar problemas de CORS al acceder a archivos desde el front
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
                                              id="toc-item-graficas-GETapi-graficas--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Mostrar una gráfica específica.">
+                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Obtener gráfica">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
                                                    href="#graficas-GETapi-graficas--id-">
-                                                    Mostrar una gráfica específica.
+                                                    Obtener gráfica
                                                 </a>
                                             </div>
                                                                                     </div>
@@ -508,10 +508,10 @@ Esto es útil para evitar problemas de CORS al acceder a archivos desde el front
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
                                              id="toc-item-graficas-PUTapi-graficas--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="PUT api/graficas/{id}">
+                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Actualizar gráfica">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
                                                    href="#graficas-PUTapi-graficas--id-">
-                                                    PUT api/graficas/{id}
+                                                    Actualizar gráfica
                                                 </a>
                                             </div>
                                                                                     </div>
@@ -520,10 +520,10 @@ Esto es útil para evitar problemas de CORS al acceder a archivos desde el front
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
                                              id="toc-item-graficas-DELETEapi-graficas--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="DELETE api/graficas/{id}">
+                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Eliminar gráfica">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
                                                    href="#graficas-DELETEapi-graficas--id-">
-                                                    DELETE api/graficas/{id}
+                                                    Eliminar gráfica
                                                 </a>
                                             </div>
                                                                                     </div>
@@ -982,10 +982,10 @@ Esto es útil para evitar problemas de CORS al acceder a archivos desde el front
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
                                              id="toc-item-users-PUTapi-usuarios--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="PUT api/usuarios/{id}">
+                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Actualizar usuario.">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
                                                    href="#users-PUTapi-usuarios--id-">
-                                                    PUT api/usuarios/{id}
+                                                    Actualizar usuario.
                                                 </a>
                                             </div>
                                                                                     </div>
@@ -994,10 +994,10 @@ Esto es útil para evitar problemas de CORS al acceder a archivos desde el front
                                                                     <div class="expandable">
                                         <div class="sl-flex sl-items-center sl-h-md sl-pr-4 sl-pl-8 sl-bg-canvas-100 hover:sl-bg-canvas-200 sl-cursor-pointer sl-select-none"
                                              id="toc-item-users-DELETEapi-usuarios--id-">
-                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="DELETE api/usuarios/{id}">
+                                            <div class="sl-flex-1 sl-items-center sl-truncate sl-mr-1.5 sl-p-0" title="Elimina un usuario">
                                                 <a class="ElementsTableOfContentsItem sl-block sl-no-underline"
                                                    href="#users-DELETEapi-usuarios--id-">
-                                                    DELETE api/usuarios/{id}
+                                                    Elimina un usuario
                                                 </a>
                                             </div>
                                                                                     </div>
@@ -1009,7 +1009,7 @@ Esto es útil para evitar problemas de CORS al acceder a archivos desde el front
 
         </div>
         <div class="sl-flex sl-items-center sl-px-4 sl-py-3 sl-border-t">
-            Last updated: December 18, 2025 \n Last commit: da36ddb899e3b94f29cd323615728c7c185718b8
+            Last updated: December 18, 2025 \n Last commit: 31da5c1017f49b3ef74bc4db0c9c4a66fd70a20b
         </div>
 
         <div class="sl-flex sl-items-center sl-px-4 sl-py-3 sl-border-t">
@@ -4689,7 +4689,7 @@ fetch(url, {
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
                     id="graficas-GETapi-graficas">
-                    Listar todas las gráficas.
+                    Listar gráficas.
                 </h2>
             </div>
         </div>
@@ -4905,7 +4905,7 @@ fetch(url, {
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
                     id="graficas-GETapi-graficas--id-">
-                    Mostrar una gráfica específica.
+                    Obtener gráfica
                 </h2>
             </div>
         </div>
@@ -5609,7 +5609,7 @@ fetch(url, {
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
                     id="graficas-PUTapi-graficas--id-">
-                    PUT api/graficas/{id}
+                    Actualizar gráfica
                 </h2>
             </div>
         </div>
@@ -5636,7 +5636,7 @@ fetch(url, {
                                     </div>
         </div>
 
-        
+        <p>Actualiza la información de una gráfica existente.</p>
     </div>
     <div class="sl-flex">
         <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
@@ -5714,19 +5714,19 @@ fetch(url, {
         <div class="sl-flex sl-items-center sl-max-w-full">
                                         <div class="sl-flex sl-items-baseline sl-text-base">
                     <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">string</span>
+                                            <span class="sl-truncate sl-text-muted">integer</span>
                                     </div>
                                     <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
                     <span class="sl-ml-2 sl-text-warning">required</span>
                                     </div>
                 <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the grafica.</p>
+            <p>El ID de la gráfica que se desea actualizar.</p>
         </div>
                                             <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        architecto
+                        16
                     </div>
                 </div>
             </div>
@@ -6018,7 +6018,7 @@ fetch(url, {
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/graficas/architecto"
+    "http://localhost/api/graficas/16"
 );
 
 const headers = {
@@ -6064,7 +6064,7 @@ fetch(url, {
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
                     id="graficas-DELETEapi-graficas--id-">
-                    DELETE api/graficas/{id}
+                    Eliminar gráfica
                 </h2>
             </div>
         </div>
@@ -6091,7 +6091,7 @@ fetch(url, {
                                     </div>
         </div>
 
-        
+        <p>Elimina una gráfica existente.</p>
     </div>
     <div class="sl-flex">
         <div data-testid="two-column-left" class="sl-flex-1 sl-w-0">
@@ -6169,19 +6169,19 @@ fetch(url, {
         <div class="sl-flex sl-items-center sl-max-w-full">
                                         <div class="sl-flex sl-items-baseline sl-text-base">
                     <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">string</span>
+                                            <span class="sl-truncate sl-text-muted">integer</span>
                                     </div>
                                     <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
                     <span class="sl-ml-2 sl-text-warning">required</span>
                                     </div>
                 <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the grafica.</p>
+            <p>El ID de la gráfica que se desea eliminar.</p>
         </div>
                                             <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        architecto
+                        16
                     </div>
                 </div>
             </div>
@@ -6219,7 +6219,7 @@ fetch(url, {
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/graficas/architecto"
+    "http://localhost/api/graficas/16"
 );
 
 const headers = {
@@ -8367,7 +8367,7 @@ automáticamente para el año en curso (01/01 - 31/12).</p>
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        /tmp/phpoW6IOB
+                        /tmp/phpFmHiy6
                     </div>
                 </div>
             </div>
@@ -13100,7 +13100,7 @@ fetch(url, {
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
                     id="users-PUTapi-usuarios--id-">
-                    PUT api/usuarios/{id}
+                    Actualizar usuario.
                 </h2>
             </div>
         </div>
@@ -13205,19 +13205,19 @@ fetch(url, {
         <div class="sl-flex sl-items-center sl-max-w-full">
                                         <div class="sl-flex sl-items-baseline sl-text-base">
                     <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">string</span>
+                                            <span class="sl-truncate sl-text-muted">integer</span>
                                     </div>
                                     <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
                     <span class="sl-ml-2 sl-text-warning">required</span>
                                     </div>
                 <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the usuario.</p>
+            <p>El ID del usuario que se desea actualizar.</p>
         </div>
                                             <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        architecto
+                        16
                     </div>
                 </div>
             </div>
@@ -13255,7 +13255,7 @@ fetch(url, {
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/usuarios/architecto"
+    "http://localhost/api/usuarios/16"
 );
 
 const headers = {
@@ -13282,7 +13282,7 @@ fetch(url, {
             <div class="sl-stack sl-stack--horizontal sl-stack--5 sl-flex sl-flex-row sl-items-center">
                 <h2 class="sl-text-3xl sl-leading-tight sl-font-prose sl-text-heading sl-mt-5 sl-mb-1"
                     id="users-DELETEapi-usuarios--id-">
-                    DELETE api/usuarios/{id}
+                    Elimina un usuario
                 </h2>
             </div>
         </div>
@@ -13387,19 +13387,19 @@ fetch(url, {
         <div class="sl-flex sl-items-center sl-max-w-full">
                                         <div class="sl-flex sl-items-baseline sl-text-base">
                     <div class="sl-font-mono sl-font-semibold sl-mr-2">id</div>
-                                            <span class="sl-truncate sl-text-muted">string</span>
+                                            <span class="sl-truncate sl-text-muted">integer</span>
                                     </div>
                                     <div class="sl-flex-1 sl-h-px sl-mx-3"></div>
                     <span class="sl-ml-2 sl-text-warning">required</span>
                                     </div>
                 <div class="sl-prose sl-markdown-viewer" style="font-size: 12px;">
-            <p>The ID of the usuario.</p>
+            <p>El ID del usuario que se desea eliminar.</p>
         </div>
                                             <div class="sl-stack sl-stack--horizontal sl-stack--2 sl-flex sl-flex-row sl-items-baseline sl-text-muted">
                 <span>Example:</span> <!-- <span> important for spacing -->
                 <div class="sl-flex sl-flex-1 sl-flex-wrap" style="gap: 4px;">
                     <div class="sl-max-w-full sl-break-all sl-px-1 sl-bg-canvas-tint sl-text-muted sl-rounded sl-border">
-                        architecto
+                        16
                     </div>
                 </div>
             </div>
@@ -13437,7 +13437,7 @@ fetch(url, {
                                     <div class="sl-px-0 sl-py-1">
                                         <div style="max-height: 400px;" class="sl-overflow-y-auto sl-rounded">
                                             <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/usuarios/architecto"
+    "http://localhost/api/usuarios/16"
 );
 
 const headers = {

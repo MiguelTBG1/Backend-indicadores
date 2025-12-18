@@ -281,7 +281,7 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'Actualizar usuario.'
       description: ''
       authenticated: true
       custom: []
@@ -292,16 +292,16 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the usuario.'
+        description: 'El ID del usuario que se desea actualizar.'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -326,7 +326,7 @@ endpoints:
       groupDescription: ''
       subgroup: ''
       subgroupDescription: ''
-      title: ''
+      title: 'Elimina un usuario'
       description: ''
       authenticated: true
       custom: []
@@ -337,16 +337,16 @@ endpoints:
     urlParameters:
       id:
         name: id
-        description: 'The ID of the usuario.'
+        description: 'El ID del usuario que se desea eliminar.'
         required: true
-        example: architecto
-        type: string
+        example: 16
+        type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: architecto
+      id: 16
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []

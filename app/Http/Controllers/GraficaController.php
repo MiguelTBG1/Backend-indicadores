@@ -20,11 +20,10 @@ use MongoDB\BSON\UTCDateTime;
 class GraficaController extends Controller
 {
     /**
-     * Listar todas las gráficas.
+     * Listar gráficas.
      *
      * Retorna una lista de todas las gráficas disponibles.
-     *
-     * */
+     */
     public function index()
     {
         try {
@@ -39,7 +38,7 @@ class GraficaController extends Controller
     }
 
     /**
-     * Mostrar una gráfica específica.
+     * Obtener gráfica
      *
      * Retorna la información completa de una gráfica identificada por su ID.
      *
@@ -133,6 +132,13 @@ class GraficaController extends Controller
         }
     }
 
+    /**
+     * Actualizar gráfica
+     * 
+     * Actualiza la información de una gráfica existente.
+     * 
+     * @urlParam id int required El ID de la gráfica que se desea actualizar.
+     */
     public function update(UpdateGraficaRequest $request, $id)
     {
         $grafica = Grafica::find($id);
@@ -152,6 +158,13 @@ class GraficaController extends Controller
         }
     }
 
+    /**
+     * Eliminar gráfica
+     * 
+     * Elimina una gráfica existente.
+     * 
+     * @urlParam id int required El ID de la gráfica que se desea eliminar.
+     */
     public function destroy($id)
     {
         $grafica = Grafica::find($id);
