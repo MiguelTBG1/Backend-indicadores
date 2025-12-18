@@ -1,81 +1,27 @@
-name: Authentification
-description: ''
+name: Indicadores
+description: |-
+
+  Endpoints para gestionar los indicadores y métricas del sistema.
+  Los indicadores representan métricas calculadas dinámicamente como
+  "Número de alumnos registrados", etc.
 endpoints:
   -
     httpMethods:
-      - POST
-    uri: api/login
+      - GET
+    uri: api/indicadores
     metadata:
-      groupName: Authentification
-      groupDescription: ''
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
       subgroup: ''
       subgroupDescription: ''
-      title: Login
-      description: 'Inicia sesion de un usuario y regresa un token'
-      authenticated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters:
-      email:
-        name: email
-        description: 'El correo del usuario'
-        required: false
-        example: gbailey@example.net
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      password:
-        name: password
-        description: 'La contraseña del usuario'
-        required: false
-        example: '|]|{+-'
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-    cleanBodyParameters:
-      email: gbailey@example.net
-      password: '|]|{+-'
-    fileParameters: []
-    responses:
-      -
-        status: 200
-        content: '{ "message": "Login exitoso", "user": {"nombre": "Miguel", "id": "68b8634ccf157bf9880c1e7"}, "token": "68b898af531f622cbf0ba1", "permisos": ["usuarios_leer", "Plantillas_leer",]}'
-        headers: []
-        description: 'Datos de inicio de sesion correctos'
-        custom: []
-      -
-        status: 401
-        content: '{"message": "Credenciales invalidas"}'
-        headers: []
-        description: 'Datos de inicio de sesion incorrectos'
-        custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
-      - POST
-    uri: api/logout
-    metadata:
-      groupName: Authentification
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: Logout
-      description: 'Cierra la sesión del usuario y elimina todos sus tokens'
+      title: 'Listar todos los indicadores'
+      description: |-
+        Obtiene la lista completa de indicadores configurados en el sistema.
+        Cada indicador incluye su configuración base y el campo numerador inicializado en 0.
       authenticated: true
       custom: []
     headers:
@@ -92,10 +38,617 @@ endpoints:
     responses:
       -
         status: 200
-        content: '{"message": "Logout exitoso"}'
+        content: |-
+          {
+            "success": true,
+            "message": "Indicadores encontrados",
+            "indicadores": [
+            {
+                "_idProyecto": "1.1.2",
+                "numero": 2,
+                "nombreIndicador": "Numero de alumnos que son mujeres",
+                "denominador": 200,
+                "numerador": 0,
+                "configuracion": {
+                    "coleccion": "Alumnos_data",
+                    "operacion": "contar",
+                    "secciones": "Información General",
+                    "campo": null,
+                    "campoFechaFiltro": [
+                        "Información General",
+                        "Fecha de inscripcion"
+                    ],
+                    "condicion": [
+                        {
+                            "campo": "Género",
+                            "operador": "igual",
+                            "valor": "Femenino"
+                        }
+                    ]
+                },
+            ]
+          }
         headers: []
-        description: 'Logout exitoso'
+        description: ''
         custom: []
+      -
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "No se encontraron indicadores",
+            "indicadores": []
+          }
+        headers: []
+        description: 'Sin indicadores registrados'
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+            "message": "Error del sistema al obtener los indicadores",
+            "error": "Descripción detallada del error"
+          }
+        headers: []
+        description: 'Error del servidor'
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/indicadores/{id}'
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Consultar indicador por ID'
+      description: 'Obtiene los detalles completos de un indicador específico mediante su identificador único.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID del indicador a consultar.'
+        required: true
+        example: 507f1f77bcf86cd799439011
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 507f1f77bcf86cd799439011
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/indicadores
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Crear indicador'
+      description: |-
+        Registra un nuevo indicador en el sistema. La configuración para
+        calcular el numerador debe agregarse posteriormente.
+        El numerador se inicializa en 0 hasta que se configure el cálculo.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      nombreIndicador:
+        name: nombreIndicador
+        description: 'Nombre descriptivo del indicador.'
+        required: true
+        example: 'Número de alumnos registrados'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      numero:
+        name: numero
+        description: 'Número identificador del indicador.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      _idProyecto:
+        name: _idProyecto
+        description: 'ID del proyecto asociado al indicador.'
+        required: true
+        example: 1.1.2
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      numerador:
+        name: numerador
+        description: 'Valor inicial del numerador del indicador. Default: 0.'
+        required: false
+        example: 0.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      denominador:
+        name: denominador
+        description: 'Valor del denominador del indicador.'
+        required: false
+        example: 100.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      departamento:
+        name: departamento
+        description: 'Departamento responsable del indicador.'
+        required: true
+        example: Académico
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      actividad:
+        name: actividad
+        description: 'Actividad relacionada con el indicador.'
+        required: false
+        example: 'Inscripción de alumnos'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      causa:
+        name: causa
+        description: 'Causa asociada al indicador.'
+        required: false
+        example: 'Baja inscripción'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      accion:
+        name: accion
+        description: 'Acción correctiva para el indicador.'
+        required: false
+        example: 'Campaña de promoción'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      tipoIndicador:
+        name: tipoIndicador
+        description: 'Tipo o categoría del indicador.'
+        required: false
+        example: Planeación
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      fecha_inicio:
+        name: fecha_inicio
+        description: 'Fecha de inicio de vigencia del indicador.'
+        required: false
+        example: '2024-01-01'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      fecha_fin:
+        name: fecha_fin
+        description: 'Fecha de fin de vigencia del indicador.'
+        required: false
+        example: '2024-12-31'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      nombreIndicador: 'Número de alumnos registrados'
+      numero: 1
+      _idProyecto: 1.1.2
+      numerador: 0.0
+      denominador: 100.0
+      departamento: Académico
+      actividad: 'Inscripción de alumnos'
+      causa: 'Baja inscripción'
+      accion: 'Campaña de promoción'
+      tipoIndicador: Planeación
+      fecha_inicio: '2024-01-01'
+      fecha_fin: '2024-12-31'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: 'api/indicadores/{id}'
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Actualizar indicador'
+      description: |-
+        Modifica la información de un indicador existente.
+        Se puede actualizar parcialmente enviando solo los campos necesarios.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the indicadore.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/indicadores/{id}'
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Eliminar indicador'
+      description: |-
+        Elimina permanentemente un indicador del sistema.
+        Esta acción no puede deshacerse.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the indicadore.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+    uri: 'api/indicadores/{id}/configuracion'
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Actualizar configuración de un indicador'
+      description: 'Modifica la configuración de un indicador existente.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the indicadore.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/indicadores/{id}/configuracion'
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Obtener configuración de un indicador'
+      description: |-
+        Consulta la configuración de cálculo de un indicador específico.
+        Retorna un objeto vacío si el indicador no tiene configuración definida.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'The ID of the indicadore.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"success":false,"message":"Token de autenticaci\u00f3n inv\u00e1lido o expirado"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          vary: Origin
+        description: null
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/indicadores/filterByDates
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Filtrar indicadores por rango de fechas'
+      description: |-
+        Obtiene los indicadores que se encuentren dentro del rango de fechas especificado
+        y calcula sus valores (numerador) según su configuración para el periodo solicitado.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      inicio:
+        name: inicio
+        description: 'Fecha de inicio del periodo a consultar. Formato: YYYY-MM-DD.'
+        required: true
+        example: '2024-01-01'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      fin:
+        name: fin
+        description: 'Fecha de fin del periodo a consultar. Debe ser igual o posterior a la fecha de inicio. Formato: YYYY-MM-DD.'
+        required: true
+        example: '2024-12-31'
+        type: date
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      inicio: '2024-01-01'
+      fin: '2024-12-31'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer token_pruebas'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/indicadores/upload
+    metadata:
+      groupName: Indicadores
+      groupDescription: |-
+
+        Endpoints para gestionar los indicadores y métricas del sistema.
+        Los indicadores representan métricas calculadas dinámicamente como
+        "Número de alumnos registrados", etc.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Cargar indicadores desde archivo Excel'
+      description: |-
+        Importa múltiples indicadores desde un archivo Excel o CSV.
+        El archivo debe contener las columnas: Proyecto, #, Indicador,
+        Denominador y Departamento. Las fechas de inicio y fin se establecen
+        automáticamente para el año en curso (01/01 - 31/12).
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {TU_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      excel_file:
+        name: excel_file
+        description: 'Archivo Excel (.xlsx, .xls) o CSV con los indicadores a importar. El tamaño máximo es 2MB.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters: []
+    fileParameters:
+      excel_file: null
+    responses: []
     responseFields: []
     auth:
       - headers

@@ -9,14 +9,17 @@ use Illuminate\Support\Facades\Log;
 use Exception;
 
 /**
- * @group Ejes
+ * @group Ejes (Obsoleto)
+ * 
+ * Esta clase maneja las operaciones CRUD para los ejes.
+ * No se utiliza actualmente por lo que no se termino de desarrollar ni documentar.
  */
 class EjesController extends Controller
 {
     /**
-     * Función para obtener todos los ejes.
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * Listar ejes
+     * 
+     * Muestra todos los ejes disponibles.
      */
     public function index()
     {

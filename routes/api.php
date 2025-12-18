@@ -16,7 +16,6 @@ use App\Models\Indicadores;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
 // LOGIN
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -125,6 +124,15 @@ Route::middleware(['auth.sanctum'])->group(function () {
             Route::delete('{id}', 'destroy')->middleware(['abilities:estadisticas.delete']);
         });
 
+    
+    /**
+     * @group Documentos
+     * 
+     * Obtener archivos
+     * 
+     * Esta ruta actúa como un proxy para obtener archivos almacenados en el storage del servidor.
+     * Esto es útil para evitar problemas de CORS al acceder a archivos desde el frontend.
+     */
     Route::get('/proxy-file', function (Request $request) {
         try {
 
